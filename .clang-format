@@ -1,0 +1,16 @@
+BasedOnStyle: LLVM
+AllowShortFunctionsOnASingleLine: Empty
+AlwaysBreakTemplateDeclarations: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+IncludeCategories:
+  - Regex:           '^".+"$'            # Private headers
+    Priority:        1
+  - Regex:           '^<binrel_wt/'      # BinRel-WT headers
+    Priority:        2
+  - Regex:           '^<.+/.+>$'         # Non standard headers
+    Priority:        3
+  - Regex:           '^<[_[:alnum:]]+>$' # Standard headers
+    Priority:        4
+  - Regex:           '.*'                # Others (like unistd.h)
+    Priority:        5
+PointerAlignment: Left
