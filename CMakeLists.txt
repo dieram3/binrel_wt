@@ -26,9 +26,9 @@ include(CPL_functions)
 # Add subdirectories
 # ---------------------------------------
 
-#add_subdirectory("src")   # Add the library
+add_subdirectory("src")   # Add the library
 
 # Add the unit tests
-# enable_testing()
-# add_subdirectory("test")
-# include(CTest)
+enable_testing()
+add_subdirectory("test")
+include(CTest)
