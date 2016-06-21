@@ -1,4 +1,4 @@
 add_unittest("brwt"
   "main.cpp"
-  #"utility_test.cpp"
+  "utility_test.cpp"
 )
