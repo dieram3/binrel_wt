@@ -2,7 +2,6 @@
 #define BRWT_BIT_HACKS_H
 
 #include <cassert>     // assert
-#include <cstddef>     // size_t
 #include <limits>      // numeric_limits
 #include <type_traits> // is_unsigned
 
@@ -22,7 +21,7 @@ inline int pop_count(unsigned long long x) {
 // Requires: count < bits_of(T)
 //
 template <typename T>
-constexpr T lsb_mask(const std::size_t count) {
+constexpr T lsb_mask(const int count) {
   static_assert(std::is_unsigned<T>::value, "");
   assert(count < std::numeric_limits<T>::digits);
   return (T{1} << count) - 1;
