@@ -1,2 +1,3 @@
-# binrel_wt
-Representation of Binary Relations using a Wavelet Tree
+# BinRel WT
+
+Representation of Binary Relations using a Wavelet Tree.
