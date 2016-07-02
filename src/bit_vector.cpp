@@ -18,13 +18,13 @@ static constexpr size_type bits_per_block =
 // ==========================================
 
 template <typename Container, typename Integer>
-static constexpr decltype(auto) at(Container& c, Integer pos) {
+static constexpr decltype(auto) at(Container& c, Integer pos) noexcept {
   using index_t = typename Container::size_type;
   assert(static_cast<index_t>(pos) < c.size());
   return c[static_cast<index_t>(pos)];
 }
 
-static constexpr block_type make_mask(const size_type count) {
+static constexpr block_type make_mask(const size_type count) noexcept {
   using brwt::lsb_mask;
   return (count == bits_per_block)
              ? (block_type{0} - 1)
@@ -61,17 +61,17 @@ bit_vector::bit_vector(const std::string& s)
   }
 }
 
-size_type bit_vector::allocated_bytes() const {
+size_type bit_vector::allocated_bytes() const noexcept {
   return static_cast<size_type>(blocks.capacity() * sizeof(block_type));
 }
 
-bool bit_vector::get(const size_type pos) const {
+bool bit_vector::get(const size_type pos) const noexcept {
   const auto block = at(blocks, pos / bits_per_block);
   const auto mask = (block_type{1} << (pos % bits_per_block));
   return (block & mask) != 0;
 }
 
-void bit_vector::set(const size_type pos, const bool value) {
+void bit_vector::set(const size_type pos, const bool value) noexcept {
   auto& block = at(blocks, pos / bits_per_block);
   const auto mask = block_type{1} << (pos % bits_per_block);
 
@@ -83,7 +83,7 @@ void bit_vector::set(const size_type pos, const bool value) {
 }
 
 block_type bit_vector::get_chunk(const size_type pos,
-                                 const size_type count) const {
+                                 const size_type count) const noexcept {
   assert(count >= 0 && count <= bits_per_block);
   assert(pos >= 0 && pos + count <= length());
 
@@ -107,7 +107,7 @@ block_type bit_vector::get_chunk(const size_type pos,
 }
 
 void bit_vector::set_chunk(const size_type pos, const size_type count,
-                           const block_type value) {
+                           const block_type value) noexcept {
   assert(count >= 0 && count <= bits_per_block);
   assert(pos >= 0 && pos + count <= length());
 

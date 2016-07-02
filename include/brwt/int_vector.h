@@ -15,19 +15,20 @@ public:
   /// the array.
   class reference {
   private:
-    reference(int_vector& vec, size_type pos) : vector{vec}, elem_pos{pos} {}
+    reference(int_vector& vec, size_type pos) noexcept
+        : vector{vec}, elem_pos{pos} {}
     reference(const reference&) = default;
 
   public:
-    reference& operator=(const value_type value) {
+    reference& operator=(const value_type value) noexcept {
       vector.set_value(elem_pos, value);
       return *this;
     }
-    reference& operator=(const reference& other) {
+    reference& operator=(const reference& other) noexcept {
       vector.set_value(elem_pos, other);
       return *this;
     }
-    operator value_type() const {
+    operator value_type() const noexcept {
       return vector.get_value(elem_pos);
     }
 
@@ -69,7 +70,7 @@ public:
   /// \par Time complexity
   /// Constant.
   ///
-  reference operator[](size_type pos) {
+  reference operator[](size_type pos) noexcept {
     return reference(*this, pos);
   }
 
@@ -80,7 +81,7 @@ public:
   /// \par Time complexity
   /// Constant.
   ///
-  value_type operator[](size_type pos) const {
+  value_type operator[](size_type pos) const noexcept {
     return get_value(pos);
   }
 
@@ -89,7 +90,7 @@ public:
   /// \par Time complexity
   /// Constant.
   ///
-  size_type length() const {
+  size_type length() const noexcept {
     return num_elems;
   }
 
@@ -98,7 +99,7 @@ public:
   /// \par Time complexity
   /// Constant.
   ///
-  size_type get_bpe() const {
+  size_type get_bpe() const noexcept {
     return bits_per_element;
   }
 
@@ -107,13 +108,13 @@ public:
   /// \par Time complexity
   /// Constant.
   ///
-  size_type allocated_bytes() const {
+  size_type allocated_bytes() const noexcept {
     return bit_seq.allocated_bytes();
   }
 
 private:
-  value_type get_value(size_type pos) const;
-  void set_value(size_type pos, value_type value);
+  value_type get_value(size_type pos) const noexcept;
+  void set_value(size_type pos, value_type value) noexcept;
 
 private:
   bit_vector bit_seq;
@@ -125,7 +126,8 @@ private:
 // Inline definitions
 // ==========================================
 
-inline int_vector::value_type int_vector::get_value(const size_type pos) const {
+inline int_vector::value_type int_vector::get_value(const size_type pos) const
+    noexcept {
   assert(pos >= 0 && pos < num_elems && "Out of range");
   return bit_seq.get_chunk(pos * bits_per_element, bits_per_element);
 }

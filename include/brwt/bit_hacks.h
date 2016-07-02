@@ -7,22 +7,27 @@
 
 namespace brwt {
 
-inline int pop_count(unsigned x) {
+constexpr int pop_count(unsigned x) noexcept {
   return __builtin_popcount(x);
 }
-inline int pop_count(unsigned long x) {
+constexpr int pop_count(unsigned long x) noexcept {
   return __builtin_popcountl(x);
 }
-inline int pop_count(unsigned long long x) {
+constexpr int pop_count(unsigned long long x) noexcept {
   return __builtin_popcountll(x);
 }
 
-// Returns a mask with the 'count' least significant bits set.
-// Requires: count < bits_of(T)
-//
+/// \brief Creates a mask with the 'count' least significant bits set.
+///
+/// \param count The number of bits to be set in the mask.
+///
+/// \returns The created mask.
+///
+/// \pre <tt>count < std::numeric_limits<T>::digits</tt>
+///
 template <typename T>
-constexpr T lsb_mask(const int count) {
-  static_assert(std::is_unsigned<T>::value, "");
+constexpr T lsb_mask(const int count) noexcept {
+  static_assert(std::is_unsigned<T>::value, "The mask type must be unsigned");
   assert(count < std::numeric_limits<T>::digits);
   return (T{1} << count) - 1;
 }
