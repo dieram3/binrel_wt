@@ -20,6 +20,14 @@ TEST_CASE("ceil_div") {
     REQUIRE(1321239 / 12314 == 107);
     CHECK(ceil_div(1321239, 12314) == 108);
   }
+
+  // check constexpr
+  static_assert(ceil_div(5, 2) == 3, "");
+  static_assert(ceil_div(10ul, 3ul) == 4ul, "");
+
+  // check noexcept
+  static_assert(noexcept(ceil_div(1, 1)), "");
+  static_assert(noexcept(ceil_div(1ul, 1ul)), "");
 }
 
 TEST_SUITE_END();
