@@ -19,14 +19,14 @@ public:
   explicit bit_vector(size_type count, block_type value);
   explicit bit_vector(const std::string& s);
 
-  size_type length() const;
-  size_type allocated_bytes() const;
+  size_type length() const noexcept;
+  size_type allocated_bytes() const noexcept;
 
-  bool get(size_type pos) const;
-  void set(size_type pos, bool value);
+  bool get(size_type pos) const noexcept;
+  void set(size_type pos, bool value) noexcept;
 
-  block_type get_chunk(size_type pos, size_type count) const;
-  void set_chunk(size_type pos, size_type count, block_type value);
+  block_type get_chunk(size_type pos, size_type count) const noexcept;
+  void set_chunk(size_type pos, size_type count, block_type value) noexcept;
 
 private:
   size_type m_len{};
@@ -37,7 +37,7 @@ private:
 // Inline definitions
 // ==========================================
 
-inline bit_vector::size_type bit_vector::length() const {
+inline bit_vector::size_type bit_vector::length() const noexcept {
   return m_len;
 }
 
