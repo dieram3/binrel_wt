@@ -23,12 +23,10 @@ int_vector::int_vector(const size_type count, const int bpe)
   bit_seq = bit_vector(num_elems * bits_per_element);
 }
 
-void int_vector::set_value(const size_type pos, const value_type value) {
+void int_vector::set_value(const size_type pos,
+                           const value_type value) noexcept {
   assert(pos >= 0 && pos < num_elems && "Out of range");
-
-  if (value > lsb_mask<value_type>(static_cast<int>(bits_per_element))) {
-    throw std::domain_error("int_vector: Value too large to be stored");
-  }
+  assert(value <= lsb_mask<value_type>(static_cast<int>(bits_per_element)));
 
   bit_seq.set_chunk(pos * bits_per_element, bits_per_element, value);
 }

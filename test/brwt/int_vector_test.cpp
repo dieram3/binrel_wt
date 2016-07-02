@@ -3,13 +3,20 @@
 
 #include <limits>      // numeric_limits
 #include <stdexcept>   // domain_error
-#include <type_traits> // is_signed, is_unsigned
+#include <type_traits> // is_signed, is_unsigned, ...
 
 using brwt::int_vector;
 // bpe stands for 'bits per element'
 
 static_assert(std::is_unsigned<int_vector::value_type>::value, "");
 static_assert(std::is_signed<int_vector::size_type>::value, "");
+
+static_assert(std::is_nothrow_default_constructible<int_vector>::value, "");
+static_assert(std::is_copy_constructible<int_vector>::value, "");
+static_assert(std::is_copy_assignable<int_vector>::value, "");
+static_assert(std::is_nothrow_move_constructible<int_vector>::value, "");
+static_assert(std::is_nothrow_move_assignable<int_vector>::value, "");
+static_assert(std::is_nothrow_destructible<int_vector>::value, "");
 
 TEST_SUITE("int_vector");
 
@@ -64,6 +71,8 @@ TEST_CASE("int_vector::set_value") {
     CHECK(vec[44] == 440);
     CHECK(vec[45] == 1023);
     CHECK(vec[46] == 460);
+
+    static_assert(noexcept(vec[0] = 140), "");
   }
   SUBCASE("There are invalid values") {
     int_vector vec(/*count=*/50, /*bpe=*/9);
@@ -74,9 +83,6 @@ TEST_CASE("int_vector::set_value") {
     CHECK(vec[29] == 0);
     CHECK(vec[30] == 511);
     CHECK(vec[31] == 0);
-
-    CHECK_THROWS_AS(vec[30] = 512, std::domain_error); // NOLINT
-    CHECK_THROWS_AS(vec[40] = 516, std::domain_error); // NOLINT
 
     CHECK(vec[29] == 0);
     CHECK(vec[30] == 511);
