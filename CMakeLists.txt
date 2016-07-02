@@ -20,13 +20,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(CPL_functions)
 
-# find_package(Doxygen)
+find_package(Doxygen)
 
 # ---------------------------------------
 # Add subdirectories
 # ---------------------------------------
 
-add_subdirectory("src")   # Add the library
+add_subdirectory("src") # The library implementation
+add_subdirectory("docs")
 
 # Add the unit tests
 enable_testing()
