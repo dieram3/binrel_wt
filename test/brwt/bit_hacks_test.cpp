@@ -3,6 +3,10 @@
 
 #include <cstdint> // uint64_t
 
+using uint = unsigned int;
+using ulong = unsigned long;
+using ullong = unsigned long long;
+
 TEST_SUITE("bit_hacks");
 
 TEST_CASE("pop_count") {
@@ -26,6 +30,15 @@ TEST_CASE("pop_count") {
     CHECK(pop_count(0x14C0'2491'A9B3'2390ull) == 23);
     CHECK(pop_count(0xFFFF'FFFF'FFFF'FFFFull) == 64);
   }
+
+  // check constexpr
+  static_assert(pop_count(0x1111u) == 4, "");
+  static_assert(pop_count(0x12F2'439Eul) == 15, "");
+  static_assert(pop_count(0x14C0'2491'A9B3'2390ull) == 23, "");
+  // check noexcept
+  static_assert(noexcept(pop_count(uint{})), "");
+  static_assert(noexcept(pop_count(ulong{})), "");
+  static_assert(noexcept(pop_count(ullong{})), "");
 }
 
 TEST_CASE("lsb_mask") {
@@ -39,6 +52,16 @@ TEST_CASE("lsb_mask") {
 
   CHECK(lsb_mask<uint64_t>(62) == 0x3FFF'FFFF'FFFF'FFFF);
   CHECK(lsb_mask<uint64_t>(63) == 0x7FFF'FFFF'FFFF'FFFF);
+
+  // check constexpr
+  static_assert(lsb_mask<uint>(8) == 0xFF, "");
+  static_assert(lsb_mask<ulong>(8) == 0xFF, "");
+  static_assert(lsb_mask<ullong>(8) == 0xFF, "");
+
+  // check noexcept
+  static_assert(noexcept(lsb_mask<uint>(4)), "");
+  static_assert(noexcept(lsb_mask<ulong>(4)), "");
+  static_assert(noexcept(lsb_mask<ullong>(4)), "");
 }
 
 TEST_SUITE_END();
