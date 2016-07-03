@@ -30,8 +30,6 @@ public:
 private:
   bit_vector sequence;
   int_vector super_blocks;
-
-  size_type bits_per_super_block{};
 };
 
 // ==========================================

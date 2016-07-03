@@ -14,12 +14,10 @@ using value_type = int_vector::value_type;
 using size_type = bitmap::size_type;
 
 // super_blocks[i] = rank_1(num_elems_per_super_blocks * (i+1) - 1);
-constexpr size_type BITS_PER_SUPER_BLOCK = 640;
+static constexpr size_type bits_per_super_block = 640;
 
 bitmap::bitmap(bit_vector vec) : sequence(vec) {
   const size_type n = vec.length();
-
-  bits_per_super_block = BITS_PER_SUPER_BLOCK;
 
   const size_type num_super_blocks = ceil_div(n, bits_per_super_block) - 1;
   {
