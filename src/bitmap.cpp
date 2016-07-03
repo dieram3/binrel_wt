@@ -15,6 +15,7 @@ using size_type = bitmap::size_type;
 
 // super_blocks[i] = rank_1(num_elems_per_super_blocks * (i+1) - 1);
 static constexpr size_type bits_per_super_block = 640;
+static constexpr size_type bits_per_block = 64;
 
 bitmap::bitmap(bit_vector vec) : sequence(vec) {
   const size_type n = vec.length();
@@ -29,9 +30,9 @@ bitmap::bitmap(bit_vector vec) : sequence(vec) {
 
   for (size_type i = 0; i < num_super_blocks; ++i) {
     const auto base = i * bits_per_super_block;
-    for (size_type j = 0; j != bits_per_super_block; j += 64) {
+    for (size_type j = 0; j != bits_per_super_block; j += bits_per_block) {
       const auto pos = base + j;
-      sum += pop_count(sequence.get_chunk(pos, 64));
+      sum += pop_count(sequence.get_block(pos / bits_per_block));
     }
     super_blocks[i] = static_cast<value_type>(sum);
   }
@@ -69,8 +70,8 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
   // sequential search in blocks (at most 10 popcounts)
   {
     auto last = std::min(idx + bits_per_super_block, length());
-    for (; idx + 64 < last; idx += 64) {
-      auto bits = pop_count(sequence.get_chunk(idx, 64));
+    for (; idx + bits_per_block < last; idx += bits_per_block) {
+      auto bits = pop_count(sequence.get_block(idx / bits_per_block));
       if (count + bits > nth) {
         break;
       }
@@ -80,7 +81,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 
   // last binary search
   {
-    auto last = std::min(length() - idx, size_type{64});
+    auto last = std::min(length() - idx, size_type{bits_per_block});
     auto first = size_type{0};
 
     auto idx_diff = index_type{0};
@@ -137,8 +138,8 @@ bitmap::size_type bitmap::rank_1(const index_type pos) const {
   }();
 
   size_type current_pos = pos - (pos % bits_per_super_block);
-  for (; current_pos + 64 <= pos; current_pos += 64) {
-    sum += pop_count(sequence.get_chunk(current_pos, 64));
+  for (; current_pos + bits_per_block <= pos; current_pos += bits_per_block) {
+    sum += pop_count(sequence.get_block(current_pos / bits_per_block));
   }
 
   if (current_pos <= pos) {
