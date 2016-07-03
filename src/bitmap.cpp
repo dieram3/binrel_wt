@@ -69,14 +69,19 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 
   // sequential search in blocks (at most 10 popcounts)
   {
-    auto last = std::min(idx + bits_per_super_block, length());
-    for (; idx + bits_per_block < last; idx += bits_per_block) {
-      auto ones_count = pop_count(sequence.get_block(idx / bits_per_block));
+    auto first = idx / bits_per_block;
+    auto last = std::min(first + bits_per_super_block / bits_per_block,
+                         length() / bits_per_block);
+
+    for (; first < last; ++first) {
+      auto ones_count = pop_count(sequence.get_block(first));
       if (count + ones_count > nth) {
         break;
       }
       count += ones_count;
     }
+
+    idx = first * bits_per_block;
   }
 
   // last binary search
@@ -133,15 +138,18 @@ bitmap::index_type bitmap::select_0(const index_type nth) const {
 
   // sequential search in blocks (at most 10 popcounts)
   {
-    auto last = std::min(idx + bits_per_super_block, length());
-    for (; idx + bits_per_block < last; idx += bits_per_block) {
-      auto bits =
-          bits_per_block - pop_count(sequence.get_block(idx / bits_per_block));
+    auto first = idx / bits_per_block;
+    auto last = std::min(first + bits_per_super_block / bits_per_block,
+                         length() / bits_per_block);
+    for (; first < last; ++first) {
+      auto bits = bits_per_block - pop_count(sequence.get_block(first));
       if (count + bits > nth) {
         break;
       }
       count += bits;
     }
+
+    idx = first * bits_per_block;
   }
 
   // last binary search
