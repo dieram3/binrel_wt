@@ -5,7 +5,7 @@
 
 using benchmark::DoNotOptimize;
 
-static void bm_8_pop_counts(benchmark::State& state) {
+static void bm_100_pop_counts(benchmark::State& state) {
   using brwt::pop_count;
   using int_t = unsigned long long;
   const auto value = [] {
@@ -44,4 +44,4 @@ static void bm_8_pop_counts(benchmark::State& state) {
   }
 }
 
-BENCHMARK(bm_8_pop_counts);
+BENCHMARK(bm_100_pop_counts);
