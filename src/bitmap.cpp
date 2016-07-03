@@ -13,9 +13,10 @@ using brwt::int_vector;
 using value_type = int_vector::value_type;
 using size_type = bitmap::size_type;
 
-// super_blocks[i] = rank_1(num_elems_per_super_blocks * (i+1) - 1);
 static constexpr size_type bits_per_super_block = 640;
 static constexpr size_type bits_per_block = 64;
+static constexpr size_type blocks_per_super_block =
+    bits_per_super_block / bits_per_block;
 
 bitmap::bitmap(bit_vector vec) : sequence(vec) {
   const size_type n = vec.length();
@@ -41,13 +42,16 @@ bitmap::bitmap(bit_vector vec) : sequence(vec) {
 bitmap::index_type bitmap::select_1(const size_type nth) const {
   assert(nth < length());
 
+  const auto num_blocks = length() / bits_per_block;
+  const auto num_super_blocks = super_blocks.length();
+
   // lower bound in super blocks
   index_type idx = 0;
   size_type count = 0;
   {
-    index_type last = super_blocks.length();
+    index_type last = num_super_blocks;
     index_type first = 0;
-    index_type sb_idx = -1;
+    index_type super_block_idx = -1;
 
     while (last > first) {
       auto current_idx = first + (last - first) / 2;
@@ -55,23 +59,24 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 
       if (ones_count < nth) {
         first = current_idx + 1;
-        sb_idx = current_idx;
+        super_block_idx = current_idx;
       } else {
         last = current_idx;
       }
     }
 
-    if (sb_idx >= 0) {
-      idx = (sb_idx + 1) * bits_per_super_block;
-      count = static_cast<size_type>(super_blocks[sb_idx]);
+    assert(super_block_idx < num_super_blocks);
+
+    if (super_block_idx >= 0) {
+      idx = (super_block_idx + 1) * bits_per_super_block;
+      count = static_cast<size_type>(super_blocks[super_block_idx]);
     }
   }
 
   // sequential search in blocks (at most 10 popcounts)
   {
     auto first = idx / bits_per_block;
-    auto last = std::min(first + bits_per_super_block / bits_per_block,
-                         length() / bits_per_block);
+    auto last = std::min(first + blocks_per_super_block, num_blocks);
 
     for (; first < last; ++first) {
       auto ones_count = pop_count(sequence.get_block(first));
@@ -109,13 +114,16 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 bitmap::index_type bitmap::select_0(const index_type nth) const {
   assert(nth < length());
 
+  const auto num_blocks = length() / bits_per_block;
+  const auto num_super_blocks = super_blocks.length();
+
   // lower bound in super blocks
   index_type idx = 0;
   size_type count = 0;
   {
-    index_type last = super_blocks.length();
+    index_type last = num_super_blocks;
     index_type first = 0;
-    index_type sb_idx = -1; // super_block index
+    index_type super_block_idx = -1; // super_block index
 
     while (last > first) {
       auto current_idx = first + (last - first) / 2;
@@ -123,24 +131,26 @@ bitmap::index_type bitmap::select_0(const index_type nth) const {
                          static_cast<size_type>(super_blocks[current_idx]);
       if (zeros_count < nth) {
         first = current_idx + 1;
-        sb_idx = current_idx;
+        super_block_idx = current_idx;
       } else {
         last = current_idx;
       }
     }
 
-    if (sb_idx >= 0) {
-      idx = (sb_idx + 1) * bits_per_super_block;
-      count = bits_per_super_block * (sb_idx + 1) -
-              static_cast<size_type>(super_blocks[sb_idx]);
+    assert(super_block_idx < num_super_blocks);
+
+    if (super_block_idx >= 0) {
+      idx = (super_block_idx + 1) * bits_per_super_block;
+      count = bits_per_super_block * (super_block_idx + 1) -
+              static_cast<size_type>(super_blocks[super_block_idx]);
     }
   }
 
   // sequential search in blocks (at most 10 popcounts)
   {
     auto first = idx / bits_per_block;
-    auto last = std::min(first + bits_per_super_block / bits_per_block,
-                         length() / bits_per_block);
+    auto last = std::min(first + blocks_per_super_block, num_blocks);
+
     for (; first < last; ++first) {
       auto bits = bits_per_block - pop_count(sequence.get_block(first));
       if (count + bits > nth) {
