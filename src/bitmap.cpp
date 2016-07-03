@@ -89,7 +89,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
     idx = first * bits_per_block;
   }
 
-  // last binary search
+  // last binary search (at most 6 popcounts)
   {
     auto idx_diff = index_type{0};
 
@@ -162,7 +162,7 @@ bitmap::index_type bitmap::select_0(const index_type nth) const {
     idx = first * bits_per_block;
   }
 
-  // last binary search
+  // last binary search (at most 6 popcounts)
   {
     auto idx_diff = index_type{0};
 
