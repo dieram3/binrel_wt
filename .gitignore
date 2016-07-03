@@ -3,6 +3,8 @@ build/
 _*
 DerivedData
 
+compile_commands.json
+
 ### Vim ###
 [._]*.s[a-w][a-z]
 [._]s[a-w][a-z]
