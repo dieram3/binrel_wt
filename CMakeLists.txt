@@ -27,6 +27,7 @@ find_package(Doxygen)
 # ---------------------------------------
 
 option(ENABLE_CLANG_MODULES "Enables support for clang modules" OFF)
+option(COMPILE_BENCHMARKS "Compiles the library benchmarks" ON)
 
 # ---------------------------------------
 # Handle options
@@ -49,3 +50,7 @@ add_subdirectory("docs")
 enable_testing()
 add_subdirectory("test")
 include(CTest)
+
+if(COMPILE_BENCHMARKS)
+  add_subdirectory("benchmarks")
+endif()
