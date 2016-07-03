@@ -102,6 +102,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
       }
       count += ones_count;
     }
+
     idx = first * bits_per_block;
 
     if (count < nth) {
@@ -112,15 +113,17 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
         return count + ones_count < nth;
       };
 
-      auto num_bits =
-          binary_search(size_type{0}, bits_per_block, valid_bits_count);
+      auto max_bits = std::min(bits_per_block, length() - idx);
+      auto num_bits = binary_search(size_type{0}, max_bits, valid_bits_count);
+
       assert(num_bits > 0);
 
       idx += (num_bits - 1);
+      count += pop_count(next_block & make_mask(num_bits));
     }
   }
 
-  return idx;
+  return (count == nth) ? idx : -1;
 }
 
 bitmap::index_type bitmap::select_0(const index_type nth) const {
@@ -174,15 +177,16 @@ bitmap::index_type bitmap::select_0(const index_type nth) const {
         return count + zeros_count < nth;
       };
 
-      auto num_bits =
-          binary_search(size_type{0}, bits_per_block, valid_bits_count);
+      auto max_bits = std::min(bits_per_block, length() - idx);
+      auto num_bits = binary_search(size_type{0}, max_bits, valid_bits_count);
       assert(num_bits > 0);
 
       idx += (num_bits - 1);
+      count += num_bits - pop_count(next_block & make_mask(num_bits));
     }
   }
 
-  return idx;
+  return (count == nth) ? idx : -1;
 }
 
 bitmap::size_type bitmap::rank_1(const index_type pos) const {
