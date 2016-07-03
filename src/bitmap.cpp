@@ -50,14 +50,14 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
     index_type sb_idx = -1;
 
     while (last > first) {
-      auto pos = first + (last - first) / 2;
-      auto bits = static_cast<size_type>(super_blocks[pos]);
+      auto current_idx = first + (last - first) / 2;
+      auto ones_count = static_cast<size_type>(super_blocks[current_idx]);
 
-      if (bits < nth) {
-        first = pos + 1;
-        sb_idx = pos;
+      if (ones_count < nth) {
+        first = current_idx + 1;
+        sb_idx = current_idx;
       } else {
-        last = pos;
+        last = current_idx;
       }
     }
 
@@ -71,29 +71,28 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
   {
     auto last = std::min(idx + bits_per_super_block, length());
     for (; idx + bits_per_block < last; idx += bits_per_block) {
-      auto bits = pop_count(sequence.get_block(idx / bits_per_block));
-      if (count + bits > nth) {
+      auto ones_count = pop_count(sequence.get_block(idx / bits_per_block));
+      if (count + ones_count > nth) {
         break;
       }
-      count += bits;
+      count += ones_count;
     }
   }
 
   // last binary search
   {
-    auto last = std::min(length() - idx, size_type{bits_per_block});
-    auto first = size_type{0};
-
     auto idx_diff = index_type{0};
 
+    auto last = std::min(length() - idx, bits_per_block);
+    auto first = size_type{0};
     while (last > first) {
-      auto pos = first + (last - first) / 2;
-      auto bits = pop_count(sequence.get_chunk(idx, pos));
-      if (count + bits < nth) {
-        first = pos + 1;
-        idx_diff = static_cast<index_type>(pos);
+      auto num_bits = first + (last - first) / 2;
+      auto ones_count = pop_count(sequence.get_chunk(idx, num_bits));
+      if (count + ones_count < nth) {
+        first = num_bits + 1;
+        idx_diff = static_cast<index_type>(num_bits);
       } else {
-        last = pos;
+        last = num_bits;
       }
     }
     idx += idx_diff;
@@ -105,25 +104,66 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 bitmap::index_type bitmap::select_0(const index_type nth) const {
   assert(nth < length());
 
-  // This needs to be improved, just a binary search
-  auto last = length() - 1;
-  auto first = size_type{0};
-  auto idx = index_type{0};
+  // lower bound in super blocks
+  index_type idx = 0;
+  size_type count = 0;
+  {
+    index_type last = super_blocks.length();
+    index_type first = 0;
+    index_type sb_idx = -1; // super_block index
 
-  while (first < last) {
-    auto pos = first + (last - first) / 2;
-    auto count = rank_0(pos);
+    while (last > first) {
+      auto current_idx = first + (last - first) / 2;
+      auto zeros_count = bits_per_super_block * (current_idx + 1) -
+                         static_cast<size_type>(super_blocks[current_idx]);
+      if (zeros_count < nth) {
+        first = current_idx + 1;
+        sb_idx = current_idx;
+      } else {
+        last = current_idx;
+      }
+    }
 
-    if (count < nth) {
-      first = pos + 1;
-      idx = pos;
-    } else {
-      last = pos;
+    if (sb_idx >= 0) {
+      idx = (sb_idx + 1) * bits_per_super_block;
+      count = bits_per_super_block * (sb_idx + 1) -
+              static_cast<size_type>(super_blocks[sb_idx]);
     }
   }
 
-  // final sequential search
-  for (; rank_0(idx) != nth && idx < length(); ++idx) {
+  // sequential search in blocks (at most 10 popcounts)
+  {
+    auto last = std::min(idx + bits_per_super_block, length());
+    for (; idx + bits_per_block < last; idx += bits_per_block) {
+      auto bits =
+          bits_per_block - pop_count(sequence.get_block(idx / bits_per_block));
+      if (count + bits > nth) {
+        break;
+      }
+      count += bits;
+    }
+  }
+
+  // last binary search
+  {
+    auto idx_diff = index_type{0};
+
+    auto last = std::min(length() - idx, bits_per_block);
+    auto first = size_type{0};
+    while (last > first) {
+      auto num_bits = first + (last - first) / 2;
+      auto zeros_count =
+          num_bits - pop_count(sequence.get_chunk(idx, num_bits));
+
+      if (count + zeros_count < nth) {
+        first = num_bits + 1;
+        idx_diff = static_cast<index_type>(num_bits);
+      } else {
+        last = num_bits;
+      }
+    }
+
+    idx += idx_diff;
   }
 
   return idx;
