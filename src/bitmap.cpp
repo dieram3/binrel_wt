@@ -31,10 +31,7 @@ static T binary_search(T a, T b, Pred pred) {
 }
 
 static constexpr value_type make_mask(const size_type count) noexcept {
-  using brwt::lsb_mask;
-  return (count == bit_vector::bits_per_block)
-             ? (value_type{0} - 1)
-             : lsb_mask<value_type>(static_cast<int>(count));
+  return brwt::lsb_mask<value_type>(static_cast<int>(count));
 }
 
 // ==========================================
