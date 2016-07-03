@@ -4,14 +4,10 @@
 #include <brwt/utility.h>   // ceil_div
 #include <algorithm>        // min
 #include <cassert>          // assert
-#include <limits>           // numeric_limits
 
 using brwt::bit_vector;
 using size_type = bit_vector::size_type;
 using block_type = bit_vector::block_type;
-
-static constexpr size_type bits_per_block =
-    std::numeric_limits<block_type>::digits;
 
 // ==========================================
 // helper functions
@@ -26,7 +22,7 @@ static constexpr decltype(auto) at(Container& c, Integer pos) noexcept {
 
 static constexpr block_type make_mask(const size_type count) noexcept {
   using brwt::lsb_mask;
-  return (count == bits_per_block)
+  return (count == bit_vector::bits_per_block)
              ? (block_type{0} - 1)
              : lsb_mask<block_type>(static_cast<int>(count));
 }
@@ -34,6 +30,8 @@ static constexpr block_type make_mask(const size_type count) noexcept {
 // ==========================================
 // bit_vector implementation
 // ==========================================
+
+constexpr size_type bit_vector::bits_per_block;
 
 bit_vector::bit_vector(const size_type count) : m_len{count} {
   using sz = decltype(blocks)::size_type;

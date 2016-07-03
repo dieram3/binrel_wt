@@ -5,6 +5,7 @@
 #include <ostream>   // string
 
 using brwt::bit_vector;
+static_assert(bit_vector::bits_per_block >= 64, "");
 
 namespace brwt {
 static std::ostream& operator<<(std::ostream& os, const bit_vector& v) {
@@ -182,6 +183,49 @@ TEST_CASE("bit_vector::set_chunk") {
   CHECK(v.get_chunk(160, 40) == 0x00'0022'1412);
 
   static_assert(noexcept(bit_vector().set_chunk(0, 8, 0xFF)), "");
+}
+
+TEST_CASE("bit_vector::get_block") {
+  constexpr auto bpb = bit_vector::bits_per_block;
+
+  bit_vector v(3 * bpb, 0xFF11'FF22);
+  const auto& cv = v;
+
+  CHECK(cv.get_block(0) == 0xFF11'FF22);
+  CHECK(cv.get_block(1) == 0);
+  CHECK(cv.get_block(2) == 0);
+
+  v.set(bpb, true);
+  v.set(2 * bpb + 2, true);
+  CHECK(cv.get_block(0) == 0xFF11'FF22);
+  CHECK(cv.get_block(1) == 1);
+  CHECK(cv.get_block(2) == 4);
+
+  static_assert(noexcept(bit_vector().get_block(0)), "");
+}
+
+TEST_CASE("bit_vector::set_block") {
+  constexpr auto bpb = bit_vector::bits_per_block;
+  bit_vector v(4 * bpb);
+  v.set_block(0, 0xFF19'1984);
+  v.set_block(2, 0x3492'4238);
+  v.set_block(3, 0x4750'1434);
+
+  CHECK(v.get_block(0) == 0xFF19'1984);
+  CHECK(v.get_block(1) == 0);
+  CHECK(v.get_block(2) == 0x3492'4238);
+  CHECK(v.get_block(3) == 0x4750'1434);
+
+  v.set_block(3, 0);
+  v.set_block(1, 0x1489'1232);
+  v.set_block(0, 0x4881);
+
+  CHECK(v.get_block(0) == 0x4881);
+  CHECK(v.get_block(1) == 0x1489'1232);
+  CHECK(v.get_block(2) == 0x3492'4238);
+  CHECK(v.get_block(3) == 0);
+
+  static_assert(noexcept(bit_vector().set_block(0, 0xFFFF)), "");
 }
 
 TEST_SUITE_END();
