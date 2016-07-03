@@ -1,17 +1,17 @@
+#include <brwt/bit_vector.h>
 #include <brwt/bitmap.h>
-#include <brwt/int_vector.h>
 
 #include <brwt/bit_hacks.h> // pop_count
 #include <brwt/utility.h>   // ceil_div
 #include <cassert>          // assert
 #include <cmath>            // log2, ceil
 #include <utility>          // move
+#include <x86intrin.h>
 
 using brwt::bitmap;
-using brwt::int_vector;
 using brwt::bit_vector;
 
-using value_type = int_vector::value_type;
+using value_type = bit_vector::block_type;
 using size_type = bitmap::size_type;
 
 // ==========================================
@@ -28,6 +28,13 @@ static T binary_search(T a, T b, Pred pred) {
       b = mid;
   }
   return a;
+}
+
+static constexpr value_type make_mask(const size_type count) noexcept {
+  using brwt::lsb_mask;
+  return (count == bit_vector::bits_per_block)
+             ? (value_type{0} - 1)
+             : lsb_mask<value_type>(static_cast<int>(count));
 }
 
 // ==========================================
@@ -91,7 +98,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
     auto first = idx / bits_per_block;
     auto last = std::min(first + blocks_per_super_block, num_blocks);
 
-    for (; first < last; ++first) {
+    for (; first != last; ++first) {
       auto ones_count = pop_count(sequence.get_block(first));
       if (count + ones_count > nth) {
         break;
@@ -99,20 +106,19 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
       count += ones_count;
     }
     idx = first * bits_per_block;
-  }
 
-  // last binary search (at most 6 popcounts)
-  {
-    auto valid_bits_count = [&](const size_type bits) {
-      auto ones_count = pop_count(sequence.get_chunk(idx, bits));
-      return count + ones_count < nth;
-    };
+    if (count < nth) {
+      auto next_block = sequence.get_block(first);
 
-    auto first = size_type{0};
-    auto last = std::min(length() - idx, bits_per_block);
-    auto num_bits = binary_search(first, last, valid_bits_count);
+      auto valid_bits_count = [&](const size_type bits) {
+        auto ones_count = pop_count(next_block & make_mask(bits));
+        return count + ones_count < nth;
+      };
 
-    if (num_bits > 0 && valid_bits_count(num_bits - 1)) {
+      auto num_bits =
+          binary_search(size_type{0}, bits_per_block, valid_bits_count);
+      assert(num_bits > 0);
+
       idx += (num_bits - 1);
     }
   }
@@ -162,20 +168,19 @@ bitmap::index_type bitmap::select_0(const index_type nth) const {
     }
 
     idx = first * bits_per_block;
-  }
 
-  // last binary search (at most 6 popcounts)
-  {
-    auto valid_bits_count = [&](const size_type bits) {
-      auto zeros_count = bits - pop_count(sequence.get_chunk(idx, bits));
-      return count + zeros_count < nth;
-    };
+    if (count < nth) {
+      auto next_block = sequence.get_block(first);
 
-    auto first = size_type{0};
-    auto last = std::min(length() - idx, bits_per_block);
-    auto num_bits = binary_search(first, last, valid_bits_count);
+      auto valid_bits_count = [&](const size_type bits) {
+        auto zeros_count = bits - pop_count(next_block & make_mask(bits));
+        return count + zeros_count < nth;
+      };
 
-    if (num_bits > 0 && valid_bits_count(num_bits - 1)) {
+      auto num_bits =
+          binary_search(size_type{0}, bits_per_block, valid_bits_count);
+      assert(num_bits > 0);
+
       idx += (num_bits - 1);
     }
   }
