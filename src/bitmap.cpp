@@ -9,14 +9,17 @@
 
 using brwt::bitmap;
 using brwt::int_vector;
+using brwt::bit_vector;
+
 using value_type = int_vector::value_type;
 using size_type = bitmap::size_type;
 
 // ==========================================
 // helper functions
 // ==========================================
+
 template <typename T, typename Pred>
-T binary_search(T a, T b, Pred pred) {
+static T binary_search(T a, T b, Pred pred) {
   while (a != b) {
     const T mid = a + (b - a) / 2;
     if (pred(mid))
@@ -31,10 +34,10 @@ T binary_search(T a, T b, Pred pred) {
 // bitmap implementation
 // ==========================================
 
-static constexpr size_type bits_per_super_block = 640;
-static constexpr size_type bits_per_block = 64;
-static constexpr size_type blocks_per_super_block =
-    bits_per_super_block / bits_per_block;
+static constexpr size_type bits_per_block = bit_vector::bits_per_block;
+static constexpr size_type blocks_per_super_block = 10;
+static constexpr size_type bits_per_super_block =
+    blocks_per_super_block * bits_per_block;
 
 bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
   const size_type n = vec.length();
