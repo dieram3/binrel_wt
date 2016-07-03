@@ -5,6 +5,7 @@ function(cpl_enable_all_warnings TARGET_ID)
       -Wno-c++98-compat
       -Wno-c++98-compat-pedantic
       -Wno-padded
+      -Wno-non-modular-include-in-module # for <cassert>
     )
   elseif(CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     target_compile_options(${TARGET_ID} PRIVATE
