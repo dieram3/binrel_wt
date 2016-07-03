@@ -23,6 +23,22 @@ include(CPL_functions)
 find_package(Doxygen)
 
 # ---------------------------------------
+# Project options
+# ---------------------------------------
+
+option(ENABLE_CLANG_MODULES "Enables support for clang modules" OFF)
+
+# ---------------------------------------
+# Handle options
+# ---------------------------------------
+
+if(ENABLE_CLANG_MODULES)
+if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-fmodules -fcxx-modules)
+endif()
+endif()
+
+# ---------------------------------------
 # Add subdirectories
 # ---------------------------------------
 
