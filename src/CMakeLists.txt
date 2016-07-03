@@ -1,6 +1,6 @@
 cpl_add_library(binrel_wt
   "bit_vector.cpp"
-  #"bitmap.cpp"
+  "bitmap.cpp"
   "int_vector.cpp"
 )
 
