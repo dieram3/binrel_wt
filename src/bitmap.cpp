@@ -5,7 +5,6 @@
 #include <brwt/utility.h>   // ceil_div
 #include <cassert>          // assert
 #include <cmath>            // log2, ceil
-#include <iostream>         // move
 #include <utility>          // move
 
 using brwt::bitmap;
@@ -42,7 +41,6 @@ bitmap::bitmap(bit_vector vec) : sequence(vec) {
 
 bitmap::index_type bitmap::select_1(const size_type nth) const {
   assert(nth < length());
-  std::cout << "count: " << nth << '\n';
 
   // lower bound in super blocks
   index_type idx = 0;
@@ -71,7 +69,6 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
   }
 
   // sequential search in blocks (at most 10 popcounts)
-  std::cout << "index: " << idx << " count: " << count << '\n';
   {
     auto last = std::min(idx + bits_per_super_block, length());
     for (; idx + 64 < last; idx += 64) {
@@ -82,9 +79,6 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
       count += bits;
     }
   }
-
-  std::cout << "after sequential search, idx " << idx
-            << " count so far: " << count << '\n';
 
   // last binary search
   {
