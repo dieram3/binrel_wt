@@ -3,10 +3,11 @@
 
 #include <brwt/bit_hacks.h> // pop_count
 #include <brwt/utility.h>   // ceil_div
-#include <cassert>          // assert
-#include <cmath>            // log2, ceil
-#include <utility>          // move
-#include <x86intrin.h>
+
+#include <algorithm> // min
+#include <cassert>   // assert
+#include <cmath>     // log2, ceil
+#include <utility>   // move
 
 using brwt::bitmap;
 using brwt::bit_vector;
@@ -65,7 +66,7 @@ bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
 }
 
 bitmap::index_type bitmap::select_1(const size_type nth) const {
-  assert(nth < length());
+  assert(nth > 0 && nth < length());
 
   const auto num_blocks = length() / bits_per_block;
   const auto num_super_blocks = super_blocks.length();
@@ -127,7 +128,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 }
 
 bitmap::index_type bitmap::select_0(const index_type nth) const {
-  assert(nth < length());
+  assert(nth > 0 && nth < length());
 
   const auto num_blocks = length() / bits_per_block;
   const auto num_super_blocks = super_blocks.length();
