@@ -15,10 +15,11 @@ public:
 
 private:
   struct node_desc {
-    index_type first;
-    index_type last;
+    index_type range_begin;
+    size_type range_size;
     symbol_type base_symbol;
     size_type num_symbols;
+    size_type ones_before;
   };
 
 public:
@@ -73,6 +74,8 @@ private:
   node_desc make_lhs(const node_desc& node) const noexcept;
   node_desc make_rhs(const node_desc& node) const noexcept;
   bool goes_to_lhs(const node_desc& node, symbol_type symbol) const noexcept;
+  size_type count_ones(const node_desc& node) const noexcept;
+  size_type count_zeros(const node_desc& node) const noexcept;
 
 private:
   bitmap table{};      // Representation of the wavelet tree without pointers.

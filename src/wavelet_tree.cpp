@@ -96,10 +96,70 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
   // }();
 }
 
+auto wavelet_tree::access(index_type pos) const noexcept -> symbol_type {
+  assert(pos >= 0 && pos < length());
+  if (alphabet_size == 1) {
+    return 0;
+  }
+  node_desc node = make_root();
+  while (node.num_symbols > 2) {
+    // each iteration invokes rank at most three times.
+    const auto absolute_pos = node.range_begin + pos;
+    if (!table.access(absolute_pos)) {
+      const auto zeros_before = (node.range_begin - node.ones_before);
+      pos = (table.rank_0(absolute_pos) - zeros_before) - 1; // 1 rank
+      node = make_lhs(node);                                 // 2 ranks
+    } else {
+      const auto ones_before = node.ones_before;
+      pos = (table.rank_1(absolute_pos) - ones_before) - 1; // 1 rank
+      node = make_rhs(node);                                // 2 ranks
+    }
+    assert(pos >= 0);
+  }
+  assert(node.num_symbols == 2);
+
+  return table.access(node.range_begin + pos) ? (node.base_symbol + 1)
+                                              : (node.base_symbol);
+}
+
 auto wavelet_tree::make_root() const noexcept -> node_desc {
-  node_desc node{/*first=*/0,       //
-                 /*last=*/seq_len,  //
-                 /*base_symbol=*/0, //
-                 /*num_symbols=*/alphabet_size};
-  return node;
+  return node_desc{/*range_begin=*/0,
+                   /*range_size=*/seq_len,
+                   /*base_symbol=*/0,
+                   /*num_symbols=*/alphabet_size,
+                   /*ones_before=*/0};
+}
+
+auto wavelet_tree::make_lhs(const node_desc& node) const noexcept -> node_desc {
+  const auto first = node.range_begin + seq_len;
+  return node_desc{/*range_begin=*/first,
+                   /*range_size=*/count_zeros(node),
+                   /*base_symbol=*/node.base_symbol,
+                   /*num_symbols=*/node.num_symbols / 2,
+                   /*ones_before=*/table.rank_1(first - 1)};
+}
+
+auto wavelet_tree::make_rhs(const node_desc& node) const noexcept -> node_desc {
+  const auto num_zeros = count_zeros(node);
+  const auto mid_ns = node.num_symbols / 2;
+  const auto first = node.range_begin + seq_len + num_zeros;
+  return node_desc{
+      /*range_begin=*/first,
+      /*range_size=*/(node.range_size - num_zeros),
+      /*base_symbol=*/(node.base_symbol + static_cast<symbol_type>(mid_ns)),
+      /*num_symbols=*/(node.num_symbols - mid_ns),
+      /*ones_before=*/table.rank_1(first - 1)};
+}
+
+// This function invokes rank_1 once.
+auto wavelet_tree::count_ones(const node_desc& node) const noexcept
+    -> size_type {
+  return table.rank_1(node.range_begin + node.range_size - 1) -
+         node.ones_before;
+}
+
+// This function invokes rank_1 once.
+auto wavelet_tree::count_zeros(const node_desc& node) const noexcept
+    -> size_type {
+  return node.range_size - count_ones(node);
 }
