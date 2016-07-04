@@ -2,7 +2,8 @@
 #include <brwt/bit_vector.h>
 
 #include <algorithm> // min
-#include <ostream>   // string
+#include <ostream>   // ostream
+#include <string>    // string
 
 using brwt::bit_vector;
 static_assert(bit_vector::bits_per_block >= 64, "");

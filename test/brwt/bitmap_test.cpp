@@ -3,7 +3,7 @@
 #include <brwt/bit_vector.h>
 #include <brwt/bitmap.h>
 
-#include <ostream> // string
+#include <string> // string
 
 using brwt::bitmap;
 using brwt::bit_vector;
