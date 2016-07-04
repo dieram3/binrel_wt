@@ -64,7 +64,7 @@ public:
   ///
   size_type length() const noexcept;
 
-  /// \brief Gets the size of the alpabhet tracked by this wavelet tree.
+  /// \brief Gets the size of the alphabet tracked by this wavelet tree.
   ///
   size_type get_alphabet_size() const noexcept;
 
