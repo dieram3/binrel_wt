@@ -14,7 +14,7 @@ public:
   using size_type = index_type;
 
 public:
-  bitmap();
+  bitmap() = default;
   explicit bitmap(bit_vector vec);
 
   bool access(index_type pos) const;
