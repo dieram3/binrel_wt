@@ -163,13 +163,15 @@ TEST_CASE("bitmap::select_1()") {
       "01111010101010100110101111010011010111101001101011110100111101001101011"
       "11010101010100110101111010011010111101001101011110100111101001101011110"
       "10101010100110101111010011010111101001101011110100111101001101011110101"
-      "01",
-  };
+      "01"};
 
   const auto bm0 = bitmap(bit_vector(sequences[0]));
   const auto bm1 = bitmap(bit_vector(sequences[1]));
   const auto bm2 = bitmap(bit_vector(sequences[2]));
   const auto bm3 = bitmap(bit_vector(sequences[3]));
+
+  const auto bm4 = bitmap(bit_vector("11111"));
+  const auto bm5 = bitmap(bit_vector("00000"));
 
   SUBCASE("Valid queries") {
     CHECK(bm0.select_1(1) == 0);
@@ -180,6 +182,7 @@ TEST_CASE("bitmap::select_1()") {
     CHECK(bm0.select_1(6) == 7);
     CHECK(bm0.select_1(7) == 8);
     CHECK(bm0.select_1(8) == 11);
+    CHECK(bm0.select_1(9) == 13);
 
     CHECK(bm1.select_1(7) == 11);
     CHECK(bm1.select_1(23) == 37);
@@ -199,14 +202,19 @@ TEST_CASE("bitmap::select_1()") {
     CHECK(bm3.select_1(800) == 1326);
     CHECK(bm3.select_1(804) == 1331);
     CHECK(bm3.select_1(850) == 1408);
+
+    CHECK(bm4.select_1(1) == 0);
+    CHECK(bm4.select_1(2) == 1);
+    CHECK(bm4.select_1(3) == 2);
+    CHECK(bm4.select_1(4) == 3);
+    CHECK(bm4.select_1(5) == 4);
   }
 
   SUBCASE("Number of ones is less than the query") {
-    CHECK(bm0.select_0(9) == -1);
-    CHECK(bm0.select_0(10) == -1);
-    CHECK(bm0.select_0(11) == -1);
-    CHECK(bm0.select_0(12) == -1);
-    CHECK(bm0.select_0(13) == -1);
+    CHECK(bm0.select_1(10) == -1);
+    CHECK(bm0.select_1(11) == -1);
+    CHECK(bm0.select_1(12) == -1);
+    CHECK(bm0.select_1(13) == -1);
 
     CHECK(bm1.select_1(50) == -1);
     CHECK(bm1.select_1(60) == -1);
@@ -217,6 +225,12 @@ TEST_CASE("bitmap::select_1()") {
     CHECK(bm3.select_1(870) == -1);
     CHECK(bm3.select_1(880) == -1);
     CHECK(bm3.select_1(900) == -1);
+
+    CHECK(bm5.select_1(1) == -1);
+    CHECK(bm5.select_1(2) == -1);
+    CHECK(bm5.select_1(3) == -1);
+    CHECK(bm5.select_1(4) == -1);
+    CHECK(bm5.select_1(5) == -1);
   }
 }
 
@@ -243,10 +257,14 @@ TEST_CASE("bitmap::select_0()") {
       "01111010101010100110101111010011010111101001101011110100111101001101011"
       "11010101010100110101111010011010111101001101011110100111101001101011110"
       "10101010100110101111010011010111101001101011110100111101001101011110101"
-      "01"};
+      "01",
+  };
 
   const auto bm0 = bitmap(bit_vector(sequences[0]));
   const auto bm1 = bitmap(bit_vector(sequences[1]));
+
+  const auto bm2 = bitmap(bit_vector("00000"));
+  const auto bm3 = bitmap(bit_vector("11111"));
 
   SUBCASE("Valid queries") {
     CHECK(bm0.select_0(1) == 4);
@@ -262,6 +280,12 @@ TEST_CASE("bitmap::select_0()") {
     CHECK(bm1.select_0(503) == 1267);
     CHECK(bm1.select_0(504) == 1268);
     CHECK(bm1.select_0(560) == 1411);
+
+    CHECK(bm2.select_0(1) == 0);
+    CHECK(bm2.select_0(2) == 1);
+    CHECK(bm2.select_0(3) == 2);
+    CHECK(bm2.select_0(4) == 3);
+    CHECK(bm2.select_0(5) == 4);
   }
 
   SUBCASE("Number of zeros is less than the query") {
@@ -278,5 +302,11 @@ TEST_CASE("bitmap::select_0()") {
     CHECK(bm1.select_0(700) == -1);
     CHECK(bm1.select_0(1255) == -1);
     CHECK(bm1.select_0(1411) == -1);
+
+    CHECK(bm3.select_0(1) == -1);
+    CHECK(bm3.select_0(2) == -1);
+    CHECK(bm3.select_0(3) == -1);
+    CHECK(bm3.select_0(4) == -1);
+    CHECK(bm3.select_0(5) == -1);
   }
 }

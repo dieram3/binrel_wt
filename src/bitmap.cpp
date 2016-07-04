@@ -66,7 +66,7 @@ bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
 }
 
 bitmap::index_type bitmap::select_1(const size_type nth) const {
-  assert(nth > 0 && nth < length());
+  assert(nth > 0);
 
   const auto num_blocks = length() / bits_per_block;
   const auto num_super_blocks = super_blocks.length();
@@ -128,7 +128,7 @@ bitmap::index_type bitmap::select_1(const size_type nth) const {
 }
 
 bitmap::index_type bitmap::select_0(const index_type nth) const {
-  assert(nth > 0 && nth < length());
+  assert(nth > 0);
 
   const auto num_blocks = length() / bits_per_block;
   const auto num_super_blocks = super_blocks.length();
