@@ -2,6 +2,7 @@
 
 #include <cassert>     // assert
 #include <cstddef>     // size_t
+#include <limits>      // numeric_limits
 #include <type_traits> // aligned_storage
 #include <utility>     // move, forward, exchange
 #include <vector>      // vector
@@ -82,6 +83,8 @@ private:
 // ==========================================
 // wavelet_vector implementation
 // ==========================================
+
+// TODO(diego): Consider implement symbols in terms of bits.
 
 wavelet_tree::wavelet_tree(const int_vector& sequence)
     : table{},
@@ -206,7 +209,8 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   assert(nth > 0);
   // Time complexity: Exactly 2 bitmap ranks and 1 bitmap select for level.
 
-  static_vector<node_desc, 64> stack;
+  constexpr size_t bits_per_symbol = std::numeric_limits<symbol_id>::digits;
+  static_vector<node_desc, bits_per_symbol> stack;
   stack.emplace_back(make_root());
   while (true) {
     const auto& node = stack.back();
