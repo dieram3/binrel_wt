@@ -122,6 +122,48 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_type {
                                               : (node.base_symbol);
 }
 
+auto wavelet_tree::rank(const symbol_type symbol, index_type pos) const noexcept
+    -> size_type {
+  assert(pos >= 0 && pos < length());
+  assert(symbol < static_cast<symbol_type>(alphabet_size));
+
+  node_desc node = make_root();
+  while (node.num_symbols > 2) {
+    // each iteration invokes rank at most three times.
+    const auto abs_pos = node.range_begin + pos;
+    const auto mid_ns = static_cast<symbol_type>(node.num_symbols / 2);
+    if (symbol < (node.base_symbol + mid_ns)) {
+      // 'symbol' is a lhs symbol.
+      const auto zeros_before = (node.range_begin - node.ones_before);
+      const auto rank0 = table.rank_0(abs_pos) - zeros_before; // 1 rank
+      if (rank0 == 0) {
+        return 0;
+      }
+      pos = rank0 - 1;
+      node = make_lhs(node); // 2 ranks
+    } else {
+      // 'symbol' is a rhs symbol.
+      const auto ones_before = node.ones_before;
+      const auto rank1 = table.rank_1(abs_pos) - ones_before; // 1 rank
+      if (rank1 == 0) {
+        return 0;
+      }
+      pos = rank1 - 1;       // 1 rank
+      node = make_rhs(node); // 2 ranks
+    }
+    assert(pos >= 0);
+  }
+  assert(node.num_symbols == 2);
+
+  const auto abs_pos = node.range_begin + pos;
+  if (symbol != node.base_symbol) {
+    // 'symbol' is rhs symbol.
+    return table.rank_1(abs_pos) - node.ones_before;
+  }
+  const auto zeros_before = node.range_begin - node.ones_before;
+  return table.rank_0(abs_pos) - zeros_before;
+}
+
 auto wavelet_tree::make_root() const noexcept -> node_desc {
   return node_desc{/*range_begin=*/0,
                    /*range_size=*/seq_len,
@@ -130,6 +172,7 @@ auto wavelet_tree::make_root() const noexcept -> node_desc {
                    /*ones_before=*/0};
 }
 
+// This function invokes rank_1 twice.
 auto wavelet_tree::make_lhs(const node_desc& node) const noexcept -> node_desc {
   const auto first = node.range_begin + seq_len;
   return node_desc{/*range_begin=*/first,
@@ -139,6 +182,7 @@ auto wavelet_tree::make_lhs(const node_desc& node) const noexcept -> node_desc {
                    /*ones_before=*/table.rank_1(first - 1)};
 }
 
+// This function invokes rank_1 twice.
 auto wavelet_tree::make_rhs(const node_desc& node) const noexcept -> node_desc {
   const auto num_zeros = count_zeros(node);
   const auto mid_ns = node.num_symbols / 2;

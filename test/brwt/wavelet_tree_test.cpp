@@ -72,7 +72,9 @@ static std::ostream& operator<<(std::ostream& os,
 }
 } // end namespace std
 
-TEST_CASE("wavelet_tree::wavelet_tree(const int_vector&)") {
+TEST_SUITE("wavelet_tree");
+
+TEST_CASE("Constructor from int_vector") {
   {
     wavelet_tree wt(create_vector_with_2_bpe());
     CHECK(wt.length() == 24);
@@ -85,25 +87,91 @@ TEST_CASE("wavelet_tree::wavelet_tree(const int_vector&)") {
   }
 }
 
-TEST_CASE("wavelet_tree::access(index_type)") {
-  {
-    const auto vec = create_vector_with_2_bpe();
-    const auto wt = wavelet_tree(vec);
-    // Explicit tests
-    CHECK(wt.access(1) == 2);
-    CHECK(wt.access(7) == 3);
-    CHECK(wt.access(19) == 0);
-    // Non-explicit full range check
-    CHECK(to_std_vector(wt) == to_std_vector(vec));
-  }
-  {
-    auto vec = create_vector_with_3_bpe();
-    const auto wt = wavelet_tree(vec);
-    // Explicit tests
-    CHECK(wt.access(1) == map_upper('H'));
-    CHECK(wt.access(6) == map_upper('E'));
-    CHECK(wt.access(14) == map_upper('F'));
-    // Non-explicit full range check
-    CHECK(to_std_vector(wt) == to_std_vector(vec));
-  }
+TEST_CASE("Access with sigma=4") {
+  const auto vec = create_vector_with_2_bpe();
+  const auto wt = wavelet_tree(vec);
+  // Explicit tests
+  CHECK(wt.access(1) == 2);
+  CHECK(wt.access(7) == 3);
+  CHECK(wt.access(19) == 0);
+  // Non-explicit full range check
+  CHECK(to_std_vector(wt) == to_std_vector(vec));
 }
+
+TEST_CASE("Access with sigma=8") {
+  auto vec = create_vector_with_3_bpe();
+  const auto wt = wavelet_tree(vec);
+  // Explicit tests
+  CHECK(wt.access(1) == map_upper('H'));
+  CHECK(wt.access(6) == map_upper('E'));
+  CHECK(wt.access(14) == map_upper('F'));
+  // Non-explicit full range check
+  CHECK(to_std_vector(wt) == to_std_vector(vec));
+}
+
+TEST_CASE("Rank with sigma=4") {
+  const auto wt = wavelet_tree(create_vector_with_2_bpe());
+  // seq = 0221 2313 2130 0120 1000 3321
+  REQUIRE(wt.length() == 24);
+
+  CHECK(wt.rank(/*symbol=*/0, /*pos=*/0) == 1);
+  CHECK(wt.rank(/*symbol=*/0, /*pos=*/8) == 1);
+  CHECK(wt.rank(/*symbol=*/0, /*pos=*/11) == 2);
+  CHECK(wt.rank(/*symbol=*/0, /*pos=*/13) == 3);
+  CHECK(wt.rank(/*symbol=*/0, /*pos=*/23) == 7);
+
+  CHECK(wt.rank(/*symbol=*/1, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/1, /*pos=*/5) == 1);
+  CHECK(wt.rank(/*symbol=*/1, /*pos=*/12) == 3);
+  CHECK(wt.rank(/*symbol=*/1, /*pos=*/13) == 4);
+  CHECK(wt.rank(/*symbol=*/1, /*pos=*/23) == 6);
+
+  CHECK(wt.rank(/*symbol=*/2, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/2, /*pos=*/4) == 3);
+  CHECK(wt.rank(/*symbol=*/2, /*pos=*/12) == 4);
+  CHECK(wt.rank(/*symbol=*/2, /*pos=*/22) == 6);
+  CHECK(wt.rank(/*symbol=*/2, /*pos=*/23) == 6);
+
+  CHECK(wt.rank(/*symbol=*/3, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/3, /*pos=*/4) == 0);
+  CHECK(wt.rank(/*symbol=*/3, /*pos=*/5) == 1);
+  CHECK(wt.rank(/*symbol=*/3, /*pos=*/17) == 3);
+  CHECK(wt.rank(/*symbol=*/3, /*pos=*/23) == 5);
+}
+
+TEST_CASE("Rank with sigma=8") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  // seq = EHDHA CEEGB CBGCF
+  REQUIRE(wt.length() == 15);
+
+  auto rank = [&](const char c, const wavelet_tree::size_type pos) {
+    return wt.rank(map_upper(c), pos);
+  };
+
+  CHECK(rank('A', 0) == 0);
+  CHECK(rank('C', 0) == 0);
+  CHECK(rank('E', 0) == 1);
+  CHECK(rank('G', 0) == 0);
+
+  CHECK(rank('B', 5) == 0);
+  CHECK(rank('B', 8) == 0);
+  CHECK(rank('B', 9) == 1);
+  CHECK(rank('B', 10) == 1);
+  CHECK(rank('B', 11) == 2);
+
+  CHECK(rank('C', 4) == 0);
+  CHECK(rank('C', 5) == 1);
+  CHECK(rank('E', 10) == 3);
+  CHECK(rank('G', 10) == 1);
+
+  CHECK(rank('A', 14) == 1);
+  CHECK(rank('B', 14) == 2);
+  CHECK(rank('C', 14) == 3);
+  CHECK(rank('D', 14) == 1);
+  CHECK(rank('E', 14) == 3);
+  CHECK(rank('F', 14) == 1);
+  CHECK(rank('G', 14) == 2);
+  CHECK(rank('H', 14) == 2);
+}
+
+TEST_SUITE_END();

@@ -73,7 +73,6 @@ private:
   node_desc make_root() const noexcept;
   node_desc make_lhs(const node_desc& node) const noexcept;
   node_desc make_rhs(const node_desc& node) const noexcept;
-  bool goes_to_lhs(const node_desc& node, symbol_type symbol) const noexcept;
   size_type count_ones(const node_desc& node) const noexcept;
   size_type count_zeros(const node_desc& node) const noexcept;
 
