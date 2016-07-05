@@ -10,10 +10,10 @@ using brwt::wavelet_tree;
 using brwt::int_vector;
 using std::size_t;
 using std::ptrdiff_t;
-using symbol_type = wavelet_tree::symbol_type;
+using symbol_id = wavelet_tree::symbol_id;
 
-static constexpr symbol_type map_upper(const char c) noexcept {
-  return static_cast<symbol_type>(c - 'A');
+static constexpr symbol_id map_upper(const char c) noexcept {
+  return static_cast<symbol_id>(c - 'A');
 }
 
 // Creates an int_vector with 2 bits per element
@@ -34,22 +34,24 @@ static int_vector create_vector_with_3_bpe() {
   int_vector vec(static_cast<ptrdiff_t>(str.size()), /*bpe=*/3);
 
   for (size_t i = 0; i < str.size(); ++i) {
-    vec[static_cast<ptrdiff_t>(i)] = map_upper(str[i]);
+    using value_t = int_vector::value_type;
+    vec[static_cast<ptrdiff_t>(i)] = static_cast<value_t>(map_upper(str[i]));
   }
 
   return vec;
 }
 
 static auto to_std_vector(const int_vector& vec) {
-  std::vector<symbol_type> res(static_cast<size_t>(vec.length()));
+  std::vector<symbol_id> res(static_cast<size_t>(vec.length()));
   for (size_t i = 0; i < res.size(); ++i) {
-    res[i] = vec[static_cast<ptrdiff_t>(i)];
+    const auto symbol = vec[static_cast<ptrdiff_t>(i)];
+    res[i] = static_cast<symbol_id>(symbol);
   }
   return res;
 }
 
 static auto to_std_vector(const wavelet_tree& wt) {
-  std::vector<symbol_type> res(static_cast<size_t>(wt.length()));
+  std::vector<symbol_id> res(static_cast<size_t>(wt.length()));
   for (size_t i = 0; i < res.size(); ++i) {
     res[i] = wt.access(static_cast<ptrdiff_t>(i));
   }
@@ -58,7 +60,7 @@ static auto to_std_vector(const wavelet_tree& wt) {
 
 namespace std {
 static std::ostream& operator<<(std::ostream& os,
-                                const std::vector<symbol_type>& vec) {
+                                const std::vector<symbol_id>& vec) {
   os << '\n';
   os << '[';
   for (size_t i = 0; i + 1 < vec.size(); ++i) {

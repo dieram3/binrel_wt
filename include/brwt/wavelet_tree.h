@@ -9,7 +9,7 @@ namespace brwt {
 
 class wavelet_tree {
 public:
-  using symbol_type = int_vector::value_type;
+  using symbol_id = std::ptrdiff_t;
   using size_type = std::ptrdiff_t;
   using index_type = std::ptrdiff_t;
 
@@ -17,7 +17,7 @@ private:
   struct node_desc {
     index_type range_begin;
     size_type range_size;
-    symbol_type base_symbol;
+    symbol_id base_symbol;
     size_type num_symbols;
     size_type ones_before;
   };
@@ -42,14 +42,14 @@ public:
   ///
   /// \pre <tt>pos < length()</tt>
   ///
-  symbol_type access(index_type pos) const noexcept;
+  symbol_id access(index_type pos) const noexcept;
 
   /// \brief Counts how many occurrences has a symbol up to the given position.
   ///
   /// \pre <tt>symbol < get_alphabet_size()</tt>
   /// \pre <tt>pos < length()</tt>
   ///
-  size_type rank(symbol_type symbol, index_type pos) const noexcept;
+  size_type rank(symbol_id symbol, index_type pos) const noexcept;
 
   /// \brief Finds the position of the \e nth occurrence of the given symbol.
   ///
@@ -59,7 +59,7 @@ public:
   /// \returns The position of the \e nth symbol if it exists. Otherwise returns
   /// <tt>-1</tt>.
   ///
-  index_type select(symbol_type symbol, size_type nth) const noexcept;
+  index_type select(symbol_id symbol, size_type nth) const noexcept;
 
   /// \brief Gets the length of the original sequence.
   ///
@@ -75,6 +75,7 @@ private:
   node_desc make_rhs(const node_desc& node) const noexcept;
   size_type count_ones(const node_desc& node) const noexcept;
   size_type count_zeros(const node_desc& node) const noexcept;
+  bool is_lhs_symbol(const node_desc& node, symbol_id symbol) const noexcept;
 
 private:
   bitmap table{};      // Representation of the wavelet tree without pointers.
