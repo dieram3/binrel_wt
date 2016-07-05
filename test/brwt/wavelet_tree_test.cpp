@@ -12,8 +12,15 @@ using std::size_t;
 using std::ptrdiff_t;
 using symbol_id = wavelet_tree::symbol_id;
 
-static constexpr symbol_id map_upper(const char c) noexcept {
-  return static_cast<symbol_id>(c - 'A');
+static constexpr symbol_id map_upper(const char c) {
+  return c - 'A';
+}
+
+static constexpr auto to_unsigned(const ptrdiff_t value) {
+  return static_cast<size_t>(value);
+}
+static constexpr auto to_signed(const size_t value) {
+  return static_cast<ptrdiff_t>(value);
 }
 
 // Creates an int_vector with 2 bits per element
@@ -23,7 +30,7 @@ static int_vector create_vector_with_2_bpe() {
 
   int_vector vec(arr.size(), /*bpe=*/2);
   for (size_t i = 0; i < arr.size(); ++i) {
-    vec[static_cast<ptrdiff_t>(i)] = arr[i];
+    vec[to_signed(i)] = arr[i];
   }
 
   return vec;
@@ -31,29 +38,30 @@ static int_vector create_vector_with_2_bpe() {
 
 static int_vector create_vector_with_3_bpe() {
   const std::string str = "EHDHACEEGBCBGCF";
-  int_vector vec(static_cast<ptrdiff_t>(str.size()), /*bpe=*/3);
+  int_vector vec(to_signed(str.size()), /*bpe=*/3);
 
   for (size_t i = 0; i < str.size(); ++i) {
     using value_t = int_vector::value_type;
-    vec[static_cast<ptrdiff_t>(i)] = static_cast<value_t>(map_upper(str[i]));
+    const auto value = static_cast<value_t>(map_upper(str[i]));
+    vec[to_signed(i)] = value;
   }
 
   return vec;
 }
 
 static auto to_std_vector(const int_vector& vec) {
-  std::vector<symbol_id> res(static_cast<size_t>(vec.length()));
+  std::vector<symbol_id> res(to_unsigned(vec.length()));
   for (size_t i = 0; i < res.size(); ++i) {
-    const auto symbol = vec[static_cast<ptrdiff_t>(i)];
+    const auto symbol = vec[to_signed(i)];
     res[i] = static_cast<symbol_id>(symbol);
   }
   return res;
 }
 
 static auto to_std_vector(const wavelet_tree& wt) {
-  std::vector<symbol_id> res(static_cast<size_t>(wt.length()));
+  std::vector<symbol_id> res(to_unsigned(wt.length()));
   for (size_t i = 0; i < res.size(); ++i) {
-    res[i] = wt.access(static_cast<ptrdiff_t>(i));
+    res[i] = wt.access(to_signed(i));
   }
   return res;
 }
