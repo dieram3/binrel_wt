@@ -75,7 +75,7 @@ private:
   node_desc make_rhs(const node_desc& node) const noexcept;
   size_type count_ones(const node_desc& node) const noexcept;
   size_type count_zeros(const node_desc& node) const noexcept;
-  bool is_lhs_symbol(const node_desc& node, symbol_id symbol) const noexcept;
+  static bool is_lhs_symbol(const node_desc& node, symbol_id symbol) noexcept;
 
 private:
   bitmap table{};      // Representation of the wavelet tree without pointers.

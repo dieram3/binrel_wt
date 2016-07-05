@@ -132,9 +132,7 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
   while (node.num_symbols > 2) {
     // each iteration invokes rank at most three times.
     const auto abs_pos = node.range_begin + pos;
-    const auto mid_ns = node.num_symbols / 2;
-    if (symbol < (node.base_symbol + mid_ns)) {
-      // 'symbol' is a lhs symbol.
+    if (is_lhs_symbol(node, symbol)) {
       const auto zeros_before = (node.range_begin - node.ones_before);
       const auto rank0 = table.rank_0(abs_pos) - zeros_before; // 1 rank
       if (rank0 == 0) {
@@ -143,7 +141,6 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
       pos = rank0 - 1;
       node = make_lhs(node); // 2 ranks
     } else {
-      // 'symbol' is a rhs symbol.
       const auto ones_before = node.ones_before;
       const auto rank1 = table.rank_1(abs_pos) - ones_before; // 1 rank
       if (rank1 == 0) {
@@ -157,12 +154,12 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
   assert(node.num_symbols == 2);
 
   const auto abs_pos = node.range_begin + pos;
-  if (symbol != node.base_symbol) {
-    // 'symbol' is rhs symbol.
-    return table.rank_1(abs_pos) - node.ones_before;
+  if (symbol == node.base_symbol) {
+    const auto zeros_before = node.range_begin - node.ones_before;
+    return table.rank_0(abs_pos) - zeros_before; // lhs symbol
   }
-  const auto zeros_before = node.range_begin - node.ones_before;
-  return table.rank_0(abs_pos) - zeros_before;
+  assert(symbol == node.base_symbol + 1);
+  return table.rank_1(abs_pos) - node.ones_before; // rhs symbol
 }
 
 // auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
@@ -213,11 +210,9 @@ auto wavelet_tree::count_zeros(const node_desc& node) const noexcept
   return node.range_size - count_ones(node);
 }
 
-// auto wavelet_tree::is_lhs_symbol(const node_desc& node,
-//                                  const symbol_id symbol) const noexcept
-//     -> bool {
-//   assert(symbol >= node.base_symbol);
-//   assert(symbol < node.base_symbol +
-//   static_cast<symbol_id>(node.num_symbols));
-//   const auto mid_ns = static_cast<symbol_id>(node.num_symbols / 2);
-// }
+auto wavelet_tree::is_lhs_symbol(const node_desc& node,
+                                 const symbol_id symbol) noexcept -> bool {
+  assert(symbol >= node.base_symbol &&
+         symbol < node.base_symbol + node.num_symbols);
+  return symbol < (node.base_symbol + node.num_symbols / 2);
+}
