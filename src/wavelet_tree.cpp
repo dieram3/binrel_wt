@@ -1,14 +1,13 @@
 #include <brwt/wavelet_tree.h>
 
-#include <cassert>     // assert
-#include <cstddef>     // size_t
-#include <limits>      // numeric_limits
-#include <type_traits> // aligned_storage
-#include <utility>     // move, forward, exchange
-#include <vector>      // vector
+#include "static_vector.h" // static_vector
+#include <cassert>         // assert
+#include <cstddef>         // size_t
+#include <limits>          // numeric_limits
+#include <utility>         // move, exchange
+#include <vector>          // vector
 
 using brwt::wavelet_tree;
-using std::size_t;
 
 // ==========================================
 // Auxiliary algorithms
@@ -23,64 +22,6 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 }
 
 // ==========================================
-// static_vector (auxiliary class)
-// ==========================================
-
-namespace {
-template <class T, size_t N>
-class static_vector {
-public:
-  using const_pointer = const T*;
-  using const_reference = const T&;
-
-public:
-  ~static_vector() {
-    // If T is trivially destructible the compiler should optimize this away.
-    while (!empty()) {
-      pop_back();
-    }
-  }
-
-  template <typename... Args>
-  void emplace_back(Args&&... args) {
-    assert(m_size < N);
-    new (m_data + m_size) T(std::forward<Args>(args)...); // NOLINT
-    ++m_size;
-  }
-
-  void pop_back() {
-    assert(!empty());
-    (data()[--m_size]).~T();
-  }
-
-  const_reference operator[](const size_t pos) const noexcept {
-    assert(pos < m_size);
-    return data()[pos];
-  }
-
-  const_reference back() const noexcept {
-    assert(!empty());
-    return data()[m_size - 1];
-  }
-
-  constexpr bool empty() const noexcept {
-    return m_size == 0;
-  }
-
-  constexpr const_pointer data() const noexcept {
-    return reinterpret_cast<const T*>(m_data); // NOLINT
-  }
-
-private:
-  using aligned_storage_t =
-      typename std::aligned_storage<sizeof(T), alignof(T)>::type;
-
-  aligned_storage_t m_data[N];
-  size_t m_size = 0;
-};
-} // end anonymous namespace
-
-// ==========================================
 // wavelet_vector implementation
 // ==========================================
 
@@ -92,6 +33,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
       alphabet_size{size_type{1} << sequence.get_bpe()} {
 
   // This temporal histogram uses roughly the same space than pointers would.
+  using std::size_t;
   std::vector<size_type> next_pos(static_cast<size_t>(2 * alphabet_size));
   auto at = [](const size_type pos) { return static_cast<size_t>(pos); };
 

@@ -1,9 +1,9 @@
 #ifndef BRWT_WAVELET_TREE_H
 #define BRWT_WAVELET_TREE_H
 
-#include <brwt/bitmap.h>
-#include <brwt/int_vector.h>
-#include <cstddef> // ptrdiff_t
+#include <brwt/bitmap.h>     // bitmap
+#include <brwt/int_vector.h> // int_vector
+#include <cstddef>           // ptrdiff_t
 
 namespace brwt {
 
