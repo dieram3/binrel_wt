@@ -154,8 +154,8 @@ TEST_CASE("Rank with sigma=8") {
   // seq = EHDHA CEEGB CBGCF
   REQUIRE(wt.length() == 15);
 
-  auto rank = [&](const char c, const wavelet_tree::size_type pos) {
-    return wt.rank(map_upper(c), pos);
+  auto rank = [&](const char symbol, const wavelet_tree::size_type pos) {
+    return wt.rank(map_upper(symbol), pos);
   };
 
   CHECK(rank('A', 0) == 0);
@@ -182,6 +182,87 @@ TEST_CASE("Rank with sigma=8") {
   CHECK(rank('F', 14) == 1);
   CHECK(rank('G', 14) == 2);
   CHECK(rank('H', 14) == 2);
+}
+
+TEST_CASE("Select with sigma=4") {
+  const auto wt = wavelet_tree(create_vector_with_2_bpe());
+  // seq = 0221 2313 2130 0120 1000 3321
+  REQUIRE(wt.length() == 24);
+
+  // Random queries
+  CHECK(wt.select(/*symbol=*/0, /*nth=*/4) == 15);
+  CHECK(wt.select(/*symbol=*/2, /*nth=*/3) == 4);
+  CHECK(wt.select(/*symbol=*/1, /*nth=*/2) == 6);
+  CHECK(wt.select(/*symbol=*/3, /*nth=*/3) == 10);
+  CHECK(wt.select(/*symbol=*/2, /*nth=*/4) == 8);
+  CHECK(wt.select(/*symbol=*/1, /*nth=*/5) == 16);
+  CHECK(wt.select(/*symbol=*/0, /*nth=*/4) == 15);
+  CHECK(wt.select(/*symbol=*/3, /*nth=*/1) == 5);
+
+  // Last occurrences
+  CHECK(wt.select(/*symbol=*/0, /*nth=*/7) == 19);
+  CHECK(wt.select(/*symbol=*/1, /*nth=*/6) == 23);
+  CHECK(wt.select(/*symbol=*/2, /*nth=*/6) == 22);
+  CHECK(wt.select(/*symbol=*/3, /*nth=*/5) == 21);
+
+  // Barely out of range.
+  CHECK(wt.select(/*symbol=*/0, /*nth=*/8) == -1);
+  CHECK(wt.select(/*symbol=*/1, /*nth=*/7) == -1);
+  CHECK(wt.select(/*symbol=*/2, /*nth=*/7) == -1);
+  CHECK(wt.select(/*symbol=*/3, /*nth=*/6) == -1);
+
+  // Totally out of range.
+  CHECK(wt.select(/*symbol=*/0, /*nth=*/190) == -1);
+  CHECK(wt.select(/*symbol=*/1, /*nth=*/1312) == -1);
+  CHECK(wt.select(/*symbol=*/2, /*nth=*/122) == -1);
+  CHECK(wt.select(/*symbol=*/3, /*nth=*/423) == -1);
+}
+
+TEST_CASE("Select with sigma=8") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  // seq = EHDHA CEEGB CBGCF
+  REQUIRE(wt.length() == 15);
+
+  auto select = [&](const char symbol, const wavelet_tree::size_type pos) {
+    return wt.select(map_upper(symbol), pos);
+  };
+
+  CHECK(select('A', 1) == 4);
+  CHECK(select('A', 2) == -1);
+
+  CHECK(select('B', 1) == 9);
+  CHECK(select('B', 2) == 11);
+  CHECK(select('B', 3) == -1);
+
+  CHECK(select('C', 1) == 5);
+  CHECK(select('C', 2) == 10);
+  CHECK(select('C', 3) == 13);
+  CHECK(select('C', 4) == -1);
+
+  CHECK(select('D', 1) == 2);
+  CHECK(select('D', 2) == -1);
+
+  CHECK(select('E', 1) == 0);
+  CHECK(select('E', 2) == 6);
+  CHECK(select('E', 3) == 7);
+  CHECK(select('E', 4) == -1);
+
+  CHECK(select('F', 1) == 14);
+  CHECK(select('F', 2) == -1);
+
+  CHECK(select('G', 1) == 8);
+  CHECK(select('G', 2) == 12);
+  CHECK(select('G', 3) == -1);
+
+  CHECK(select('H', 1) == 1);
+  CHECK(select('H', 2) == 3);
+  CHECK(select('H', 3) == -1);
+
+  // Totally out of range.
+  CHECK(select('A', 4) == -1);
+  CHECK(select('B', 13) == -1);
+  CHECK(select('E', 74) == -1);
+  CHECK(select('H', 9923) == -1);
 }
 
 TEST_SUITE_END();
