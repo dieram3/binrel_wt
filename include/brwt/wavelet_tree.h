@@ -73,9 +73,22 @@ private:
   node_desc make_root() const noexcept;
   node_desc make_lhs(const node_desc& node) const noexcept;
   node_desc make_rhs(const node_desc& node) const noexcept;
+
   size_type count_ones(const node_desc& node) const noexcept;
   size_type count_zeros(const node_desc& node) const noexcept;
-  static bool is_lhs_symbol(const node_desc& node, symbol_id symbol) noexcept;
+
+  size_type rank_0(const node_desc& node, index_type rel_pos) const noexcept;
+  size_type rank_1(const node_desc& node, index_type rel_pos) const noexcept;
+  index_type select_0(const node_desc& node, size_type nth) const noexcept;
+  index_type select_1(const node_desc& node, size_type nth) const noexcept;
+
+  static constexpr bool is_lhs_symbol(const node_desc& node,
+                                      symbol_id symbol) noexcept;
+  static constexpr size_type ones_before(const node_desc& node) noexcept;
+  static constexpr size_type zeros_before(const node_desc& node) noexcept;
+  static constexpr index_type begin(const node_desc& node) noexcept;
+  static constexpr index_type end(const node_desc& node) noexcept;
+  static constexpr size_type size(const node_desc& node) noexcept;
 
 private:
   bitmap table{};      // Representation of the wavelet tree without pointers.
