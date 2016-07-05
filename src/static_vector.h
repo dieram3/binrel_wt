@@ -1,12 +1,14 @@
 #ifndef BINREL_WT_SRC_STATIC_VECTOR_H // NOLINT
 #define BINREL_WT_SRC_STATIC_VECTOR_H
 
+#include <cassert>     // assert
 #include <cstddef>     // size_t
 #include <type_traits> // aligned_storage
 #include <utility>     // forward
 
 namespace brwt {
-template <class T, std::size_t N>
+
+template <typename T, std::size_t N>
 class static_vector {
 public:
   using size_type = std::size_t;
@@ -43,11 +45,11 @@ public:
     return data()[m_size - 1];
   }
 
-  constexpr bool empty() const noexcept {
+  bool empty() const noexcept {
     return m_size == 0;
   }
 
-  constexpr const_pointer data() const noexcept {
+  const_pointer data() const noexcept {
     return reinterpret_cast<const T*>(m_data); // NOLINT
   }
 
@@ -58,6 +60,7 @@ private:
   aligned_storage_t m_data[N];
   size_type m_size = 0;
 };
+
 } // end namespace brwt
 
 #endif // BINREL_WT_SRC_STATIC_VECTOR_H
