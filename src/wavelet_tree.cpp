@@ -162,10 +162,10 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
 
   node_desc node = make_root();
   while (node.num_symbols > 2) {
-    // each iteration invokes rank at most three times.
+    // each iteration invokes rank three times.
     if (!access(node, pos)) {
       pos = rank_0(node, pos) - 1; // 1 rank
-      node = make_lhs(node);       // 1 rank
+      node = make_lhs(node);       // 2 ranks
     } else {
       pos = rank_1(node, pos) - 1; // 1 rank
       node = make_rhs(node);       // 2 ranks
@@ -182,13 +182,13 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
 
   node_desc node = make_root();
   while (node.num_symbols > 2) {
-    // each iteration invokes rank at most three times.
+    // each iteration invokes rank three times.
     if (is_lhs_symbol(node, symbol)) {
       pos = rank_0(node, pos) - 1; // 1 rank
       if (pos == -1) {
         return 0;
       }
-      node = make_lhs(node); // 1 rank
+      node = make_lhs(node); // 2 ranks
     } else {
       pos = rank_1(node, pos) - 1; // 1 rank
       if (pos == -1) {
@@ -198,7 +198,6 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
     }
   }
   assert(node.num_symbols == 2);
-
   return is_lhs_symbol(node, symbol) ? rank_0(node, pos) : rank_1(node, pos);
 }
 
