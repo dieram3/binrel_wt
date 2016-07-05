@@ -159,67 +159,47 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
 
 auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
   assert(pos >= 0 && pos < length());
-  if (alphabet_size == 1) {
-    return 0;
-  }
+
   node_desc node = make_root();
   while (node.num_symbols > 2) {
     // each iteration invokes rank at most three times.
-    const auto absolute_pos = node.range_begin + pos;
-    if (!table.access(absolute_pos)) {
-      const auto zeros_before = (node.range_begin - node.ones_before);
-      pos = (table.rank_0(absolute_pos) - zeros_before) - 1; // 1 rank
-      node = make_lhs(node);                                 // 2 ranks
+    if (!access(node, pos)) {
+      pos = rank_0(node, pos) - 1; // 1 rank
+      node = make_lhs(node);       // 1 rank
     } else {
-      const auto ones_before = node.ones_before;
-      pos = (table.rank_1(absolute_pos) - ones_before) - 1; // 1 rank
-      node = make_rhs(node);                                // 2 ranks
+      pos = rank_1(node, pos) - 1; // 1 rank
+      node = make_rhs(node);       // 2 ranks
     }
-    assert(pos >= 0);
   }
   assert(node.num_symbols == 2);
-
-  return table.access(node.range_begin + pos) ? (node.base_symbol + 1)
-                                              : (node.base_symbol);
+  return (!access(node, pos)) ? (node.base_symbol) : (node.base_symbol + 1);
 }
 
 auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
     -> size_type {
   assert(pos >= 0 && pos < length());
-  assert(symbol < alphabet_size);
+  assert(symbol >= 0 && symbol < alphabet_size);
 
   node_desc node = make_root();
   while (node.num_symbols > 2) {
     // each iteration invokes rank at most three times.
-    const auto abs_pos = node.range_begin + pos;
     if (is_lhs_symbol(node, symbol)) {
-      const auto zeros_before = (node.range_begin - node.ones_before);
-      const auto rank0 = table.rank_0(abs_pos) - zeros_before; // 1 rank
-      if (rank0 == 0) {
+      pos = rank_0(node, pos) - 1; // 1 rank
+      if (pos == -1) {
         return 0;
       }
-      pos = rank0 - 1;
-      node = make_lhs(node); // 2 ranks
+      node = make_lhs(node); // 1 rank
     } else {
-      const auto ones_before = node.ones_before;
-      const auto rank1 = table.rank_1(abs_pos) - ones_before; // 1 rank
-      if (rank1 == 0) {
+      pos = rank_1(node, pos) - 1; // 1 rank
+      if (pos == -1) {
         return 0;
       }
-      pos = rank1 - 1;       // 1 rank
       node = make_rhs(node); // 2 ranks
     }
-    assert(pos >= 0);
   }
   assert(node.num_symbols == 2);
 
-  const auto abs_pos = node.range_begin + pos;
-  if (symbol == node.base_symbol) {
-    const auto zeros_before = node.range_begin - node.ones_before;
-    return table.rank_0(abs_pos) - zeros_before; // lhs symbol
-  }
-  assert(symbol == node.base_symbol + 1);
-  return table.rank_1(abs_pos) - node.ones_before; // rhs symbol
+  return is_lhs_symbol(node, symbol) ? rank_0(node, pos) : rank_1(node, pos);
 }
 
 auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
@@ -244,8 +224,8 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   auto pos = [&] {
     const auto& node = stack.back();
     assert(size(node) >= nth);
-    const bool is_lhs = (symbol == node.base_symbol);
-    return is_lhs ? select_0(node, nth) : select_1(node, nth);
+    return is_lhs_symbol(node, symbol) ? select_0(node, nth)
+                                       : select_1(node, nth);
   }();
   if (pos == -1) {
     return -1; // such element does not exists.
@@ -254,11 +234,8 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   stack.pop_back();
   while (!stack.empty()) {
     const auto& node = stack.back();
-    if (is_lhs_symbol(node, symbol)) {
-      pos = select_0(node, pos + 1); // costs 1 select
-    } else {
-      pos = select_1(node, pos + 1); // costs 1 select
-    }
+    pos = is_lhs_symbol(node, symbol) ? select_0(node, pos + 1)
+                                      : select_1(node, pos + 1);
     assert(pos >= 0 && pos < size(node)); // The element is supposed to exist.
     stack.pop_back();
   }
@@ -295,18 +272,13 @@ auto wavelet_tree::make_rhs(const node_desc& node) const noexcept -> node_desc {
                    /*ones_before=*/table.rank_1(first - 1)};
 }
 
-auto wavelet_tree::count_zeros(const node_desc& node) const noexcept
-    -> size_type {
-  return rank_0(node, size(node) - 1);
-}
-
-auto wavelet_tree::count_ones(const node_desc& node) const noexcept
-    -> size_type {
-  return rank_1(node, size(node) - 1);
+bool wavelet_tree::access(const node_desc& node, const index_type rel_pos) const
+    noexcept {
+  return table.access(node.range_begin + rel_pos);
 }
 
 // This function invokes rank_1 once.
-auto wavelet_tree::rank_0(const node_desc& node, index_type rel_pos) const
+auto wavelet_tree::rank_0(const node_desc& node, const index_type rel_pos) const
     noexcept -> size_type {
   assert(rel_pos >= 0 && rel_pos < size(node));
   const auto abs_pos = begin(node) + rel_pos;
@@ -314,7 +286,7 @@ auto wavelet_tree::rank_0(const node_desc& node, index_type rel_pos) const
 }
 
 // This function invokes rank_1 once.
-auto wavelet_tree::rank_1(const node_desc& node, index_type rel_pos) const
+auto wavelet_tree::rank_1(const node_desc& node, const index_type rel_pos) const
     noexcept -> size_type {
   assert(rel_pos >= 0 && rel_pos < size(node));
   const auto abs_pos = begin(node) + rel_pos;
@@ -341,22 +313,9 @@ auto wavelet_tree::select_1(const node_desc& node, const size_type nth) const
   return abs_pos - begin(node);
 }
 
-constexpr auto wavelet_tree::is_lhs_symbol(const node_desc& node,
-                                           const symbol_id symbol) noexcept
-    -> bool {
-  assert(symbol >= node.base_symbol &&
-         symbol < node.base_symbol + node.num_symbols);
-  return symbol < (node.base_symbol + node.num_symbols / 2);
-}
-
-constexpr auto wavelet_tree::ones_before(const node_desc& node) noexcept
+auto wavelet_tree::count_zeros(const node_desc& node) const noexcept
     -> size_type {
-  return node.ones_before;
-}
-
-constexpr auto wavelet_tree::zeros_before(const node_desc& node) noexcept
-    -> size_type {
-  return node.range_begin - node.ones_before;
+  return rank_0(node, size(node) - 1);
 }
 
 constexpr auto wavelet_tree::begin(const node_desc& node) noexcept
@@ -370,4 +329,22 @@ constexpr auto wavelet_tree::end(const node_desc& node) noexcept -> index_type {
 
 constexpr auto wavelet_tree::size(const node_desc& node) noexcept -> size_type {
   return node.range_size;
+}
+
+constexpr auto wavelet_tree::zeros_before(const node_desc& node) noexcept
+    -> size_type {
+  return node.range_begin - node.ones_before;
+}
+
+constexpr auto wavelet_tree::ones_before(const node_desc& node) noexcept
+    -> size_type {
+  return node.ones_before;
+}
+
+constexpr auto wavelet_tree::is_lhs_symbol(const node_desc& node,
+                                           const symbol_id symbol) noexcept
+    -> bool {
+  assert(symbol >= node.base_symbol &&
+         symbol < node.base_symbol + node.num_symbols);
+  return symbol < (node.base_symbol + node.num_symbols / 2);
 }
