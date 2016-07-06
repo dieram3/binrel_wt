@@ -4,6 +4,7 @@
 #include <brwt/int_vector.h> // int_vector
 #include <array>             // array
 #include <ostream>           // ostream
+#include <string>            // string
 #include <vector>            // vector
 
 using brwt::wavelet_tree;
@@ -63,6 +64,14 @@ static auto to_std_vector(const wavelet_tree& wt) {
     res[i] = wt.access(to_signed(i));
   }
   return res;
+}
+
+static auto to_string(const wavelet_tree::node_desc& node) {
+  std::string str(to_unsigned(node.size()), '\0');
+  for (size_t i = 0; i < str.size(); ++i) {
+    str[i] = node.access(to_signed(i)) ? '1' : '0';
+  }
+  return str;
 }
 
 namespace std {
@@ -262,6 +271,52 @@ TEST_CASE("Select with sigma=8") {
   CHECK(select('B', 13) == -1);
   CHECK(select('E', 74) == -1);
   CHECK(select('H', 9923) == -1);
+}
+
+TEST_CASE("Navigation in WT with sigma=4") {
+  const auto wt = wavelet_tree(create_vector_with_2_bpe());
+  // seq = 022123132130012010003321
+
+  const auto root = wt.make_root();
+  const auto node_0 = root.make_lhs();
+  const auto node_1 = root.make_rhs();
+
+  CHECK(!root.is_leaf());
+  CHECK(node_0.is_leaf());
+  CHECK(node_1.is_leaf());
+
+  CHECK(to_string(root) == "011011011010001000001110");
+  CHECK(to_string(node_0) == "0111001010001");
+  CHECK(to_string(node_1) == "00011010110");
+}
+
+TEST_CASE("Navigation in WT with sigma=8") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  // seq = EHDHACEEGBCBGCF
+
+  const auto root = wt.make_root();
+  const auto node_0 = root.make_lhs();
+  const auto node_1 = root.make_rhs();
+  const auto node_00 = node_0.make_lhs();
+  const auto node_01 = node_0.make_rhs();
+  const auto node_10 = node_1.make_lhs();
+  const auto node_11 = node_1.make_rhs();
+
+  CHECK(!root.is_leaf());
+  CHECK(!node_0.is_leaf());
+  CHECK(!node_1.is_leaf());
+  CHECK(node_00.is_leaf());
+  CHECK(node_01.is_leaf());
+  CHECK(node_10.is_leaf());
+  CHECK(node_11.is_leaf());
+
+  CHECK(to_string(root) == "110100111000101");
+  CHECK(to_string(node_0) == "1010101");
+  CHECK(to_string(node_1) == "01100110");
+  CHECK(to_string(node_00) == "011");
+  CHECK(to_string(node_01) == "1000");
+  CHECK(to_string(node_10) == "0001");
+  CHECK(to_string(node_11) == "1100");
 }
 
 TEST_SUITE_END();
