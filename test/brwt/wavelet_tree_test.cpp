@@ -3,6 +3,7 @@
 
 #include <brwt/int_vector.h> // int_vector
 #include <array>             // array
+#include <cstddef>           // size_t, ptrdiff_t
 #include <ostream>           // ostream
 #include <string>            // string
 #include <vector>            // vector
@@ -92,15 +93,22 @@ static std::ostream& operator<<(std::ostream& os,
 
 TEST_SUITE("wavelet_tree");
 
+TEST_CASE("Default constructor") {
+  const wavelet_tree wt{};
+  CHECK(wt.size() == 0);
+  CHECK(wt.get_bits_per_symbol() == 0);
+  CHECK(wt.max_symbol_id() == 0);
+}
+
 TEST_CASE("Constructor from int_vector") {
   {
-    wavelet_tree wt(create_vector_with_2_bpe());
+    const wavelet_tree wt(create_vector_with_2_bpe());
     CHECK(wt.size() == 24);
     CHECK(wt.get_bits_per_symbol() == 2);
     CHECK(wt.max_symbol_id() == 3);
   }
   {
-    wavelet_tree wt(create_vector_with_3_bpe());
+    const wavelet_tree wt(create_vector_with_3_bpe());
     CHECK(wt.size() == 15);
     CHECK(wt.get_bits_per_symbol() == 3);
     CHECK(wt.max_symbol_id() == 7);
@@ -273,6 +281,21 @@ TEST_CASE("Select with sigma=8") {
   CHECK(select('B', 13) == -1);
   CHECK(select('E', 74) == -1);
   CHECK(select('H', 9923) == -1);
+}
+
+TEST_CASE("size, get_bits_per_symbol, max_symbol_id") {
+  {
+    const auto wt = wavelet_tree(int_vector(34, /*bpe=*/8));
+    CHECK(wt.size() == 34);
+    CHECK(wt.get_bits_per_symbol() == 8);
+    CHECK(wt.max_symbol_id() == 255);
+  }
+  {
+    const auto wt = wavelet_tree(int_vector(411, /*bpe=*/10));
+    CHECK(wt.size() == 411);
+    CHECK(wt.get_bits_per_symbol() == 10);
+    CHECK(wt.max_symbol_id() == 1023);
+  }
 }
 
 TEST_CASE("Navigation in WT with sigma=4") {
