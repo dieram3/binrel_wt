@@ -95,13 +95,23 @@ static std::ostream& operator<<(std::ostream& os,
 TEST_SUITE("wavelet_tree");
 
 template <typename T>
-static void test_default_member_functions() {
+static void test_wavelet_tree_default_member_functions() {
   static_assert(std::is_nothrow_default_constructible<T>::value, "");
   static_assert(std::is_copy_constructible<T>::value, "");
-  static_assert(std::is_copy_assignable<T>::value, "");
   static_assert(std::is_nothrow_move_constructible<T>::value, "");
+  static_assert(std::is_copy_assignable<T>::value, "");
   static_assert(std::is_nothrow_move_assignable<T>::value, "");
   static_assert(std::is_nothrow_destructible<T>::value, "");
+}
+
+template <typename T>
+static void test_node_desc_default_member_functions() {
+  static_assert(!std::is_default_constructible<T>::value, "");
+  static_assert(std::is_trivially_copy_constructible<T>::value, "");
+  static_assert(std::is_trivially_move_constructible<T>::value, "");
+  static_assert(std::is_trivially_copy_assignable<T>::value, "");
+  static_assert(std::is_trivially_move_assignable<T>::value, "");
+  static_assert(std::is_trivially_destructible<T>::value, "");
 }
 
 TEST_CASE("Default constructor") {
@@ -111,7 +121,8 @@ TEST_CASE("Default constructor") {
   CHECK(wt.max_symbol_id() == 0);
 
   // static asserts for the wavelet tree go here.
-  test_default_member_functions<wavelet_tree>();
+  test_wavelet_tree_default_member_functions<wavelet_tree>();
+  test_node_desc_default_member_functions<wavelet_tree::node_desc>();
 }
 
 TEST_CASE("Constructor from int_vector") {
