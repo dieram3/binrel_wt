@@ -31,10 +31,10 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
   assert(bits_per_symbol >= 1);
   using std::size_t;
 
-  // TODO(diegoramirez): Improves the constructor implementation. Use bitmask
-  // for symbols. Consider represent the tree with a Wavelet matrix.
+  // TODO(diegoramirez): Improves the constructor implementation. Consider
+  // represent the tree with a Wavelet matrix.
 
-  const auto alphabet_size = (symbol_id{1} << bits_per_symbol);
+  const auto alphabet_size = max_symbol_id() + 1;
   std::vector<size_type> next_pos(2 * alphabet_size);
 
   for (size_type i = 0; i < sequence.length(); ++i) {
@@ -81,7 +81,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
     assert(level_pos == bit_seq.length());
   };
   for (size_type i = 0; i < sequence.length(); ++i) {
-    push_symbol(static_cast<symbol_id>(sequence[i]));
+    push_symbol(sequence[i]);
   }
 
   table = bitmap(std::move(bit_seq)); // The final magic.
@@ -142,6 +142,7 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
 
   constexpr size_t max_bits_per_symbol = std::numeric_limits<symbol_id>::digits;
   static_vector<node_proxy, max_bits_per_symbol> stack;
+
   stack.emplace_back(make_root());
   while (true) {
     const auto& node = stack.back();

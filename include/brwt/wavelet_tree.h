@@ -173,7 +173,7 @@ private:
   node_proxy(const wavelet_tree& wt_, index_type begin_, size_type size_,
              size_type ones_before_, symbol_id level_mask_) noexcept;
 
-  // absolute position information
+  // Absolute position information
   index_type begin() const noexcept;
   index_type end() const noexcept;
   size_type zeros_before() const noexcept;

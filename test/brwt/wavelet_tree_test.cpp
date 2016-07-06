@@ -15,13 +15,14 @@ using std::size_t;
 using std::ptrdiff_t;
 using symbol_id = wavelet_tree::symbol_id;
 
-static constexpr symbol_id map_upper(const char c) {
+static constexpr auto map_upper(const char c) {
   return static_cast<symbol_id>(c - 'A');
 }
 
 static constexpr auto to_unsigned(const ptrdiff_t value) {
   return static_cast<size_t>(value);
 }
+
 static constexpr auto to_signed(const size_t value) {
   return static_cast<ptrdiff_t>(value);
 }
@@ -147,7 +148,7 @@ TEST_CASE("Access with sigma=4") {
   CHECK(wt.access(1) == 2);
   CHECK(wt.access(7) == 3);
   CHECK(wt.access(19) == 0);
-  // Non-explicit full range check
+  // Full range check
   CHECK(to_std_vector(wt) == to_std_vector(vec));
 }
 
@@ -158,7 +159,7 @@ TEST_CASE("Access with sigma=8") {
   CHECK(wt.access(1) == map_upper('H'));
   CHECK(wt.access(6) == map_upper('E'));
   CHECK(wt.access(14) == map_upper('F'));
-  // Non-explicit full range check
+  // Full range check
   CHECK(to_std_vector(wt) == to_std_vector(vec));
 }
 
