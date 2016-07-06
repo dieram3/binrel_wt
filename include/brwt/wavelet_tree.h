@@ -16,8 +16,6 @@ public:
   class node_desc {
   public:
     explicit node_desc(const wavelet_tree& wt) noexcept;
-    node_desc(const node_desc& other) = default;
-    node_desc& operator=(const node_desc& other) = default;
 
     // internal bitmap access
     bool access(size_type pos) const noexcept;
