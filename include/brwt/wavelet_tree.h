@@ -96,15 +96,21 @@ public:
   ///
   index_type select(symbol_id symbol, size_type nth) const noexcept;
 
-  /// \brief Gets the length of the original sequence.
+  /// \brief Gets the size (or length) of the original sequence.
   ///
-  size_type length() const noexcept;
+  size_type size() const noexcept;
 
-  /// \brief Gets the size of the alphabet tracked by this wavelet tree.
+  /// \brief Gets the number of bits per symbol used in this wavelet tree.
   ///
-  size_type get_alphabet_size() const noexcept;
+  int get_bits_per_symbol() const noexcept;
 
-  /// \brief Creates the root node to navigate through the wavelet tree.
+  /// \brief Returns the maximum symbol id representable for this wavelet tree.
+  ///
+  symbol_id max_symbol_id() const noexcept;
+
+  /// \brief Creates the root node.
+  ///
+  /// The returned node allows navigate through the wavelet tree.
   ///
   node_desc make_root() const noexcept;
 
@@ -118,12 +124,8 @@ private:
 // Inline definitions
 // ==========================================
 
-inline auto wavelet_tree::length() const noexcept -> size_type {
+inline auto wavelet_tree::size() const noexcept -> size_type {
   return seq_len;
-}
-
-inline auto wavelet_tree::get_alphabet_size() const noexcept -> size_type {
-  return size_type{1} << (bits_per_symbol);
 }
 
 inline auto wavelet_tree::make_root() const noexcept -> node_desc {

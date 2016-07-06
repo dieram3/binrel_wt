@@ -88,7 +88,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
 }
 
 auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
-  assert(pos >= 0 && pos < length());
+  assert(pos >= 0 && pos < size());
 
   node_desc node = make_root();
   symbol_id res = 0;
@@ -111,7 +111,7 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
 
 auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
     -> size_type {
-  assert(pos >= 0 && pos < length());
+  assert(pos >= 0 && pos < size());
 
   node_desc node = make_root();
   while (!node.is_leaf()) {
@@ -172,6 +172,17 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   }
   return pos;
 };
+
+auto wavelet_tree::get_bits_per_symbol() const noexcept -> int {
+  return static_cast<int>(bits_per_symbol);
+}
+
+auto wavelet_tree::max_symbol_id() const noexcept -> symbol_id {
+  using limits = std::numeric_limits<symbol_id>;
+  return bits_per_symbol == limits::digits
+             ? limits::max()
+             : (symbol_id{1} << bits_per_symbol) - 1;
+}
 
 // ==========================================
 // node_desc implementation

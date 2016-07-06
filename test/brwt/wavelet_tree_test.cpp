@@ -59,7 +59,7 @@ static auto to_std_vector(const int_vector& vec) {
 }
 
 static auto to_std_vector(const wavelet_tree& wt) {
-  std::vector<symbol_id> res(to_unsigned(wt.length()));
+  std::vector<symbol_id> res(to_unsigned(wt.size()));
   for (size_t i = 0; i < res.size(); ++i) {
     res[i] = wt.access(to_signed(i));
   }
@@ -95,13 +95,15 @@ TEST_SUITE("wavelet_tree");
 TEST_CASE("Constructor from int_vector") {
   {
     wavelet_tree wt(create_vector_with_2_bpe());
-    CHECK(wt.length() == 24);
-    CHECK(wt.get_alphabet_size() == 4);
+    CHECK(wt.size() == 24);
+    CHECK(wt.get_bits_per_symbol() == 2);
+    CHECK(wt.max_symbol_id() == 3);
   }
   {
     wavelet_tree wt(create_vector_with_3_bpe());
-    CHECK(wt.length() == 15);
-    CHECK(wt.get_alphabet_size() == 8);
+    CHECK(wt.size() == 15);
+    CHECK(wt.get_bits_per_symbol() == 3);
+    CHECK(wt.max_symbol_id() == 7);
   }
 }
 
@@ -130,7 +132,7 @@ TEST_CASE("Access with sigma=8") {
 TEST_CASE("Rank with sigma=4") {
   const auto wt = wavelet_tree(create_vector_with_2_bpe());
   // seq = 0221 2313 2130 0120 1000 3321
-  REQUIRE(wt.length() == 24);
+  REQUIRE(wt.size() == 24);
 
   CHECK(wt.rank(/*symbol=*/0, /*pos=*/0) == 1);
   CHECK(wt.rank(/*symbol=*/0, /*pos=*/8) == 1);
@@ -160,7 +162,7 @@ TEST_CASE("Rank with sigma=4") {
 TEST_CASE("Rank with sigma=8") {
   const auto wt = wavelet_tree(create_vector_with_3_bpe());
   // seq = EHDHA CEEGB CBGCF
-  REQUIRE(wt.length() == 15);
+  REQUIRE(wt.size() == 15);
 
   auto rank = [&](const char symbol, const wavelet_tree::size_type pos) {
     return wt.rank(map_upper(symbol), pos);
@@ -195,7 +197,7 @@ TEST_CASE("Rank with sigma=8") {
 TEST_CASE("Select with sigma=4") {
   const auto wt = wavelet_tree(create_vector_with_2_bpe());
   // seq = 0221 2313 2130 0120 1000 3321
-  REQUIRE(wt.length() == 24);
+  REQUIRE(wt.size() == 24);
 
   // Random queries
   CHECK(wt.select(/*symbol=*/0, /*nth=*/4) == 15);
@@ -229,7 +231,7 @@ TEST_CASE("Select with sigma=4") {
 TEST_CASE("Select with sigma=8") {
   const auto wt = wavelet_tree(create_vector_with_3_bpe());
   // seq = EHDHA CEEGB CBGCF
-  REQUIRE(wt.length() == 15);
+  REQUIRE(wt.size() == 15);
 
   auto select = [&](const char symbol, const wavelet_tree::size_type pos) {
     return wt.select(map_upper(symbol), pos);
