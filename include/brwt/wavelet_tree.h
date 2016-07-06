@@ -55,7 +55,6 @@ public:
     size_type num_ones_before;
     symbol_id level_mask;
   };
-  friend node_desc;
 
 public:
   /// \brief Constructs an empty wavelet tree.
@@ -66,29 +65,35 @@ public:
   ///
   /// \param sequence The input sequence.
   ///
-  /// \post <tt>get_alphabet_size() == pow(2, sequence.get_bpe())</tt>
+  /// \post <tt>get_bits_per_symbol() == sequence.get_bpe()</tt>
   ///
-  /// \remark The usage of memory of the wavelet tree will be roughly the same
-  /// that the given sequence.
+  /// \par Complexity
+  /// Given:
+  /// \li <tt>bpe = sequence.get_bpe()</tt>
+  /// \li <tt>n = sequence.length()</tt>
+  /// \li <tt>sigma = 2<sup>bpe</sup></tt>
+  ///
+  /// The time and space complexity to build the wavelet tree using this
+  /// constructor is <tt>O(bpe * n + sigma)</tt>.
   ///
   explicit wavelet_tree(const int_vector& sequence);
 
   /// \brief Retrieves the symbol at the given position.
   ///
-  /// \pre <tt>pos < length()</tt>
+  /// \pre <tt>pos < size()</tt>
   ///
   symbol_id access(index_type pos) const noexcept;
 
   /// \brief Counts how many occurrences has a symbol up to the given position.
   ///
-  /// \pre <tt>symbol < get_alphabet_size()</tt>
-  /// \pre <tt>pos < length()</tt>
+  /// \pre <tt>symbol <= max_symbol_id()</tt>
+  /// \pre <tt>pos >= 0 && pos < size()</tt>
   ///
   size_type rank(symbol_id symbol, index_type pos) const noexcept;
 
   /// \brief Finds the position of the \e nth occurrence of the given symbol.
   ///
-  /// \pre <tt>symbol < get_alphabet_size()</tt>
+  /// \pre <tt>symbol <= max_symbol_id()</tt>
   /// \pre <tt>nth > 0</tt>
   ///
   /// \returns The position of the \e nth symbol if it exists. Otherwise returns
@@ -110,7 +115,7 @@ public:
 
   /// \brief Creates the root node.
   ///
-  /// The returned node allows navigate through the wavelet tree.
+  /// The returned node allows navigating through the wavelet tree.
   ///
   node_desc make_root() const noexcept;
 
