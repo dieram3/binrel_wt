@@ -26,8 +26,6 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 // wavelet_vector implementation
 // ==========================================
 
-// TODO(diego): Consider implement symbols in terms of bits.
-
 wavelet_tree::wavelet_tree(const int_vector& sequence)
     : table{}, seq_len{sequence.length()}, bits_per_symbol{sequence.get_bpe()} {
   assert(bits_per_symbol >= 1);
