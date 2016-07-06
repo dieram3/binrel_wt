@@ -68,7 +68,7 @@ static auto to_std_vector(const wavelet_tree& wt) {
   return res;
 }
 
-static auto to_string(const wavelet_tree::node_desc& node) {
+static auto to_string(const wavelet_tree::node_proxy& node) {
   std::string str(to_unsigned(node.size()), '\0');
   for (size_t i = 0; i < str.size(); ++i) {
     str[i] = node.access(to_signed(i)) ? '1' : '0';
@@ -105,7 +105,7 @@ static void test_wavelet_tree_default_member_functions() {
 }
 
 template <typename T>
-static void test_node_desc_default_member_functions() {
+static void test_node_proxy_default_member_functions() {
   static_assert(!std::is_default_constructible<T>::value, "");
   static_assert(std::is_trivially_copy_constructible<T>::value, "");
   static_assert(std::is_trivially_move_constructible<T>::value, "");
@@ -122,7 +122,7 @@ TEST_CASE("Default constructor") {
 
   // static asserts for the wavelet tree go here.
   test_wavelet_tree_default_member_functions<wavelet_tree>();
-  test_node_desc_default_member_functions<wavelet_tree::node_desc>();
+  test_node_proxy_default_member_functions<wavelet_tree::node_proxy>();
 }
 
 TEST_CASE("Constructor from int_vector") {

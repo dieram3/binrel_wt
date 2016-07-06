@@ -18,7 +18,7 @@ public:
   /// Signed vocabulary type used to indicate positions.
   using index_type = size_type;
 
-  class node_desc;
+  class node_proxy;
 
 public:
   /// \brief Constructs an empty wavelet tree.
@@ -81,7 +81,7 @@ public:
   ///
   /// The returned node allows navigating through the wavelet tree.
   ///
-  node_desc make_root() const noexcept;
+  node_proxy make_root() const noexcept;
 
 private:
   /// Representation of the wavelet tree without pointers.
@@ -99,11 +99,11 @@ private:
 /// Note that the node descriptors allow exploring the wavelet tree regardless
 /// of the internal structure.
 ///
-class wavelet_tree::node_desc {
+class wavelet_tree::node_proxy {
 public:
   /// \brief Constructs the root node of the given wavelet tree.
   ///
-  explicit node_desc(const wavelet_tree& wt) noexcept;
+  explicit node_proxy(const wavelet_tree& wt) noexcept;
 
   // internal bitmap access
 
@@ -150,18 +150,18 @@ public:
   ///
   /// \pre <tt>!is_leaf()</tt>
   ///
-  node_desc make_lhs() const noexcept;
+  node_proxy make_lhs() const noexcept;
 
   /// \brief Constructs a proxy to the right hand side child.
   ///
   /// \pre <tt>!is_leaf()</tt>
   ///
-  node_desc make_rhs() const noexcept;
+  node_proxy make_rhs() const noexcept;
 
 private:
   // Memberwise constructor
-  node_desc(const wavelet_tree& wt_, index_type begin_, size_type size_,
-            size_type ones_before_, symbol_id level_mask_) noexcept;
+  node_proxy(const wavelet_tree& wt_, index_type begin_, size_type size_,
+             size_type ones_before_, symbol_id level_mask_) noexcept;
 
   // absolute position information
   index_type begin() const noexcept;
@@ -189,8 +189,8 @@ inline auto wavelet_tree::size() const noexcept -> size_type {
   return seq_len;
 }
 
-inline auto wavelet_tree::make_root() const noexcept -> node_desc {
-  return node_desc(*this);
+inline auto wavelet_tree::make_root() const noexcept -> node_proxy {
+  return node_proxy(*this);
 }
 
 } // end namespace brwt

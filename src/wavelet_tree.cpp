@@ -8,7 +8,7 @@
 #include <vector>          // vector
 
 using brwt::wavelet_tree;
-using node_desc = wavelet_tree::node_desc;
+using node_proxy = wavelet_tree::node_proxy;
 
 // ==========================================
 // Auxiliary algorithms
@@ -90,7 +90,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
 auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
   assert(pos >= 0 && pos < size());
 
-  node_desc node = make_root();
+  node_proxy node = make_root();
   symbol_id res = 0;
   while (!node.is_leaf()) {
     // each iteration invokes rank three times.
@@ -114,7 +114,7 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
   assert(symbol <= max_symbol_id());
   assert(pos >= 0 && pos < size());
 
-  node_desc node = make_root();
+  node_proxy node = make_root();
   while (!node.is_leaf()) {
     // each iteration invokes rank three times.
     if (node.is_lhs_symbol(symbol)) {
@@ -141,7 +141,7 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   // Time complexity: Exactly 2 bitmap ranks and 1 bitmap select for level.
 
   constexpr size_t max_bits_per_symbol = std::numeric_limits<symbol_id>::digits;
-  static_vector<node_desc, max_bits_per_symbol> stack;
+  static_vector<node_proxy, max_bits_per_symbol> stack;
   stack.emplace_back(make_root());
   while (true) {
     const auto& node = stack.back();
@@ -187,10 +187,10 @@ auto wavelet_tree::max_symbol_id() const noexcept -> symbol_id {
 }
 
 // ==========================================
-// node_desc implementation
+// node_proxy implementation
 // ==========================================
 
-node_desc::node_desc(const wavelet_tree& wt) noexcept
+node_proxy::node_proxy(const wavelet_tree& wt) noexcept
     : wt_ptr{&wt},
       range_begin{0},
       range_size{wt.seq_len},
@@ -199,24 +199,24 @@ node_desc::node_desc(const wavelet_tree& wt) noexcept
   assert(wt.bits_per_symbol >= 1);
 }
 
-auto node_desc::access(const index_type pos) const noexcept -> bool {
+auto node_proxy::access(const index_type pos) const noexcept -> bool {
   assert(pos >= 0 && pos < size());
   return get_table().access(begin() + pos);
 }
 
 // This function invokes table.rank_0 once.
-auto node_desc::rank_0(const index_type pos) const noexcept -> size_type {
+auto node_proxy::rank_0(const index_type pos) const noexcept -> size_type {
   assert(pos >= 0 && pos < size());
   return get_table().rank_0(begin() + pos) - zeros_before();
 }
 
 // This function invokes table.rank_1 once.
-auto node_desc::rank_1(const index_type pos) const noexcept -> size_type {
+auto node_proxy::rank_1(const index_type pos) const noexcept -> size_type {
   assert(pos >= 0 && pos < size());
   return get_table().rank_1(begin() + pos) - ones_before();
 }
 
-auto node_desc::select_0(const size_type nth) const noexcept -> index_type {
+auto node_proxy::select_0(const size_type nth) const noexcept -> index_type {
   assert(nth > 0);
   const auto abs_pos = get_table().select_0(zeros_before() + nth);
   if (abs_pos == -1 || abs_pos >= end()) {
@@ -225,7 +225,7 @@ auto node_desc::select_0(const size_type nth) const noexcept -> index_type {
   return abs_pos - begin();
 }
 
-auto node_desc::select_1(const size_type nth) const noexcept -> index_type {
+auto node_proxy::select_1(const size_type nth) const noexcept -> index_type {
   assert(nth > 0);
   const auto abs_pos = get_table().select_1(ones_before() + nth);
   if (abs_pos == -1 || abs_pos >= end()) {
@@ -234,70 +234,70 @@ auto node_desc::select_1(const size_type nth) const noexcept -> index_type {
   return abs_pos - begin();
 }
 
-auto node_desc::size() const noexcept -> size_type {
+auto node_proxy::size() const noexcept -> size_type {
   return range_size;
 }
 
-auto node_desc::is_leaf() const noexcept -> bool {
+auto node_proxy::is_leaf() const noexcept -> bool {
   return level_mask == 1;
 }
 
-auto node_desc::is_lhs_symbol(const symbol_id symbol) const noexcept -> bool {
+auto node_proxy::is_lhs_symbol(const symbol_id symbol) const noexcept -> bool {
   return (symbol & level_mask) == 0;
 }
 
 // This function invokes table rank twice.
-auto node_desc::make_lhs() const noexcept -> node_desc {
+auto node_proxy::make_lhs() const noexcept -> node_proxy {
   assert(!is_leaf());
   const auto first = begin() + wt_ptr->seq_len;
-  return node_desc(/*wt_=*/*wt_ptr,
-                   /*begin_=*/first,
-                   /*size_=*/count_zeros(),
-                   /*ones_before_=*/get_table().rank_1(first - 1),
-                   /*level_mask_=*/(level_mask >> 1));
+  return node_proxy(/*wt_=*/*wt_ptr,
+                    /*begin_=*/first,
+                    /*size_=*/count_zeros(),
+                    /*ones_before_=*/get_table().rank_1(first - 1),
+                    /*level_mask_=*/(level_mask >> 1));
 }
 
 // This function invokes table rank twice.
-auto node_desc::make_rhs() const noexcept -> node_desc {
+auto node_proxy::make_rhs() const noexcept -> node_proxy {
   assert(!is_leaf());
   const auto num_zeros = count_zeros();
   const auto first = (begin() + wt_ptr->seq_len) + num_zeros;
-  return node_desc(/*wt_=*/*wt_ptr,
-                   /*begin_=*/first,
-                   /*size_=*/(size() - num_zeros),
-                   /*ones_before_=*/get_table().rank_1(first - 1),
-                   /*level_mask_=*/(level_mask >> 1));
+  return node_proxy(/*wt_=*/*wt_ptr,
+                    /*begin_=*/first,
+                    /*size_=*/(size() - num_zeros),
+                    /*ones_before_=*/get_table().rank_1(first - 1),
+                    /*level_mask_=*/(level_mask >> 1));
 }
 
-node_desc::node_desc(const wavelet_tree& wt_, const index_type begin_,
-                     const size_type size_, const size_type ones_before_,
-                     const symbol_id level_mask_) noexcept
+node_proxy::node_proxy(const wavelet_tree& wt_, const index_type begin_,
+                       const size_type size_, const size_type ones_before_,
+                       const symbol_id level_mask_) noexcept
     : wt_ptr{&wt_},
       range_begin{begin_},
       range_size{size_},
       num_ones_before{ones_before_},
       level_mask{level_mask_} {}
 
-auto node_desc::begin() const noexcept -> index_type {
+auto node_proxy::begin() const noexcept -> index_type {
   return range_begin;
 }
 
-auto node_desc::end() const noexcept -> index_type {
+auto node_proxy::end() const noexcept -> index_type {
   return begin() + size();
 }
 
-auto node_desc::zeros_before() const noexcept -> size_type {
+auto node_proxy::zeros_before() const noexcept -> size_type {
   return begin() - ones_before();
 }
 
-auto node_desc::ones_before() const noexcept -> size_type {
+auto node_proxy::ones_before() const noexcept -> size_type {
   return num_ones_before;
 }
 
-auto node_desc::count_zeros() const noexcept -> size_type {
+auto node_proxy::count_zeros() const noexcept -> size_type {
   return rank_0(size() - 1);
 }
 
-auto node_desc::get_table() const noexcept -> const bitmap& {
+auto node_proxy::get_table() const noexcept -> const bitmap& {
   return wt_ptr->table;
 }
