@@ -111,6 +111,7 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
 
 auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
     -> size_type {
+  assert(symbol <= max_symbol_id());
   assert(pos >= 0 && pos < size());
 
   node_desc node = make_root();
@@ -135,6 +136,7 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
 
 auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
     noexcept -> index_type {
+  assert(symbol <= max_symbol_id());
   assert(nth > 0);
   // Time complexity: Exactly 2 bitmap ranks and 1 bitmap select for level.
 
@@ -246,6 +248,7 @@ auto node_desc::is_lhs_symbol(const symbol_id symbol) const noexcept -> bool {
 
 // This function invokes table rank twice.
 auto node_desc::make_lhs() const noexcept -> node_desc {
+  assert(!is_leaf());
   const auto first = begin() + wt_ptr->seq_len;
   return node_desc(/*wt_=*/*wt_ptr,
                    /*begin_=*/first,
@@ -256,6 +259,7 @@ auto node_desc::make_lhs() const noexcept -> node_desc {
 
 // This function invokes table rank twice.
 auto node_desc::make_rhs() const noexcept -> node_desc {
+  assert(!is_leaf());
   const auto num_zeros = count_zeros();
   const auto first = (begin() + wt_ptr->seq_len) + num_zeros;
   return node_desc(/*wt_=*/*wt_ptr,
