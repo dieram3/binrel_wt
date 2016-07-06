@@ -7,6 +7,16 @@
 
 namespace brwt {
 
+/// \brief This class represents a wavelet tree.
+///
+/// A wavelet tree is used to manipulate sequences. It provides access, rank and
+/// select on <tt>O(bits)</tt> time where \c bits is the number of bits used to
+/// represent the symbols of the sequence.
+///
+/// This class also provide proxy nodes so that one can extend the wavelet tree
+/// functionality easily regardless of the internal representation (which might
+/// be optimized in some way).
+///
 class wavelet_tree {
 public:
   /// Unsigned type used to represent symbol codes.
@@ -77,9 +87,9 @@ public:
   ///
   symbol_id max_symbol_id() const noexcept;
 
-  /// \brief Creates the root node.
+  /// \brief Creates a proxy to the root node.
   ///
-  /// The returned node allows navigating through the wavelet tree.
+  /// The returned node proxy allows navigating through the wavelet tree.
   ///
   node_proxy make_root() const noexcept;
 
@@ -96,12 +106,12 @@ private:
 
 /// \brief Proxy class to access the nodes of a wavelet tree.
 ///
-/// Note that the node descriptors allow exploring the wavelet tree regardless
+/// Note that the node proxies allow exploring the wavelet tree regardless
 /// of the internal structure.
 ///
 class wavelet_tree::node_proxy {
 public:
-  /// \brief Constructs the root node of the given wavelet tree.
+  /// \brief Constructs a proxy to the root node of the given wavelet tree.
   ///
   explicit node_proxy(const wavelet_tree& wt) noexcept;
 
