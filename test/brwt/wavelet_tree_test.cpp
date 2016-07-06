@@ -13,7 +13,7 @@ using std::ptrdiff_t;
 using symbol_id = wavelet_tree::symbol_id;
 
 static constexpr symbol_id map_upper(const char c) {
-  return c - 'A';
+  return static_cast<symbol_id>(c - 'A');
 }
 
 static constexpr auto to_unsigned(const ptrdiff_t value) {
@@ -52,8 +52,7 @@ static int_vector create_vector_with_3_bpe() {
 static auto to_std_vector(const int_vector& vec) {
   std::vector<symbol_id> res(to_unsigned(vec.length()));
   for (size_t i = 0; i < res.size(); ++i) {
-    const auto symbol = vec[to_signed(i)];
-    res[i] = static_cast<symbol_id>(symbol);
+    res[i] = vec[to_signed(i)];
   }
   return res;
 }

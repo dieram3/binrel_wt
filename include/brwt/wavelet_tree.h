@@ -9,18 +9,55 @@ namespace brwt {
 
 class wavelet_tree {
 public:
-  using symbol_id = std::ptrdiff_t;
+  using symbol_id = bit_vector::block_type;
   using size_type = std::ptrdiff_t;
   using index_type = std::ptrdiff_t;
 
-private:
-  struct node_desc {
+  class node_desc {
+  public:
+    explicit node_desc(const wavelet_tree& wt) noexcept;
+    node_desc(const node_desc& other) = default;
+    node_desc& operator=(const node_desc& other) = default;
+
+    // internal bitmap access
+    bool access(size_type pos) const noexcept;
+    size_type rank_0(index_type pos) const noexcept;
+    size_type rank_1(index_type pos) const noexcept;
+    index_type select_0(size_type nth) const noexcept;
+    index_type select_1(size_type nth) const noexcept;
+    size_type size() const noexcept;
+
+    // Level information
+    bool is_leaf() const noexcept;
+    bool is_lhs_symbol(symbol_id symbol) const noexcept;
+
+    // Navigation
+    node_desc make_lhs() const noexcept;
+    node_desc make_rhs() const noexcept;
+
+  private:
+    // Memberwise constructor
+    node_desc(const wavelet_tree& wt_, index_type begin_, size_type size_,
+              size_type ones_before_, symbol_id level_mask_) noexcept;
+
+    // absolute position information
+    index_type begin() const noexcept;
+    index_type end() const noexcept;
+    size_type zeros_before() const noexcept;
+    size_type ones_before() const noexcept;
+
+    // Auxiliary methods
+    size_type count_zeros() const noexcept;
+    const bitmap& get_table() const noexcept;
+
+  private:
+    const wavelet_tree* wt_ptr;
     index_type range_begin;
     size_type range_size;
-    symbol_id base_symbol;
-    size_type num_symbols;
-    size_type ones_before;
+    size_type num_ones_before;
+    symbol_id level_mask;
   };
+  friend node_desc;
 
 public:
   /// \brief Constructs an empty wavelet tree.
@@ -69,30 +106,14 @@ public:
   ///
   size_type get_alphabet_size() const noexcept;
 
-private:
+  /// \brief Creates the root node to navigate through the wavelet tree.
+  ///
   node_desc make_root() const noexcept;
-  node_desc make_lhs(const node_desc& node) const noexcept;
-  node_desc make_rhs(const node_desc& node) const noexcept;
-
-  bool access(const node_desc& node, index_type rel_pos) const noexcept;
-  size_type rank_0(const node_desc& node, index_type rel_pos) const noexcept;
-  size_type rank_1(const node_desc& node, index_type rel_pos) const noexcept;
-  index_type select_0(const node_desc& node, size_type nth) const noexcept;
-  index_type select_1(const node_desc& node, size_type nth) const noexcept;
-  size_type count_zeros(const node_desc& node) const noexcept;
-
-  static constexpr index_type begin(const node_desc& node) noexcept;
-  static constexpr index_type end(const node_desc& node) noexcept;
-  static constexpr size_type size(const node_desc& node) noexcept;
-  static constexpr size_type zeros_before(const node_desc& node) noexcept;
-  static constexpr size_type ones_before(const node_desc& node) noexcept;
-  static constexpr bool is_lhs_symbol(const node_desc& node,
-                                      symbol_id symbol) noexcept;
 
 private:
   bitmap table{};      // Representation of the wavelet tree without pointers.
   size_type seq_len{}; // The length of the original sequence.
-  size_type alphabet_size{}; // a.k.a sigma
+  size_type bits_per_symbol{}; // The number of bits per symbol used in *this.
 };
 
 // ==========================================
@@ -104,7 +125,11 @@ inline auto wavelet_tree::length() const noexcept -> size_type {
 }
 
 inline auto wavelet_tree::get_alphabet_size() const noexcept -> size_type {
-  return alphabet_size;
+  return size_type{1} << (bits_per_symbol);
+}
+
+inline auto wavelet_tree::make_root() const noexcept -> node_desc {
+  return node_desc(*this);
 }
 
 } // end namespace brwt
