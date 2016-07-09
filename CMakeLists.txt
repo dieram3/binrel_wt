@@ -43,7 +43,7 @@ endif()
 # Add subdirectories
 # ---------------------------------------
 
-add_subdirectory("src") # The library implementation
+add_subdirectory("lib")
 add_subdirectory("docs")
 
 # Add the unit tests
