@@ -4,6 +4,7 @@
 #include <brwt/bitmap.h>     // bitmap
 #include <brwt/int_vector.h> // int_vector
 #include <cstddef>           // ptrdiff_t
+#include <utility>           // pair
 
 namespace brwt {
 
@@ -77,7 +78,9 @@ public:
 
   /// \brief Gets the size (or length) of the original sequence.
   ///
-  size_type size() const noexcept;
+  size_type size() const noexcept {
+    return seq_len;
+  }
 
   /// \brief Gets the number of bits per symbol used in this wavelet tree.
   ///
@@ -139,20 +142,35 @@ public:
 
   /// \brief Retrieves the size of this node bitmap.
   ///
-  size_type size() const noexcept;
+  size_type size() const noexcept {
+    return range_size;
+  }
 
   // Level information
 
   /// \brief Checks whether the node has no materialized children.
   ///
-  bool is_leaf() const noexcept;
+  bool is_leaf() const noexcept {
+    return level_mask == 1;
+  }
 
   /// \brief Checks if the next bit of the symbol is handled by the left child.
   ///
-  /// Note that this function can be called even on a leaf node because it does
-  /// not need its children to be materialized.
+  /// Note that this function can be called even on a leaf node (the node that
+  /// manages the last division).
   ///
-  bool is_lhs_symbol(symbol_id symbol) const noexcept;
+  bool is_lhs_symbol(symbol_id symbol) const noexcept {
+    return (symbol & level_mask) == 0;
+  }
+
+  /// \brief Checks if the next bit of the symbol is handled by the left child.
+  ///
+  /// Note that this function can be called even on a leaf node (the node that
+  /// manages the last division).
+  ///
+  bool is_rhs_symbol(symbol_id symbol) const noexcept {
+    return !is_lhs_symbol(symbol);
+  }
 
   // Navigation
 
@@ -167,6 +185,36 @@ public:
   /// \pre <tt>!is_leaf()</tt>
   ///
   node_proxy make_rhs() const noexcept;
+
+  /// \brief Returns a pair containing proxies to the left child and to the
+  /// right child.
+  ///
+  /// This function is equivalent to <tt>std::make_pair(make_lhs(),
+  /// make_rhs())</tt>, except that it reduces the number of needed bitmap
+  /// operations.
+  ///
+  /// \pre <tt>!is_leaf()</tt>
+  ///
+  /// \returns An \c std::pair where \c p.first refers to the left child and \c
+  /// p.second refer to the second child.
+  ///
+  std::pair<node_proxy, node_proxy> make_lhs_and_rhs() const noexcept;
+
+  /// \brief Checks if two node proxies refer to the same node.
+  ///
+  friend bool operator==(const node_proxy& lhs,
+                         const node_proxy& rhs) noexcept {
+    return lhs.wt_ptr == rhs.wt_ptr &&           //
+           lhs.range_begin == rhs.range_begin && //
+           lhs.level_mask == rhs.level_mask;
+  }
+
+  /// \brief Checks it twho proxies do not refer to the same node.
+  ///
+  friend bool operator!=(const node_proxy& lhs,
+                         const node_proxy& rhs) noexcept {
+    return !(lhs == rhs);
+  }
 
 private:
   // Memberwise constructor
@@ -187,17 +235,13 @@ private:
   const wavelet_tree* wt_ptr;
   index_type range_begin;
   size_type range_size;
-  size_type num_ones_before;
+  size_type num_ones_before; // equals to: get_table().rank_1(begin() - 1)
   symbol_id level_mask;
 };
 
 // ==========================================
-// Inline definitions
+// Extra inline definitions
 // ==========================================
-
-inline auto wavelet_tree::size() const noexcept -> size_type {
-  return seq_len;
-}
 
 inline auto wavelet_tree::make_root() const noexcept -> node_proxy {
   return node_proxy(*this);

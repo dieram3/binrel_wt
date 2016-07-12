@@ -7,6 +7,7 @@
 #include <ostream>           // ostream
 #include <string>            // string
 #include <type_traits>       // is_nothrow_default_constructible, ...
+#include <utility>           // make_pair
 #include <vector>            // vector
 
 using brwt::wavelet_tree;
@@ -349,7 +350,7 @@ TEST_CASE("Navigation in WT with sigma=8") {
   const auto node_0 = root.make_lhs();
   const auto node_1 = root.make_rhs();
   const auto node_00 = node_0.make_lhs();
-  const auto node_01 = node_0.make_rhs();
+  const auto node_01 = node_0.make_rhs(); // Test not optimized make_rhs
   const auto node_10 = node_1.make_lhs();
   const auto node_11 = node_1.make_rhs();
 
@@ -368,6 +369,85 @@ TEST_CASE("Navigation in WT with sigma=8") {
   CHECK(to_string(node_01) == "1000");
   CHECK(to_string(node_10) == "0001");
   CHECK(to_string(node_11) == "1100");
+}
+
+TEST_CASE("node_proxy: equality operator") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  const auto x0 = wt.make_root();
+  const auto x1 = x0.make_lhs();
+  const auto x2 = x1.make_rhs();
+
+  SUBCASE("Copied wavelet tree") {
+    const auto copy = wt;
+    const auto y0 = copy.make_root();
+    const auto y1 = y0.make_lhs();
+    const auto y2 = y1.make_rhs();
+
+    CHECK(x0 != y0);
+    CHECK(x1 != y1);
+    CHECK(x2 != y2);
+  }
+  SUBCASE("Nodes from the same WT") {
+    CHECK(x0 == x0);
+    CHECK(x1 == x1);
+    CHECK(x2 == x2);
+
+    CHECK(x0 != x1);
+    CHECK(x0 != x2);
+    CHECK(x1 != x2);
+  }
+  SUBCASE("Copied node proxies") {
+    const auto y0 = x0;
+    const auto y1 = x1;
+    const auto y2 = x2;
+
+    CHECK(x0 == y0);
+    CHECK(x1 == y1);
+    CHECK(x2 == y2);
+  }
+}
+
+TEST_CASE("node_proxy: check symbol side") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  const auto root = wt.make_root();    // [0, 8)
+  const auto lhs = root.make_lhs();    // [0, 4)
+  const auto lhs_rhs = lhs.make_rhs(); // [2, 4)
+
+  CHECK(root.is_lhs_symbol(0));
+  CHECK(root.is_lhs_symbol(3));
+  CHECK(!root.is_lhs_symbol(4));
+  CHECK(!root.is_lhs_symbol(7));
+
+  CHECK(!root.is_rhs_symbol(0));
+  CHECK(!root.is_rhs_symbol(3));
+  CHECK(root.is_rhs_symbol(4));
+  CHECK(root.is_rhs_symbol(7));
+
+  CHECK(lhs.is_lhs_symbol(0));
+  CHECK(lhs.is_lhs_symbol(1));
+  CHECK(lhs.is_rhs_symbol(2));
+  CHECK(lhs.is_rhs_symbol(3));
+
+  CHECK(lhs_rhs.is_lhs_symbol(2));
+  CHECK(!lhs_rhs.is_lhs_symbol(3));
+
+  CHECK(!lhs_rhs.is_rhs_symbol(2));
+  CHECK(lhs_rhs.is_rhs_symbol(3));
+}
+
+TEST_CASE("node_proxy: make lhs and rhs") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  // seq = EHDHACEEGBCBGCF
+
+  const auto root = wt.make_root();
+  const auto lhs = root.make_lhs();
+  const auto rhs = root.make_rhs();
+
+  CHECK(root.make_lhs_and_rhs() == std::make_pair(lhs, rhs));
+  CHECK(lhs.make_lhs_and_rhs() ==
+        std::make_pair(lhs.make_lhs(), lhs.make_rhs()));
+  CHECK(rhs.make_lhs_and_rhs() ==
+        std::make_pair(rhs.make_lhs(), rhs.make_rhs()));
 }
 
 TEST_SUITE_END();

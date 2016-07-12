@@ -235,18 +235,6 @@ auto node_proxy::select_1(const size_type nth) const noexcept -> index_type {
   return abs_pos - begin();
 }
 
-auto node_proxy::size() const noexcept -> size_type {
-  return range_size;
-}
-
-auto node_proxy::is_leaf() const noexcept -> bool {
-  return level_mask == 1;
-}
-
-auto node_proxy::is_lhs_symbol(const symbol_id symbol) const noexcept -> bool {
-  return (symbol & level_mask) == 0;
-}
-
 // This function invokes table rank twice.
 auto node_proxy::make_lhs() const noexcept -> node_proxy {
   assert(!is_leaf());
@@ -268,6 +256,26 @@ auto node_proxy::make_rhs() const noexcept -> node_proxy {
                     /*size_=*/(size() - num_zeros),
                     /*ones_before_=*/get_table().rank_1(first - 1),
                     /*level_mask_=*/(level_mask >> 1));
+}
+
+// This function invokes table rank thrice.
+auto node_proxy::make_lhs_and_rhs() const noexcept
+    -> std::pair<node_proxy, node_proxy> {
+  const auto num_zeros = count_zeros();
+  const auto lhs_first = begin() + wt_ptr->seq_len;
+  const auto rhs_first = lhs_first + num_zeros;
+  return {node_proxy(
+              /*wt_=*/*wt_ptr,
+              /*begin_=*/lhs_first,
+              /*size_=*/num_zeros,
+              /*ones_before_=*/get_table().rank_1(lhs_first - 1),
+              /*level_mask_=*/level_mask >> 1),
+          node_proxy(
+              /*wt_=*/*wt_ptr,
+              /*begin_=*/rhs_first,
+              /*size_=*/(size() - num_zeros),
+              /*ones_before_=*/get_table().rank_1(rhs_first - 1),
+              /*level_mask_=*/(level_mask >> 1))};
 }
 
 node_proxy::node_proxy(const wavelet_tree& wt_, const index_type begin_,
