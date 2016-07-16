@@ -91,6 +91,15 @@ public:
   /// Constant.
   ///
   size_type length() const noexcept {
+    return num_elems; // TODO(Diego): deprecate this.
+  }
+
+  /// \brief Returns the number of elements of the array.
+  ///
+  /// \par Time complexity
+  /// Constant.
+  ///
+  size_type size() const noexcept {
     return num_elems;
   }
 
