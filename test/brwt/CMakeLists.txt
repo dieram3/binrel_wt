@@ -1,4 +1,5 @@
 add_unittest("brwt"
+  "binary_relation_test.cpp"
   "bit_hacks_test.cpp"
   "bit_vector_test.cpp"
   "bitmap_test.cpp"
