@@ -126,6 +126,14 @@ auto make_rhs_range_using_lhs(const index_range& range,
                      end(range) - end(lhs_range)};
 }
 
+auto make_lhs_and_rhs_ranges(const node_proxy& node, const index_range& range) {
+  assert(begin(range) >= 0 && end(range) <= node.size());
+
+  const auto lhs = make_lhs_range(node, range);
+  const auto rhs = make_rhs_range_using_lhs(range, lhs);
+  return std::make_pair(lhs, rhs);
+}
+
 } // end anonymous namespace
 
 static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
@@ -207,6 +215,9 @@ namespace brwt {
 namespace count_symbols_detail {
 namespace {
 
+// TODO(diego): Optimization. Some overloads of count_symbols generate children
+// nodes even when its respective ranges are empty.
+
 struct greater_equal {
   symbol_id symbol;
 };
@@ -217,8 +228,28 @@ struct less_equal {
 
 size_type count_symbols(node_proxy node, const index_range range) {
   assert(begin(range) >= 0 && end(range) <= node.size());
-  assert(false && "Unimplemented");
-  return 0;
+
+  if (empty(range)) {
+    return 0;
+  }
+
+  const auto children_ranges = make_lhs_and_rhs_ranges(node, range);
+  const auto& lhs_range = get_left(children_ranges);
+  const auto& rhs_range = get_right(children_ranges);
+
+  if (!node.is_leaf()) {
+    if (empty(lhs_range)) {
+      return count_symbols(node.make_rhs(), rhs_range);
+    }
+    if (empty(rhs_range)) {
+      return count_symbols(node.make_lhs(), lhs_range);
+    }
+    const auto children = node.make_lhs_and_rhs();
+    return count_symbols(get_left(children), lhs_range) +
+           count_symbols(get_right(children), rhs_range);
+  }
+
+  return (empty(lhs_range) ? 0 : 1) + (empty(rhs_range) ? 0 : 1);
 }
 
 size_type count_symbols(node_proxy node, index_range range,
@@ -362,42 +393,13 @@ size_type count_symbols(node_proxy node, index_range range,
 } // end namespace count_symbols_detail
 } // end namespace brwt
 
-// static size_type count_distinct_symbols(const node_proxy& node,
-//                                         const symbol_id symbol_min,
-//                                         const symbol_id symbol_max,
-//                                         const index_type index_min,
-//                                         const index_type index_max) noexcept
-//                                         {
-//
-//   size_type ans = 0;
-//   if (node.is_lhs_symbol(symbol_min)) {
-//     const auto lhs_index_min = (index_min > 0 ? node.rank_0(index_min - 1) :
-//     0);
-//     const auto lhs_index_max = node.rank_0(index_max) - 1;
-//     if (lhs_index_min <= lhs_index_max) {
-//       if (node.is_leaf()) {
-//         ans += 1;
-//       } else {
-//         ans += count_distinct_symbols(node.make_lhs(), symbol_min,
-//         symbol_max,
-//                                       lhs_index_min, lhs_index_max);
-//       }
-//     }
-//   } else {
-//     const auto rhs_index_min = (first > 0 ? node.rank_1(first - 1) : 0);
-//     const auto rhs_index_max = node.rank_1(last) - 1;
-//     if (rhs_index_min <= rhs_index_max) {
-//       if (node.is_leaf()) {
-//         ans += 1;
-//       } else {
-//         ans += count_distinct_symbols(node.make_rhs(), symbol_min,
-//         symbol_max,
-//                                       rhs_index_min, rhs_index_max);
-//       }
-//     }
-//   }
-//   return ans;
-// }
+static size_type count_distinct_symbols(const node_proxy& node,
+                                        const index_range& range,
+                                        const symbol_id min_symbol,
+                                        const symbol_id max_symbol) {
+  namespace detail = brwt::count_symbols_detail;
+  return detail::count_symbols(node, range, min_symbol, max_symbol);
+}
 
 // ==========================================
 // binary_relation implementation
