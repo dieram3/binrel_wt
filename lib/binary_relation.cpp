@@ -91,15 +91,6 @@ static size_type exclusive_rank_1(const node_proxy& node,
   return node.rank_1(pos - 1);
 }
 
-static size_type exclusive_rank(const wavelet_tree& wt, const symbol_id symbol,
-                                const index_type pos) noexcept {
-  assert(pos >= 0 && pos <= wt.size());
-  if (pos == 0) {
-    return 0;
-  }
-  return wt.rank(symbol, pos);
-}
-
 // ==========================================
 // class index_range
 // ==========================================
@@ -179,6 +170,15 @@ auto make_lhs_and_rhs_ranges(const node_proxy& node, const index_range& range) {
 // ==========================================
 // wavelet_tree extensions
 // ==========================================
+
+static size_type exclusive_rank(const wavelet_tree& wt, const symbol_id symbol,
+                                const index_type pos) noexcept {
+  assert(pos >= 0 && pos <= wt.size());
+  if (pos == 0) {
+    return 0;
+  }
+  return wt.rank(symbol, pos);
+}
 
 static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
                             index_type pos) noexcept {
