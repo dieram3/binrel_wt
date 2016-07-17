@@ -7,6 +7,7 @@
 #include <iterator>         // begin, end
 #include <numeric>          // partial_sum
 #include <tuple>            // tie
+#include <type_traits>      // is_enum, underlying_type_t
 #include <utility>          // pair, make_pair, move
 #include <vector>           // vector
 
@@ -24,7 +25,7 @@ using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
 
 // ==========================================
-// Helper functions and classes
+// Generic helpers
 // ==========================================
 
 template <typename T>
@@ -36,6 +37,31 @@ template <typename T>
 static const T& get_right(const std::pair<T, T>& p) {
   return p.second;
 }
+
+// TODO(Diego): Consider to put exclusive_scan in a private header. It is also
+// used in the wavelet tree implementation.
+template <typename InputIt, typename OutputIt, typename T>
+static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
+                           T init) {
+  for (; first != last; ++first) {
+    *d_first++ = std::exchange(init, init + (*first));
+  }
+}
+
+template <typename InputRange, typename UnaryFunction>
+static UnaryFunction for_each(const InputRange& range, UnaryFunction f) {
+  return std::for_each(std::begin(range), std::end(range), f);
+}
+
+template <typename T>
+constexpr auto to_underlying_type(const T value) noexcept {
+  static_assert(std::is_enum<T>::value, "");
+  return static_cast<std::underlying_type_t<T>>(value);
+}
+
+// ==========================================
+// node_proxy extensions
+// ==========================================
 
 static size_type inclusive_rank_0(const node_proxy& node,
                                   const index_type pos) noexcept {
@@ -73,6 +99,10 @@ static size_type exclusive_rank(const wavelet_tree& wt, const symbol_id symbol,
   }
   return wt.rank(symbol, pos);
 }
+
+// ==========================================
+// class index_range
+// ==========================================
 
 namespace {
 class index_range {
@@ -145,6 +175,10 @@ auto make_lhs_and_rhs_ranges(const node_proxy& node, const index_range& range) {
 }
 
 } // end anonymous namespace
+
+// ==========================================
+// wavelet_tree extensions
+// ==========================================
 
 static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
                             index_type pos) noexcept {
@@ -395,22 +429,28 @@ static size_type count_symbols(node_proxy node, index_range range,
 
 } // namespace count_symbols_detail
 
-static size_type count_distinct_symbols(const node_proxy& node,
+static size_type count_distinct_symbols(const wavelet_tree& wt,
                                         const index_range& range,
                                         const symbol_id min_symbol,
                                         const symbol_id max_symbol) {
+  assert(begin(range) >= 0 && end(range) <= wt.size());
   namespace detail = count_symbols_detail;
-  return detail::count_symbols(node, range, min_symbol, max_symbol);
-}
-
-template <typename InputRange, typename UnaryFunction>
-static UnaryFunction for_each(const InputRange& range, UnaryFunction f) {
-  return std::for_each(std::begin(range), std::end(range), f);
+  return detail::count_symbols(wt.make_root(), range, min_symbol, max_symbol);
 }
 
 // ==========================================
 // binary_relation implementation
 // ==========================================
+
+static constexpr object_id prev(const object_id x) noexcept {
+  assert(to_underlying_type(x) != 0);
+  return static_cast<object_id>(to_underlying_type(x) - 1);
+}
+
+static constexpr label_id prev(const label_id alpha) noexcept {
+  assert(to_underlying_type(alpha) != 0);
+  return static_cast<label_id>(to_underlying_type(alpha));
+}
 
 namespace pairs_constructor_detail {
 using std::vector;
@@ -418,7 +458,7 @@ using std::vector;
 static auto count_objects_frequency(const vector<pair_type>& pairs,
                                     const object_id max_object) {
   // TODO(Diego): Consider to replace the histogram with a compressed vector.
-  const auto num_objects = static_cast<size_t>(max_object + 1);
+  const auto num_objects = static_cast<size_t>(max_object) + 1;
   std::vector<size_type> frequency(num_objects);
   for_each(pairs, [&](const pair_type& p) { ++frequency[p.object]; });
   return frequency;
@@ -440,16 +480,6 @@ static bitmap make_bitmap(const vector<size_type>& objects_frequency,
   return bitmap(std::move(bit_seq));
 }
 
-// TODO(Diego): Consider to put exclusive_scan in a private header. It is also
-// used in the wavelet tree implementation.
-template <typename InputIt, typename OutputIt, typename T>
-static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
-                           T init) {
-  for (; first != last; ++first) {
-    *d_first++ = std::exchange(init, init + (*first));
-  }
-}
-
 template <typename ForwardRange, typename T>
 static void inplace_exclusive_scan(ForwardRange& range, const T init) {
   exclusive_scan(std::begin(range), std::end(range), std::begin(range), init);
@@ -459,7 +489,7 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
                                       vector<size_type> objects_frequency,
                                       const label_id max_label) {
   int_vector seq(/*count=*/static_cast<size_type>(pairs.size()),
-                 /*bpe=*/used_bits(max_label));
+                 /*bpe=*/used_bits(types::word_type{max_label}));
 
   // The exclusive_scan and the for_each are an inline counting sort.
   inplace_exclusive_scan(objects_frequency, size_type{0});
@@ -475,8 +505,8 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
 } // end namespace pairs_constructor_detail
 
 binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
-  object_id max_object = 0;
-  label_id max_label = 0;
+  object_id max_object{};
+  label_id max_label{};
   for_each(pairs, [&](const pair_type& pair) {
     max_object = std::max(max_object, pair.object);
     max_label = std::max(max_label, pair.label);
@@ -492,18 +522,18 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
       detail::make_wavelet_tree(pairs, std::move(objects_frequency), max_label);
 }
 
-auto binary_relation::rank(object_id obj_max, label_id label_max) const noexcept
-    -> size_type {
-  const auto end_pos = map(obj_max);
-  return range_rank(m_wtree, label_max, end_pos);
+auto binary_relation::rank(object_id max_object, label_id max_label) const
+    noexcept -> size_type {
+  const auto end_pos = map(max_object);
+  return range_rank(m_wtree, max_label, end_pos);
 }
 
-auto binary_relation::rank(label_id label_max, object_id obj_min,
-                           object_id obj_max) const noexcept -> size_type {
-  if (obj_min == 0) {
-    return rank(label_max, obj_max);
+auto binary_relation::rank(object_id min_object, object_id max_object,
+                           label_id max_label) const noexcept -> size_type {
+  if (min_object == 0) {
+    return rank(max_object, max_label);
   }
-  return rank(label_max, obj_max) - rank(label_max, obj_min - 1);
+  return rank(max_object, max_label) - rank(prev(min_object), max_label);
 }
 
 auto binary_relation::select_label_major(const label_id alpha,
@@ -512,22 +542,26 @@ auto binary_relation::select_label_major(const label_id alpha,
     -> pair_type {
   assert(x <= y);
 
-  nth += (alpha > 0 ? rank(alpha - 1, x, y) : 0);
+  nth += (alpha > 0 ? rank(x, y, prev(alpha)) : 0);
 
-  const index_type first = (x > 0 ? map(x - 1) + 1 : 0);
+  const index_type first = (x > 0 ? map(prev(x)) + 1 : 0);
   const index_type last = map(y) + 1; // Elem after last pair with object = y
 
-  label_id label{};
+  symbol_id symbol{};
   index_type pos{};
-  std::tie(label, pos) = nth_element(m_wtree, index_range{first, last}, nth);
-  return {label, unmap(pos)};
+  std::tie(symbol, pos) = nth_element(m_wtree, index_range{first, last}, nth);
+  return {unmap(pos), label_id(symbol)};
 }
 
-auto binary_relation::object_select(label_id fixed_label, object_id obj_min,
-                                    size_type nth) const noexcept -> object_id {
-  const auto p = map(obj_min);
-  const auto objects_before = p > 0 ? m_wtree.rank(fixed_label, p - 1) : 0;
-  return unmap(m_wtree.select(fixed_label, nth + objects_before));
+auto binary_relation::object_select(label_id fixed_label,
+                                    object_id object_start, size_type nth) const
+    noexcept -> object_id {
+  const auto objects_before = [&] {
+    const auto wt_pos = map(object_start);
+    return exclusive_rank(m_wtree, fixed_label, wt_pos);
+  }();
+  const auto wt_pos = m_wtree.select(fixed_label, nth + objects_before);
+  return unmap(wt_pos);
 }
 
 auto binary_relation::count_distinct_labels(const label_id alpha,
@@ -536,7 +570,7 @@ auto binary_relation::count_distinct_labels(const label_id alpha,
                                             const object_id y) const noexcept
     -> size_type {
   const auto range = index_range{map(x), map(y) + 1};
-  return count_distinct_symbols(m_wtree.make_root(), range, alpha, beta);
+  return count_distinct_symbols(m_wtree, range, alpha, beta);
 }
 
 auto binary_relation::map(const object_id x) const noexcept -> index_type {

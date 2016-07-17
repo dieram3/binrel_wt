@@ -13,8 +13,8 @@ class binary_relation {
 public:
   // types
   using size_type = types::size_type;
-  using object_id = types::word_type;
-  using label_id = types::word_type;
+  enum object_id : types::word_type {};
+  enum label_id : types::word_type {};
 
   struct pair_type {
     object_id object;
@@ -34,12 +34,12 @@ public:
 
   /// \brief Counts the number of pairs in the specified range.
   ///
-  size_type rank(object_id obj_max, label_id label_max) const noexcept;
+  size_type rank(object_id max_object, label_id max_label) const noexcept;
 
   /// \brief Counts the number of pairs in the specified range.
   ///
-  size_type rank(label_id label_max, object_id obj_min, object_id obj_max) const
-      noexcept;
+  size_type rank(object_id min_object, object_id max_object,
+                 label_id max_label) const noexcept;
 
   /// \brief Finds the nth pair in the range
   /// 'access(alpha, max_label, x, y)' when it is ordered by label value, then
@@ -75,7 +75,7 @@ public:
   ///
   /// \remark In the literature this operation is known as \e obj_sel1
   ///
-  object_id object_select(label_id fixed_label, object_id obj_min,
+  object_id object_select(label_id fixed_label, object_id object_start,
                           size_type nth) const noexcept;
 
   /// \brief Count the number of labels in the range lab_acc(alpha, beta, x, y).
