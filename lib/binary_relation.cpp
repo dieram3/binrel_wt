@@ -133,7 +133,7 @@ auto before_end(const index_range& range) noexcept {
   return end(range) - 1;
 }
 
-auto make_lhs_range(const node_proxy& node, const index_range& range) noexcept {
+auto make_lhs_range(const index_range& range, const node_proxy& node) noexcept {
   assert(!empty(range));
   assert(begin(range) >= 0 && end(range) <= node.size());
 
@@ -141,7 +141,7 @@ auto make_lhs_range(const node_proxy& node, const index_range& range) noexcept {
                      inclusive_rank_0(node, before_end(range))};
 }
 
-auto make_rhs_range(const node_proxy& node, const index_range& range) noexcept {
+auto make_rhs_range(const index_range& range, const node_proxy& node) noexcept {
   assert(!empty(range));
   assert(begin(range) >= 0 && end(range) <= node.size());
 
@@ -157,10 +157,10 @@ auto make_rhs_range_using_lhs(const index_range& range,
                      end(range) - end(lhs_range)};
 }
 
-auto make_lhs_and_rhs_ranges(const node_proxy& node, const index_range& range) {
+auto make_lhs_and_rhs_ranges(const index_range& range, const node_proxy& node) {
   assert(begin(range) >= 0 && end(range) <= node.size());
 
-  const auto lhs = make_lhs_range(node, range);
+  const auto lhs = make_lhs_range(range, node);
   const auto rhs = make_rhs_range_using_lhs(range, lhs);
   return std::make_pair(lhs, rhs);
 }
@@ -220,7 +220,7 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept {
   symbol_id symbol{};
   auto node = wt.make_root();
   while (!node.is_leaf()) {
-    const auto lhs_range = make_lhs_range(node, range);
+    const auto lhs_range = make_lhs_range(range, node);
     const auto rhs_range = make_rhs_range_using_lhs(range, lhs_range);
 
     if (nth <= size(lhs_range)) {
@@ -237,7 +237,7 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept {
     symbol <<= 1;
   }
   {
-    const auto lhs_range = make_lhs_range(node, range);
+    const auto lhs_range = make_lhs_range(range, node);
     if (nth > size(lhs_range)) {
       nth -= size(lhs_range);
       symbol |= 1;
@@ -271,7 +271,7 @@ static size_type count_symbols(node_proxy node, const index_range range) {
     return 0;
   }
 
-  const auto children_ranges = make_lhs_and_rhs_ranges(node, range);
+  const auto children_ranges = make_lhs_and_rhs_ranges(range, node);
   const auto& lhs_range = get_left(children_ranges);
   const auto& rhs_range = get_right(children_ranges);
 
@@ -300,7 +300,7 @@ static size_type count_symbols(node_proxy node, index_range range,
   const auto min_symbol = cond.symbol;
   size_type count = 0;
   while (!node.is_leaf()) {
-    const auto lhs_range = make_lhs_range(node, range);
+    const auto lhs_range = make_lhs_range(range, node);
     const auto rhs_range = make_rhs_range_using_lhs(range, lhs_range);
 
     if (node.is_lhs_symbol(min_symbol)) {
@@ -320,7 +320,7 @@ static size_type count_symbols(node_proxy node, index_range range,
   assert(!empty(range));
 
   // At this point, the symbol of the rhs child is always >= min_symbol
-  const auto rhs_range = make_rhs_range(node, range);
+  const auto rhs_range = make_rhs_range(range, node);
   if (!empty(rhs_range)) {
     count += 1;
   }
@@ -340,7 +340,7 @@ static size_type count_symbols(node_proxy node, index_range range,
   const auto max_symbol = cond.symbol;
   size_type count = 0;
   while (!node.is_leaf()) {
-    const auto lhs_range = make_lhs_range(node, range);
+    const auto lhs_range = make_lhs_range(range, node);
     const auto rhs_range = make_rhs_range_using_lhs(range, lhs_range);
 
     if (node.is_rhs_symbol(max_symbol)) {
@@ -360,7 +360,7 @@ static size_type count_symbols(node_proxy node, index_range range,
   assert(!empty(range));
 
   // At this point, the symbol of the lhs child is always <= max_symbol
-  const auto lhs_range = make_lhs_range(node, range);
+  const auto lhs_range = make_lhs_range(range, node);
   if (!empty(lhs_range)) {
     count += 1;
   }
@@ -383,15 +383,15 @@ static size_type count_symbols(node_proxy node, index_range range,
 
   while (!node.is_leaf()) {
     if (node.is_lhs_symbol(max_symbol)) {
-      range = make_lhs_range(node, range);
+      range = make_lhs_range(range, node);
       node = node.make_lhs();
     } else if (node.is_rhs_symbol(min_symbol)) {
-      range = make_rhs_range(node, range);
+      range = make_rhs_range(range, node);
       node = node.make_rhs();
     } else {
       assert(node.is_lhs_symbol(min_symbol) && node.is_rhs_symbol(max_symbol));
 
-      const auto lhs_range = make_lhs_range(node, range);
+      const auto lhs_range = make_lhs_range(range, node);
       const auto rhs_range = make_rhs_range_using_lhs(range, lhs_range);
       const auto children = node.make_lhs_and_rhs();
 
@@ -409,14 +409,14 @@ static size_type count_symbols(node_proxy node, index_range range,
   assert(node.is_leaf());
 
   if (node.is_lhs_symbol(max_symbol)) {
-    return empty(make_lhs_range(node, range)) ? 0 : 1;
+    return empty(make_lhs_range(range, node)) ? 0 : 1;
   }
   if (node.is_rhs_symbol(min_symbol)) {
-    return empty(make_rhs_range(node, range)) ? 0 : 1;
+    return empty(make_rhs_range(range, node)) ? 0 : 1;
   }
   assert(node.is_lhs_symbol(min_symbol) && node.is_rhs_symbol(max_symbol));
 
-  const auto lhs_range = make_lhs_range(node, range);
+  const auto lhs_range = make_lhs_range(range, node);
   size_type result = 0;
   if (!empty(lhs_range)) {
     result += 1; // lhs range is not empty
