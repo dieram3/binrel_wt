@@ -177,7 +177,7 @@ static size_type exclusive_rank(const wavelet_tree& wt, const symbol_id symbol,
   if (pos == 0) {
     return 0;
   }
-  return wt.rank(symbol, pos);
+  return wt.rank(symbol, pos - 1);
 }
 
 static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
