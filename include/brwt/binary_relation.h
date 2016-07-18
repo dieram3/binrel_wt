@@ -17,6 +17,7 @@ public:
   enum label_id : types::word_type {};
 
   struct pair_type {
+    // TODO(Diego): Consider renaming pair_type.
     object_id object;
     label_id label;
   };
