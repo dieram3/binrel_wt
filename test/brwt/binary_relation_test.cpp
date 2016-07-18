@@ -115,4 +115,94 @@ TEST_CASE("Rank with max object, max label") {
   CHECK(binrel.rank(11_obj, 9_lab) == 40);
 }
 
+TEST_CASE("Rank with min object, max object, max label") {
+  const auto br = make_test_binary_relation();
+  CHECK(br.rank(0_obj, 0_obj, 0_lab) == 0);
+  CHECK(br.rank(0_obj, 8_obj, 0_lab) == 1);
+  CHECK(br.rank(0_obj, 9_obj, 0_lab) == 2);
+
+  CHECK(br.rank(0_obj, 0_obj, 5_lab) == 1);
+  CHECK(br.rank(4_obj, 4_obj, 7_lab) == 3);
+  CHECK(br.rank(8_obj, 8_obj, 4_lab) == 3);
+  CHECK(br.rank(11_obj, 11_obj, 8_lab) == 4);
+
+  CHECK(br.rank(0_obj, 0_obj, 9_lab) == 2);
+  CHECK(br.rank(4_obj, 4_obj, 9_lab) == 4);
+  CHECK(br.rank(8_obj, 8_obj, 9_lab) == 6);
+  CHECK(br.rank(11_obj, 11_obj, 9_lab) == 4);
+
+  CHECK(br.rank(4_obj, 5_obj, 4_lab) == 4);
+  CHECK(br.rank(4_obj, 6_obj, 4_lab) == 6);
+  CHECK(br.rank(2_obj, 7_obj, 6_lab) == 13);
+  CHECK(br.rank(2_obj, 7_obj, 7_lab) == 14);
+
+  CHECK(br.rank(7_obj, 10_obj, 6_lab) == 11);
+  CHECK(br.rank(7_obj, 10_obj, 8_lab) == 16);
+  CHECK(br.rank(7_obj, 10_obj, 9_lab) == 18);
+  CHECK(br.rank(7_obj, 11_obj, 6_lab) == 14);
+  CHECK(br.rank(7_obj, 11_obj, 8_lab) == 20);
+  CHECK(br.rank(7_obj, 11_obj, 9_lab) == 22);
+
+  CHECK(br.rank(3_obj, 11_obj, 9_lab) == 35);
+  CHECK(br.rank(2_obj, 11_obj, 9_lab) == 36);
+  CHECK(br.rank(1_obj, 11_obj, 9_lab) == 38);
+  CHECK(br.rank(0_obj, 11_obj, 9_lab) == 40);
+}
+
+TEST_CASE("count_distinct_labels, basic") {
+  const auto br = make_test_binary_relation();
+  // Rectangle starting from (0, 0)
+  CHECK(br.count_distinct_labels(0_obj, 0_obj, 0_lab, 0_lab) == 0);
+  CHECK(br.count_distinct_labels(0_obj, 4_obj, 0_lab, 4_lab) == 2);
+  CHECK(br.count_distinct_labels(0_obj, 8_obj, 0_lab, 8_lab) == 8);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 0_lab, 9_lab) == 9);
+
+  // Rows
+  CHECK(br.count_distinct_labels(0_obj, 0_obj, 0_lab, 9_lab) == 2);
+  CHECK(br.count_distinct_labels(5_obj, 5_obj, 0_lab, 9_lab) == 4);
+  CHECK(br.count_distinct_labels(8_obj, 8_obj, 0_lab, 9_lab) == 6);
+  CHECK(br.count_distinct_labels(11_obj, 11_obj, 0_lab, 9_lab) == 4);
+
+  // Columns
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 0_lab, 0_lab) == 1);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 2_lab, 2_lab) == 1);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 4_lab, 4_lab) == 1);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 5_lab, 5_lab) == 0);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 6_lab, 6_lab) == 1);
+  CHECK(br.count_distinct_labels(0_obj, 11_obj, 9_lab, 9_lab) == 1);
+
+  // Spread (all labels)
+  CHECK(br.count_distinct_labels(0_obj, 3_obj, 0_lab, 9_lab) == 4);
+  CHECK(br.count_distinct_labels(3_obj, 7_obj, 0_lab, 9_lab) == 9);
+  CHECK(br.count_distinct_labels(9_obj, 11_obj, 0_lab, 9_lab) == 9);
+  CHECK(br.count_distinct_labels(10_obj, 11_obj, 0_lab, 9_lab) == 7);
+}
+
+TEST_CASE("count_distinct_labels, complex") {
+  const auto br = make_test_binary_relation();
+  // Different wavelet tree nodes:
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 0_lab, 7_lab) == 3);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 0_lab, 3_lab) == 1);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 4_lab, 7_lab) == 2);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 0_lab, 1_lab) == 0);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 2_lab, 3_lab) == 1);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 4_lab, 5_lab) == 1);
+  CHECK(br.count_distinct_labels(1_obj, 3_obj, 6_lab, 7_lab) == 1);
+
+  // Random label pairs
+  auto count_labels = [&](const label_id alpha, const label_id beta) {
+    return br.count_distinct_labels(1_obj, 4_obj, alpha, beta);
+  };
+  CHECK(count_labels(1_lab, 6_lab) == 3);
+  CHECK(count_labels(2_lab, 9_lab) == 5);
+  CHECK(count_labels(3_lab, 8_lab) == 4);
+  CHECK(count_labels(0_lab, 5_lab) == 2);
+  CHECK(count_labels(3_lab, 5_lab) == 1);
+  CHECK(count_labels(7_lab, 9_lab) == 2);
+  CHECK(count_labels(1_lab, 8_lab) == 5);
+  CHECK(count_labels(0_lab, 5_lab) == 2);
+  CHECK(count_labels(3_lab, 9_lab) == 4);
+  CHECK(count_labels(4_lab, 8_lab) == 4);
+}
+
 TEST_SUITE_END();

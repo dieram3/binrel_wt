@@ -82,8 +82,8 @@ public:
   ///
   /// \remark In the literature this operation is known as \e lab_num
   ///
-  size_type count_distinct_labels(label_id alpha, label_id beta, object_id x,
-                                  object_id y) const noexcept;
+  size_type count_distinct_labels(object_id x, object_id y, label_id alpha,
+                                  label_id beta) const noexcept;
 
   /// \brief Returns the number of different objects.
   ///
@@ -98,6 +98,7 @@ private:
 
   index_type map(object_id x) const noexcept;
   object_id unmap(index_type pos) const noexcept;
+  auto make_mapped_range(object_id x, object_id y) const noexcept;
 
   // member data
   wavelet_tree m_wtree;

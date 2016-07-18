@@ -434,6 +434,7 @@ static size_type count_distinct_symbols(const wavelet_tree& wt,
                                         const symbol_id min_symbol,
                                         const symbol_id max_symbol) {
   assert(begin(range) >= 0 && end(range) <= wt.size());
+  assert(min_symbol >= 0 && max_symbol <= wt.max_symbol_id());
   namespace detail = count_symbols_detail;
   return detail::count_symbols(wt.make_root(), range, min_symbol, max_symbol);
 }
@@ -450,6 +451,37 @@ static constexpr object_id prev(const object_id x) noexcept {
 static constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_underlying_type(alpha) != 0);
   return static_cast<label_id>(to_underlying_type(alpha));
+}
+
+auto binary_relation::map(const object_id x) const noexcept -> index_type {
+  const auto pos_of_one = m_bitmap.select_1(static_cast<size_type>(x) + 1);
+  // Each object has at least an associated pair.
+  assert(!m_bitmap.access(pos_of_one - 1));
+
+  const auto wt_pos = m_bitmap.rank_0(pos_of_one) - 1;
+
+  assert(wt_pos >= 0 && wt_pos < size());
+  return wt_pos;
+}
+
+auto binary_relation::unmap(const index_type pos) const noexcept -> object_id {
+  const auto pos_of_one = m_bitmap.select_0(pos + 1) + 1;
+  assert(m_bitmap.access(pos_of_one)); // bit after last zero should be one.
+
+  return static_cast<object_id>(m_bitmap.rank_1(pos_of_one) - 1);
+}
+
+auto binary_relation::make_mapped_range(const object_id x,
+                                        const object_id y) const noexcept {
+  assert(x <= y);
+
+  // First element with object = x
+  const index_type first = (x > 0 ? map(prev(x)) + 1 : 0);
+
+  // Element after last pair with object = y
+  const index_type last = map(y) + 1;
+
+  return index_range{first, last};
 }
 
 namespace pairs_constructor_detail {
@@ -542,20 +574,20 @@ auto binary_relation::select_label_major(const label_id alpha,
     -> pair_type {
   assert(x <= y);
 
-  nth += (alpha > 0 ? rank(x, y, prev(alpha)) : 0);
-
-  const index_type first = (x > 0 ? map(prev(x)) + 1 : 0);
-  const index_type last = map(y) + 1; // Elem after last pair with object = y
+  if (alpha > 0) {
+    nth += rank(x, y, prev(alpha));
+  }
 
   symbol_id symbol{};
   index_type pos{};
-  std::tie(symbol, pos) = nth_element(m_wtree, index_range{first, last}, nth);
+  std::tie(symbol, pos) = nth_element(m_wtree, make_mapped_range(x, y), nth);
   return {unmap(pos), label_id(symbol)};
 }
 
-auto binary_relation::object_select(label_id fixed_label,
-                                    object_id object_start, size_type nth) const
-    noexcept -> object_id {
+auto binary_relation::object_select(const label_id fixed_label,
+                                    const object_id object_start,
+                                    const size_type nth) const noexcept
+    -> object_id {
   const auto objects_before = [&] {
     const auto wt_pos = map(object_start);
     return exclusive_rank(m_wtree, fixed_label, wt_pos);
@@ -564,31 +596,13 @@ auto binary_relation::object_select(label_id fixed_label,
   return unmap(wt_pos);
 }
 
-auto binary_relation::count_distinct_labels(const label_id alpha,
-                                            const label_id beta,
-                                            const object_id x,
-                                            const object_id y) const noexcept
+auto binary_relation::count_distinct_labels(const object_id x,
+                                            const object_id y,
+                                            const label_id alpha,
+                                            const label_id beta) const noexcept
     -> size_type {
-  const auto range = index_range{map(x), map(y) + 1};
+  const auto range = make_mapped_range(x, y);
   return count_distinct_symbols(m_wtree, range, alpha, beta);
-}
-
-auto binary_relation::map(const object_id x) const noexcept -> index_type {
-  const auto pos_of_one = m_bitmap.select_1(static_cast<size_type>(x) + 1);
-  // Each object has at least an associated pair.
-  assert(!m_bitmap.access(pos_of_one - 1));
-
-  const auto wt_pos = m_bitmap.rank_0(pos_of_one) - 1;
-
-  assert(wt_pos >= 0 && wt_pos < size());
-  return wt_pos;
-}
-
-auto binary_relation::unmap(const index_type pos) const noexcept -> object_id {
-  const auto pos_of_one = m_bitmap.select_0(pos + 1) + 1;
-  assert(m_bitmap.access(pos_of_one)); // bit after last zero should be one.
-
-  return static_cast<object_id>(m_bitmap.rank_1(pos_of_one) - 1);
 }
 
 } // end namespace brwt
