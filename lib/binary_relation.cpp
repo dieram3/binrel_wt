@@ -182,6 +182,8 @@ static size_type exclusive_rank(const wavelet_tree& wt, const symbol_id symbol,
 
 static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
                             index_type pos) noexcept {
+  assert(pos >= 0 && pos < wt.size());
+
   size_type count = 0;
   auto node = wt.make_root();
   while (!node.is_leaf()) {
@@ -208,7 +210,18 @@ static size_type range_rank(const wavelet_tree& wt, const symbol_id symbol,
   return count;
 }
 
-// Returns the element that would occur in the nth position in the given range
+static size_type exclusive_range_rank(const wavelet_tree& wt,
+                                      const symbol_id symbol,
+                                      index_type pos) noexcept {
+  assert(pos >= 0 && pos <= wt.size());
+  if (pos == 0) {
+    return 0;
+  }
+  return range_rank(wt, symbol, pos - 1);
+}
+
+// Returns the element that would occur in the nth position in the given
+// range
 // if it was sorted.
 //
 static std::pair<symbol_id, index_type>
@@ -453,35 +466,67 @@ static constexpr label_id prev(const label_id alpha) noexcept {
   return static_cast<label_id>(to_underlying_type(alpha) - 1);
 }
 
-auto binary_relation::map(const object_id x) const noexcept -> index_type {
-  const auto pos_of_one = m_bitmap.select_1(static_cast<size_type>(x) + 1);
-  // Each object has at least an associated pair.
-  assert(!m_bitmap.access(pos_of_one - 1));
-
-  const auto wt_pos = m_bitmap.rank_0(pos_of_one) - 1;
-
-  assert(wt_pos >= 0 && wt_pos < size());
-  return wt_pos;
+[[deprecated("when there is no pair with object_id=x, this function does not "
+             "work as expected")]] auto
+binary_relation::map(const object_id x) const noexcept -> index_type {
+  // Note that in some cases upper_bound(x) == 0 so this function would return
+  // -1 (an invalid index).
+  return upper_bound(x) - 1;
 }
 
-auto binary_relation::unmap(const index_type pos) const noexcept -> object_id {
-  const auto pos_of_one = m_bitmap.select_0(pos + 1) + 1;
-  assert(m_bitmap.access(pos_of_one)); // bit after last zero should be one.
-
-  return static_cast<object_id>(m_bitmap.rank_1(pos_of_one) - 1);
+[[deprecated(
+    "the function 'map' will be removed, so this function would be "
+    "unclear. Prefer get_associated_object() member function instead")]] auto
+binary_relation::unmap(const index_type wt_pos) const noexcept -> object_id {
+  return get_associated_object(wt_pos);
 }
 
+/// Returns the position of the first element in the wavelet tree such that its
+/// associated object has value >= x.
+/// In the stored wavelet tree, the range [lower_bound(x), wt.size()) contains
+/// the labels of all the 'pairs' with object >= x (where 'pairs' refer to the
+/// pairs of the original sequence).
+/// If no such element exists, return m_wtree.size().
+///
+auto binary_relation::lower_bound(const object_id x) const noexcept
+    -> index_type {
+  if (x == 0) {
+    return 0;
+  }
+  const auto flag_pos = m_bitmap.select_1(x);
+  return m_bitmap.rank_0(flag_pos);
+}
+
+/// Returns the position of the first element in the wavelet tree such that its
+/// associated object has value > x.
+/// In the stored wavelet tree, the range [0, upper_bound(x)) contains the
+/// labels of all the 'pairs' with object <= x (where 'pairs' refer to the pairs
+/// of the original sequence).
+/// If no such element exists, return m_wtree.size().
+///
+auto binary_relation::upper_bound(const object_id x) const noexcept
+    -> index_type {
+  const auto flag_pos = m_bitmap.select_1(x + 1);
+  return m_bitmap.rank_0(flag_pos);
+}
+
+/// Returns the range of elements with: (object >= x && object <= y)
+///
 auto binary_relation::make_mapped_range(const object_id x,
                                         const object_id y) const noexcept {
   assert(x <= y);
+  return index_range{lower_bound(x), upper_bound(y)};
+}
 
-  // First element with object = x
-  const index_type first = (x > 0 ? map(prev(x)) + 1 : 0);
+/// Returns the associated object of the element  in the wavelet tree at
+/// position \p wt_pos.
+///
+auto binary_relation::get_associated_object(const index_type wt_pos) const
+    noexcept -> object_id {
+  assert(wt_pos >= 0 && wt_pos < m_wtree.size());
 
-  // Element after last pair with object = y
-  const index_type last = map(y) + 1;
-
-  return index_range{first, last};
+  const auto bit_pos = m_bitmap.select_0(wt_pos + 1);
+  return static_cast<object_id>(m_bitmap.rank_1(bit_pos));
 }
 
 namespace pairs_constructor_detail {
@@ -556,8 +601,7 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
 
 auto binary_relation::rank(object_id max_object, label_id max_label) const
     noexcept -> size_type {
-  const auto end_pos = map(max_object);
-  return range_rank(m_wtree, max_label, end_pos);
+  return exclusive_range_rank(m_wtree, max_label, upper_bound(max_object));
 }
 
 auto binary_relation::rank(object_id min_object, object_id max_object,
@@ -579,21 +623,27 @@ auto binary_relation::select_label_major(const label_id alpha,
   }
 
   symbol_id symbol{};
-  index_type pos{};
-  std::tie(symbol, pos) = nth_element(m_wtree, make_mapped_range(x, y), nth);
-  return {unmap(pos), label_id(symbol)};
+  index_type wt_pos{};
+  std::tie(symbol, wt_pos) = nth_element(m_wtree, make_mapped_range(x, y), nth);
+  return {get_associated_object(wt_pos), label_id(symbol)};
 }
 
 auto binary_relation::object_select(const label_id fixed_label,
                                     const object_id object_start,
                                     const size_type nth) const noexcept
     -> object_id {
-  const auto objects_before = [&] {
-    const auto wt_pos = map(object_start);
-    return exclusive_rank(m_wtree, fixed_label, wt_pos);
-  }();
-  const auto wt_pos = m_wtree.select(fixed_label, nth + objects_before);
-  return unmap(wt_pos);
+
+  const auto abs_nth =
+      nth + exclusive_rank(m_wtree, fixed_label, lower_bound(object_start));
+
+  const auto wt_pos = m_wtree.select(fixed_label, abs_nth);
+  assert(wt_pos != -1 && "The element was supposed to exist");
+
+  // TODO(Diego): Design decision. Determine what to do if wt_pos == -1, that
+  // is, if the searched element does not exist. Note that returning -1 is not
+  // possible as the return type is an object id, not an index.
+
+  return get_associated_object(wt_pos);
 }
 
 auto binary_relation::count_distinct_labels(const object_id x,

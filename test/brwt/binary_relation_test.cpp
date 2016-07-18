@@ -6,6 +6,9 @@
 #include <initializer_list> // initializer_list
 #include <random>           // default_random_engine
 
+// TODO(Diego): Adapt the test data as objects with no associated pairs
+// are allowed now :)
+
 using brwt::binary_relation;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;

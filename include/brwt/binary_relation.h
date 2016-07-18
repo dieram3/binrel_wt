@@ -73,6 +73,8 @@ public:
   /// The nth object in the range
   /// (access(fixed_label, fixed_label, object_start, n)) sorted by objects.
   ///
+  /// \pre n > 0
+  ///
   /// \remark In the literature this operation is known as \e obj_sel1
   ///
   object_id object_select(label_id fixed_label, object_id object_start,
@@ -97,8 +99,12 @@ private:
   using index_type = wavelet_tree::index_type;
 
   index_type map(object_id x) const noexcept;
-  object_id unmap(index_type pos) const noexcept;
+  object_id unmap(index_type wt_pos) const noexcept;
+
+  index_type lower_bound(object_id x) const noexcept;
+  index_type upper_bound(object_id x) const noexcept;
   auto make_mapped_range(object_id x, object_id y) const noexcept;
+  object_id get_associated_object(index_type wt_pos) const noexcept;
 
   // member data
   wavelet_tree m_wtree;
