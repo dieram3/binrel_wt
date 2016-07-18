@@ -514,11 +514,12 @@ auto binary_relation::upper_bound(const object_id x) const noexcept
 ///
 auto binary_relation::make_mapped_range(const object_id x,
                                         const object_id y) const noexcept {
+  // TODO(Diego): Consider renaming this member function.
   assert(x <= y);
   return index_range{lower_bound(x), upper_bound(y)};
 }
 
-/// Returns the associated object of the element  in the wavelet tree at
+/// Returns the associated object of the element in the wavelet tree at
 /// position \p wt_pos.
 ///
 auto binary_relation::get_associated_object(const index_type wt_pos) const
