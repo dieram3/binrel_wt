@@ -450,7 +450,7 @@ static constexpr object_id prev(const object_id x) noexcept {
 
 static constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_underlying_type(alpha) != 0);
-  return static_cast<label_id>(to_underlying_type(alpha));
+  return static_cast<label_id>(to_underlying_type(alpha) - 1);
 }
 
 auto binary_relation::map(const object_id x) const noexcept -> index_type {
