@@ -1,8 +1,8 @@
 #ifndef BRWT_INDEX_RANGE_H
 #define BRWT_INDEX_RANGE_H
 
-#include <brwt/common_types.h>     // index_type, size_type
-#include <brwt/detail/contracts.h> // Expects, Ensures
+#include <brwt/common_types.h> // index_type, size_type
+#include <cassert>             // assert
 
 namespace brwt {
 
@@ -15,10 +15,8 @@ public:
 
   index_range(index_type first, index_type last) noexcept
       : m_first{first}, m_size{last - first} {
-    Expects(first <= last);
-
-    Ensures(begin() == first);
-    Ensures(end() == last);
+    assert(begin() >= 0);
+    assert(size() >= 0);
   }
 
   index_type begin() const noexcept {
