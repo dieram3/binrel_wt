@@ -15,8 +15,11 @@ public:
 
   index_range(index_type first, index_type last) noexcept
       : m_first{first}, m_size{last - first} {
-    assert(begin() >= 0);
-    assert(size() >= 0);
+    // preconditions
+    assert(first <= last);
+    // postconditions
+    assert(begin() == first);
+    assert(end() == last);
   }
 
   index_type begin() const noexcept {
