@@ -23,7 +23,7 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 }
 
 // ==========================================
-// wavelet_vector implementation
+// wavelet_tree implementation
 // ==========================================
 
 wavelet_tree::wavelet_tree(const int_vector& sequence)
