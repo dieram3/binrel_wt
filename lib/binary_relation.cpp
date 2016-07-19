@@ -1,15 +1,16 @@
 #include <brwt/binary_relation.h>
 
-#include <brwt/bit_hacks.h> // used_bits
-#include <algorithm>        // max, for_each
-#include <cassert>          // assert
-#include <cstddef>          // size_t
-#include <iterator>         // begin, end
-#include <numeric>          // partial_sum
-#include <tuple>            // tie
-#include <type_traits>      // is_enum, underlying_type_t
-#include <utility>          // pair, make_pair, move
-#include <vector>           // vector
+#include <brwt/bit_hacks.h>   // used_bits
+#include <brwt/index_range.h> // index_range
+#include <algorithm>          // max, for_each
+#include <cassert>            // assert
+#include <cstddef>            // size_t
+#include <iterator>           // begin, end
+#include <numeric>            // partial_sum
+#include <tuple>              // tie
+#include <type_traits>        // is_enum, underlying_type_t
+#include <utility>            // pair, make_pair, move
+#include <vector>             // vector
 
 namespace brwt {
 
@@ -92,48 +93,16 @@ static size_type exclusive_rank_1(const node_proxy& node,
 }
 
 // ==========================================
-// class index_range
+// index_range, node_proxy extensions
 // ==========================================
 
-namespace {
-class index_range {
-public:
-  index_range(index_type first, index_type last) noexcept
-      : m_first{first}, m_size{last - first} {
-    assert(begin() >= 0);
-    assert(size() >= 0);
-  }
-
-  index_type begin() const noexcept {
-    return m_first;
-  }
-  size_type size() const noexcept {
-    return m_size;
-  }
-
-private:
-  index_type m_first{};
-  size_type m_size{};
-};
-
-auto size(const index_range& range) noexcept {
-  return range.size();
-}
-bool empty(const index_range& range) noexcept {
-  return size(range) == 0;
-}
-auto begin(const index_range& range) noexcept {
-  return range.begin();
-}
-auto end(const index_range& range) noexcept {
-  return begin(range) + size(range);
-}
-auto before_end(const index_range& range) noexcept {
-  assert(size(range) >= 0);
+static auto before_end(const index_range& range) noexcept {
+  assert(size(range) > 0);
   return end(range) - 1;
 }
 
-auto make_lhs_range(const index_range& range, const node_proxy& node) noexcept {
+static auto make_lhs_range(const index_range& range,
+                           const node_proxy& node) noexcept {
   assert(!empty(range));
   assert(begin(range) >= 0 && end(range) <= node.size());
 
@@ -141,7 +110,8 @@ auto make_lhs_range(const index_range& range, const node_proxy& node) noexcept {
                      inclusive_rank_0(node, before_end(range))};
 }
 
-auto make_rhs_range(const index_range& range, const node_proxy& node) noexcept {
+static auto make_rhs_range(const index_range& range,
+                           const node_proxy& node) noexcept {
   assert(!empty(range));
   assert(begin(range) >= 0 && end(range) <= node.size());
 
@@ -149,23 +119,22 @@ auto make_rhs_range(const index_range& range, const node_proxy& node) noexcept {
                      inclusive_rank_1(node, before_end(range))};
 }
 
-auto make_rhs_range_using_lhs(const index_range& range,
-                              const index_range& lhs_range) {
+static auto make_rhs_range_using_lhs(const index_range& range,
+                                     const index_range& lhs_range) {
   assert(begin(range) >= begin(lhs_range));
   assert(end(range) >= end(lhs_range));
   return index_range{begin(range) - begin(lhs_range),
                      end(range) - end(lhs_range)};
 }
 
-auto make_lhs_and_rhs_ranges(const index_range& range, const node_proxy& node) {
+static auto make_lhs_and_rhs_ranges(const index_range& range,
+                                    const node_proxy& node) {
   assert(begin(range) >= 0 && end(range) <= node.size());
 
   const auto lhs = make_lhs_range(range, node);
   const auto rhs = make_rhs_range_using_lhs(range, lhs);
   return std::make_pair(lhs, rhs);
 }
-
-} // end anonymous namespace
 
 // ==========================================
 // wavelet_tree extensions
