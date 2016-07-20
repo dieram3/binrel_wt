@@ -1,17 +1,14 @@
 #ifndef BRWT_BINARY_RELATION_H
 #define BRWT_BINARY_RELATION_H
 
-#include <brwt/bitmap.h>
-#include <brwt/common_types.h>
-#include <brwt/int_vector.h>
-#include <brwt/wavelet_tree.h>
-#include <experimental/optional>
-#include <vector>
+#include <brwt/bitmap.h>       // bitmap
+#include <brwt/common_types.h> // size_type, word_type, optional
+#include <brwt/wavelet_tree.h> // wavelet_tree
+#include <vector>              // vector
 
 namespace brwt {
 
-using std::experimental::optional;
-using std::experimental::nullopt;
+// helper types
 
 struct object_major_order_t {};
 struct label_major_order_t {};
@@ -19,9 +16,11 @@ struct label_major_order_t {};
 constexpr object_major_order_t obj_major{};
 constexpr label_major_order_t lab_major{};
 
+// class definition
+
 class binary_relation {
 public:
-  // types
+  // member types
   using size_type = types::size_type;
   enum object_id : types::word_type {};
   enum label_id : types::word_type {};
