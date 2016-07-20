@@ -9,8 +9,12 @@ namespace types {
 // TODO(Diego): Deprecate the use of 'types' namespace, remove the use of it
 // along the library, then remove it. Types will be in brwt namespace now.
 
+/// Signed vocabulary type used to indicate quantities.
 using size_type = std::ptrdiff_t;
+
+/// Signed vocabulary type used to indicate positions.
 using index_type = size_type;
+
 using word_type = std::uint_fast64_t;
 
 } // end namespace types
@@ -23,7 +27,8 @@ using types::word_type;
 
 // wavelet tree types
 
-using symbol_id = word_type;
+/// Unsigned type used to represent symbol codes.
+enum symbol_id : word_type {};
 
 // condition types (used as function parameters)
 
