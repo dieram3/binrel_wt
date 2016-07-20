@@ -1,11 +1,12 @@
 #include <brwt/wavelet_tree.h>
 
-#include "static_vector.h" // static_vector
-#include <cassert>         // assert
-#include <cstddef>         // size_t
-#include <limits>          // numeric_limits
-#include <utility>         // move, exchange
-#include <vector>          // vector
+#include "bitmask_support.h" // symbol_id-stuff
+#include "static_vector.h"   // static_vector
+#include <cassert>           // assert
+#include <cstddef>           // size_t
+#include <limits>            // numeric_limits
+#include <utility>           // move, exchange
+#include <vector>            // vector
 
 using brwt::wavelet_tree;
 using node_proxy = wavelet_tree::node_proxy;
@@ -23,13 +24,14 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 }
 
 // ==========================================
-// wavelet_vector implementation
+// wavelet_tree implementation
 // ==========================================
 
 wavelet_tree::wavelet_tree(const int_vector& sequence)
     : table{}, seq_len{sequence.length()}, bits_per_symbol{sequence.get_bpe()} {
   assert(bits_per_symbol >= 1);
   using std::size_t;
+  using value_type = int_vector::value_type;
 
   // TODO(diegoramirez): Improves the constructor implementation. Consider
   // represent the tree with a Wavelet matrix.
@@ -52,9 +54,10 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
 
   // Finally we can fill the table.
   bit_vector bit_seq(bits_per_symbol * seq_len);
-  auto push_symbol = [&](const symbol_id symbol) {
-    symbol_id j = 1;
-    symbol_id base_symbol = 0;
+
+  auto push_symbol = [&](const value_type symbol) {
+    value_type j = 1;
+    value_type base_symbol = 0;
     auto num_symbols = alphabet_size;
     size_type level_pos = 0;
 
@@ -91,7 +94,7 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
   assert(pos >= 0 && pos < size());
 
   node_proxy node = make_root();
-  symbol_id res = 0;
+  symbol_id res{};
   while (!node.is_leaf()) {
     // each iteration invokes rank three times.
     if (!node.access(pos)) {
@@ -99,13 +102,13 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
       pos = node.rank_0(pos) - 1; // 1 rank
       node = node.make_lhs();     // 2 ranks
     } else {
-      res |= 1;
+      res |= 1u;
       pos = node.rank_1(pos) - 1; // 1 rank
       node = node.make_rhs();     // 2 ranks
     }
     res <<= 1;
   }
-  res |= (node.access(pos)) ? 1 : 0;
+  res |= (node.access(pos)) ? 1u : 0u;
   return res;
 }
 
@@ -140,7 +143,8 @@ auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
   assert(nth > 0);
   // Time complexity: Exactly 2 bitmap ranks and 1 bitmap select for level.
 
-  constexpr size_t max_bits_per_symbol = std::numeric_limits<symbol_id>::digits;
+  constexpr size_t max_bits_per_symbol =
+      std::numeric_limits<std::underlying_type_t<symbol_id>>::digits;
   static_vector<node_proxy, max_bits_per_symbol> stack;
 
   stack.emplace_back(make_root());
@@ -182,9 +186,10 @@ auto wavelet_tree::get_bits_per_symbol() const noexcept -> int {
 
 auto wavelet_tree::max_symbol_id() const noexcept -> symbol_id {
   using limits = std::numeric_limits<symbol_id>;
-  return bits_per_symbol == limits::digits
-             ? limits::max()
-             : (symbol_id{1} << bits_per_symbol) - 1;
+  const auto res = bits_per_symbol == limits::digits
+                       ? limits::max()
+                       : (symbol_id(1) << bits_per_symbol) - 1;
+  return static_cast<symbol_id>(res);
 }
 
 // ==========================================
@@ -196,7 +201,7 @@ node_proxy::node_proxy(const wavelet_tree& wt) noexcept
       range_begin{0},
       range_size{wt.seq_len},
       num_ones_before{0},
-      level_mask{symbol_id{1} << (wt.bits_per_symbol - 1)} {
+      level_mask{symbol_id(1) << (wt.bits_per_symbol - 1)} {
   assert(wt.bits_per_symbol >= 1);
 }
 
@@ -235,18 +240,6 @@ auto node_proxy::select_1(const size_type nth) const noexcept -> index_type {
   return abs_pos - begin();
 }
 
-auto node_proxy::size() const noexcept -> size_type {
-  return range_size;
-}
-
-auto node_proxy::is_leaf() const noexcept -> bool {
-  return level_mask == 1;
-}
-
-auto node_proxy::is_lhs_symbol(const symbol_id symbol) const noexcept -> bool {
-  return (symbol & level_mask) == 0;
-}
-
 // This function invokes table rank twice.
 auto node_proxy::make_lhs() const noexcept -> node_proxy {
   assert(!is_leaf());
@@ -268,6 +261,26 @@ auto node_proxy::make_rhs() const noexcept -> node_proxy {
                     /*size_=*/(size() - num_zeros),
                     /*ones_before_=*/get_table().rank_1(first - 1),
                     /*level_mask_=*/(level_mask >> 1));
+}
+
+// This function invokes table rank thrice.
+auto node_proxy::make_lhs_and_rhs() const noexcept
+    -> std::pair<node_proxy, node_proxy> {
+  const auto num_zeros = count_zeros();
+  const auto lhs_first = begin() + wt_ptr->seq_len;
+  const auto rhs_first = lhs_first + num_zeros;
+  return {node_proxy(
+              /*wt_=*/*wt_ptr,
+              /*begin_=*/lhs_first,
+              /*size_=*/num_zeros,
+              /*ones_before_=*/get_table().rank_1(lhs_first - 1),
+              /*level_mask_=*/level_mask >> 1),
+          node_proxy(
+              /*wt_=*/*wt_ptr,
+              /*begin_=*/rhs_first,
+              /*size_=*/(size() - num_zeros),
+              /*ones_before_=*/get_table().rank_1(rhs_first - 1),
+              /*level_mask_=*/(level_mask >> 1))};
 }
 
 node_proxy::node_proxy(const wavelet_tree& wt_, const index_type begin_,

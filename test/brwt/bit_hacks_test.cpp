@@ -3,6 +3,10 @@
 
 #include <cstdint> // uint64_t
 
+/// TODO(Diego): Test the count_leading_zeros overloads.
+/// TODO(Diego): Test the count_trailing_zeros overloads.
+/// TODO(Diego): Test used_bits
+
 using uint = unsigned int;
 using ulong = unsigned long;
 using ullong = unsigned long long;

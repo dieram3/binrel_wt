@@ -7,13 +7,18 @@
 #include <ostream>           // ostream
 #include <string>            // string
 #include <type_traits>       // is_nothrow_default_constructible, ...
+#include <utility>           // make_pair
 #include <vector>            // vector
 
 using brwt::wavelet_tree;
 using brwt::int_vector;
+using brwt::symbol_id;
 using std::size_t;
 using std::ptrdiff_t;
-using symbol_id = wavelet_tree::symbol_id;
+
+static constexpr symbol_id operator"" _sym(const unsigned long long value) {
+  return static_cast<symbol_id>(value);
+}
 
 static constexpr auto map_upper(const char c) {
   return static_cast<symbol_id>(c - 'A');
@@ -56,7 +61,7 @@ static int_vector create_vector_with_3_bpe() {
 static auto to_std_vector(const int_vector& vec) {
   std::vector<symbol_id> res(to_unsigned(vec.length()));
   for (size_t i = 0; i < res.size(); ++i) {
-    res[i] = vec[to_signed(i)];
+    res[i] = static_cast<symbol_id>(vec[to_signed(i)]);
   }
   return res;
 }
@@ -168,29 +173,29 @@ TEST_CASE("Rank with sigma=4") {
   // seq = 0221 2313 2130 0120 1000 3321
   REQUIRE(wt.size() == 24);
 
-  CHECK(wt.rank(/*symbol=*/0, /*pos=*/0) == 1);
-  CHECK(wt.rank(/*symbol=*/0, /*pos=*/8) == 1);
-  CHECK(wt.rank(/*symbol=*/0, /*pos=*/11) == 2);
-  CHECK(wt.rank(/*symbol=*/0, /*pos=*/13) == 3);
-  CHECK(wt.rank(/*symbol=*/0, /*pos=*/23) == 7);
+  CHECK(wt.rank(0_sym, /*pos=*/0) == 1);
+  CHECK(wt.rank(0_sym, /*pos=*/8) == 1);
+  CHECK(wt.rank(/*symbol=*/0_sym, /*pos=*/11) == 2);
+  CHECK(wt.rank(/*symbol=*/0_sym, /*pos=*/13) == 3);
+  CHECK(wt.rank(/*symbol=*/0_sym, /*pos=*/23) == 7);
 
-  CHECK(wt.rank(/*symbol=*/1, /*pos=*/0) == 0);
-  CHECK(wt.rank(/*symbol=*/1, /*pos=*/5) == 1);
-  CHECK(wt.rank(/*symbol=*/1, /*pos=*/12) == 3);
-  CHECK(wt.rank(/*symbol=*/1, /*pos=*/13) == 4);
-  CHECK(wt.rank(/*symbol=*/1, /*pos=*/23) == 6);
+  CHECK(wt.rank(/*symbol=*/1_sym, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/1_sym, /*pos=*/5) == 1);
+  CHECK(wt.rank(/*symbol=*/1_sym, /*pos=*/12) == 3);
+  CHECK(wt.rank(/*symbol=*/1_sym, /*pos=*/13) == 4);
+  CHECK(wt.rank(/*symbol=*/1_sym, /*pos=*/23) == 6);
 
-  CHECK(wt.rank(/*symbol=*/2, /*pos=*/0) == 0);
-  CHECK(wt.rank(/*symbol=*/2, /*pos=*/4) == 3);
-  CHECK(wt.rank(/*symbol=*/2, /*pos=*/12) == 4);
-  CHECK(wt.rank(/*symbol=*/2, /*pos=*/22) == 6);
-  CHECK(wt.rank(/*symbol=*/2, /*pos=*/23) == 6);
+  CHECK(wt.rank(/*symbol=*/2_sym, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/2_sym, /*pos=*/4) == 3);
+  CHECK(wt.rank(/*symbol=*/2_sym, /*pos=*/12) == 4);
+  CHECK(wt.rank(/*symbol=*/2_sym, /*pos=*/22) == 6);
+  CHECK(wt.rank(/*symbol=*/2_sym, /*pos=*/23) == 6);
 
-  CHECK(wt.rank(/*symbol=*/3, /*pos=*/0) == 0);
-  CHECK(wt.rank(/*symbol=*/3, /*pos=*/4) == 0);
-  CHECK(wt.rank(/*symbol=*/3, /*pos=*/5) == 1);
-  CHECK(wt.rank(/*symbol=*/3, /*pos=*/17) == 3);
-  CHECK(wt.rank(/*symbol=*/3, /*pos=*/23) == 5);
+  CHECK(wt.rank(/*symbol=*/3_sym, /*pos=*/0) == 0);
+  CHECK(wt.rank(/*symbol=*/3_sym, /*pos=*/4) == 0);
+  CHECK(wt.rank(/*symbol=*/3_sym, /*pos=*/5) == 1);
+  CHECK(wt.rank(/*symbol=*/3_sym, /*pos=*/17) == 3);
+  CHECK(wt.rank(/*symbol=*/3_sym, /*pos=*/23) == 5);
 }
 
 TEST_CASE("Rank with sigma=8") {
@@ -198,7 +203,7 @@ TEST_CASE("Rank with sigma=8") {
   // seq = EHDHA CEEGB CBGCF
   REQUIRE(wt.size() == 15);
 
-  auto rank = [&](const char symbol, const wavelet_tree::size_type pos) {
+  auto rank = [&](const char symbol, const brwt::size_type pos) {
     return wt.rank(map_upper(symbol), pos);
   };
 
@@ -234,32 +239,32 @@ TEST_CASE("Select with sigma=4") {
   REQUIRE(wt.size() == 24);
 
   // Random queries
-  CHECK(wt.select(/*symbol=*/0, /*nth=*/4) == 15);
-  CHECK(wt.select(/*symbol=*/2, /*nth=*/3) == 4);
-  CHECK(wt.select(/*symbol=*/1, /*nth=*/2) == 6);
-  CHECK(wt.select(/*symbol=*/3, /*nth=*/3) == 10);
-  CHECK(wt.select(/*symbol=*/2, /*nth=*/4) == 8);
-  CHECK(wt.select(/*symbol=*/1, /*nth=*/5) == 16);
-  CHECK(wt.select(/*symbol=*/0, /*nth=*/4) == 15);
-  CHECK(wt.select(/*symbol=*/3, /*nth=*/1) == 5);
+  CHECK(wt.select(/*symbol=*/0_sym, /*nth=*/4) == 15);
+  CHECK(wt.select(/*symbol=*/2_sym, /*nth=*/3) == 4);
+  CHECK(wt.select(/*symbol=*/1_sym, /*nth=*/2) == 6);
+  CHECK(wt.select(/*symbol=*/3_sym, /*nth=*/3) == 10);
+  CHECK(wt.select(/*symbol=*/2_sym, /*nth=*/4) == 8);
+  CHECK(wt.select(/*symbol=*/1_sym, /*nth=*/5) == 16);
+  CHECK(wt.select(/*symbol=*/0_sym, /*nth=*/4) == 15);
+  CHECK(wt.select(/*symbol=*/3_sym, /*nth=*/1) == 5);
 
   // Last occurrences
-  CHECK(wt.select(/*symbol=*/0, /*nth=*/7) == 19);
-  CHECK(wt.select(/*symbol=*/1, /*nth=*/6) == 23);
-  CHECK(wt.select(/*symbol=*/2, /*nth=*/6) == 22);
-  CHECK(wt.select(/*symbol=*/3, /*nth=*/5) == 21);
+  CHECK(wt.select(/*symbol=*/0_sym, /*nth=*/7) == 19);
+  CHECK(wt.select(/*symbol=*/1_sym, /*nth=*/6) == 23);
+  CHECK(wt.select(/*symbol=*/2_sym, /*nth=*/6) == 22);
+  CHECK(wt.select(/*symbol=*/3_sym, /*nth=*/5) == 21);
 
   // Barely out of range.
-  CHECK(wt.select(/*symbol=*/0, /*nth=*/8) == -1);
-  CHECK(wt.select(/*symbol=*/1, /*nth=*/7) == -1);
-  CHECK(wt.select(/*symbol=*/2, /*nth=*/7) == -1);
-  CHECK(wt.select(/*symbol=*/3, /*nth=*/6) == -1);
+  CHECK(wt.select(/*symbol=*/0_sym, /*nth=*/8) == -1);
+  CHECK(wt.select(/*symbol=*/1_sym, /*nth=*/7) == -1);
+  CHECK(wt.select(/*symbol=*/2_sym, /*nth=*/7) == -1);
+  CHECK(wt.select(/*symbol=*/3_sym, /*nth=*/6) == -1);
 
   // Totally out of range.
-  CHECK(wt.select(/*symbol=*/0, /*nth=*/190) == -1);
-  CHECK(wt.select(/*symbol=*/1, /*nth=*/1312) == -1);
-  CHECK(wt.select(/*symbol=*/2, /*nth=*/122) == -1);
-  CHECK(wt.select(/*symbol=*/3, /*nth=*/423) == -1);
+  CHECK(wt.select(/*symbol=*/0_sym, /*nth=*/190) == -1);
+  CHECK(wt.select(/*symbol=*/1_sym, /*nth=*/1312) == -1);
+  CHECK(wt.select(/*symbol=*/2_sym, /*nth=*/122) == -1);
+  CHECK(wt.select(/*symbol=*/3_sym, /*nth=*/423) == -1);
 }
 
 TEST_CASE("Select with sigma=8") {
@@ -267,7 +272,7 @@ TEST_CASE("Select with sigma=8") {
   // seq = EHDHA CEEGB CBGCF
   REQUIRE(wt.size() == 15);
 
-  auto select = [&](const char symbol, const wavelet_tree::size_type pos) {
+  auto select = [&](const char symbol, const brwt::size_type pos) {
     return wt.select(map_upper(symbol), pos);
   };
 
@@ -349,7 +354,7 @@ TEST_CASE("Navigation in WT with sigma=8") {
   const auto node_0 = root.make_lhs();
   const auto node_1 = root.make_rhs();
   const auto node_00 = node_0.make_lhs();
-  const auto node_01 = node_0.make_rhs();
+  const auto node_01 = node_0.make_rhs(); // Test not optimized make_rhs
   const auto node_10 = node_1.make_lhs();
   const auto node_11 = node_1.make_rhs();
 
@@ -368,6 +373,85 @@ TEST_CASE("Navigation in WT with sigma=8") {
   CHECK(to_string(node_01) == "1000");
   CHECK(to_string(node_10) == "0001");
   CHECK(to_string(node_11) == "1100");
+}
+
+TEST_CASE("node_proxy: equality operator") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  const auto x0 = wt.make_root();
+  const auto x1 = x0.make_lhs();
+  const auto x2 = x1.make_rhs();
+
+  SUBCASE("Copied wavelet tree") {
+    const auto copy = wt;
+    const auto y0 = copy.make_root();
+    const auto y1 = y0.make_lhs();
+    const auto y2 = y1.make_rhs();
+
+    CHECK(x0 != y0);
+    CHECK(x1 != y1);
+    CHECK(x2 != y2);
+  }
+  SUBCASE("Nodes from the same WT") {
+    CHECK(x0 == x0);
+    CHECK(x1 == x1);
+    CHECK(x2 == x2);
+
+    CHECK(x0 != x1);
+    CHECK(x0 != x2);
+    CHECK(x1 != x2);
+  }
+  SUBCASE("Copied node proxies") {
+    const auto y0 = x0;
+    const auto y1 = x1;
+    const auto y2 = x2;
+
+    CHECK(x0 == y0);
+    CHECK(x1 == y1);
+    CHECK(x2 == y2);
+  }
+}
+
+TEST_CASE("node_proxy: check symbol side") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  const auto root = wt.make_root();    // [0, 8)
+  const auto lhs = root.make_lhs();    // [0, 4)
+  const auto lhs_rhs = lhs.make_rhs(); // [2, 4)
+
+  CHECK(root.is_lhs_symbol(0_sym));
+  CHECK(root.is_lhs_symbol(3_sym));
+  CHECK(!root.is_lhs_symbol(4_sym));
+  CHECK(!root.is_lhs_symbol(7_sym));
+
+  CHECK(!root.is_rhs_symbol(0_sym));
+  CHECK(!root.is_rhs_symbol(3_sym));
+  CHECK(root.is_rhs_symbol(4_sym));
+  CHECK(root.is_rhs_symbol(7_sym));
+
+  CHECK(lhs.is_lhs_symbol(0_sym));
+  CHECK(lhs.is_lhs_symbol(1_sym));
+  CHECK(lhs.is_rhs_symbol(2_sym));
+  CHECK(lhs.is_rhs_symbol(3_sym));
+
+  CHECK(lhs_rhs.is_lhs_symbol(2_sym));
+  CHECK(!lhs_rhs.is_lhs_symbol(3_sym));
+
+  CHECK(!lhs_rhs.is_rhs_symbol(2_sym));
+  CHECK(lhs_rhs.is_rhs_symbol(3_sym));
+}
+
+TEST_CASE("node_proxy: make lhs and rhs") {
+  const auto wt = wavelet_tree(create_vector_with_3_bpe());
+  // seq = EHDHACEEGBCBGCF
+
+  const auto root = wt.make_root();
+  const auto lhs = root.make_lhs();
+  const auto rhs = root.make_rhs();
+
+  CHECK(root.make_lhs_and_rhs() == std::make_pair(lhs, rhs));
+  CHECK(lhs.make_lhs_and_rhs() ==
+        std::make_pair(lhs.make_lhs(), lhs.make_rhs()));
+  CHECK(rhs.make_lhs_and_rhs() ==
+        std::make_pair(rhs.make_lhs(), rhs.make_rhs()));
 }
 
 TEST_SUITE_END();
