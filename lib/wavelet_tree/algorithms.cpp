@@ -1,5 +1,6 @@
 #include <brwt/wavelet_tree/algorithms.h>
 
+#include "../generic_algorithms.h"          // int_binary_search
 #include "bitmask_support.h"                // symbol_id-stuff
 #include <brwt/wavelet_tree/wavelet_tree.h> // wavelet_tree class definition.
 
@@ -155,6 +156,21 @@ size_type exclusive_rank(const wavelet_tree& wt,
     return 0;
   }
   return inclusive_rank(wt, cond, pos - 1);
+}
+
+size_type inclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
+                         const index_type pos) noexcept {
+  return exclusive_rank(wt, cond, pos + 1);
+}
+
+size_type exclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
+                         index_type end_pos) noexcept {
+  if (cond.min_value == 0) {
+    return exclusive_rank(wt, less_equal<symbol_id>{cond.max_value}, end_pos);
+  }
+  return exclusive_rank(wt, less_equal<symbol_id>{cond.max_value}, end_pos) -
+         exclusive_rank(wt, less_equal<symbol_id>{prev(cond.min_value)},
+                        end_pos);
 }
 
 namespace count_symbols_detail {
@@ -383,6 +399,21 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept {
 
   const auto abs_nth = nth + exclusive_rank(wt, symbol, root_begin);
   return std::make_pair(symbol, wt.select(symbol, abs_nth));
+}
+
+index_type select(const wavelet_tree& wt, const between<symbol_id> cond,
+                  const size_type nth) noexcept {
+  // Find position such that:
+  // inclusive_rank(wt, cond, pos) == nth;
+  // exclusive_rank(wt, cond, pos) == nth - 1;
+  auto pred = [&](const index_type pos) {
+    return inclusive_rank(wt, cond, pos) < nth;
+  };
+  const auto pos = int_binary_search(index_type{0}, wt.size(), pred);
+  if (pos == wt.size()) {
+    return index_npos;
+  }
+  return pos;
 }
 
 } // end namespace brwt

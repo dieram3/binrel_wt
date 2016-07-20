@@ -13,6 +13,7 @@
 using brwt::wavelet_tree;
 using brwt::int_vector;
 using brwt::symbol_id;
+using brwt::size_type;
 using std::size_t;
 using std::ptrdiff_t;
 
@@ -452,6 +453,61 @@ TEST_CASE("node_proxy: make lhs and rhs") {
         std::make_pair(lhs.make_lhs(), lhs.make_rhs()));
   CHECK(rhs.make_lhs_and_rhs() ==
         std::make_pair(rhs.make_lhs(), rhs.make_rhs()));
+}
+
+// ==========================================
+// Extended algorithms
+// ==========================================
+
+// TODO(Diego): Lots of algorithms are not tested. Test them.
+
+static auto make_wavelet_tree_with_3_bpe() {
+  return wavelet_tree(create_vector_with_3_bpe());
+}
+
+TEST_CASE("[wavelet_tree][select][between]") {
+  auto select = [wt = make_wavelet_tree_with_3_bpe()](
+      const char min, const char max, const size_type nth) {
+    const auto cond = brwt::between<symbol_id>{map_upper(min), map_upper(max)};
+    return brwt::select(wt, cond, nth); // seq = EHDHA CEEGB CBGCF
+  };
+  using brwt::index_npos;
+
+  CHECK(select('C', 'C', 1) == 5);
+  CHECK(select('C', 'C', 2) == 10);
+  CHECK(select('C', 'C', 3) == 13);
+  CHECK(select('C', 'C', 4) == index_npos);
+  CHECK(select('C', 'C', 42) == index_npos);
+
+  CHECK(select('A', 'B', 1) == 4);
+  CHECK(select('A', 'B', 2) == 9);
+  CHECK(select('A', 'B', 3) == 11);
+  CHECK(select('A', 'B', 4) == index_npos);
+  CHECK(select('A', 'B', 19) == index_npos);
+
+  CHECK(select('G', 'H', 1) == 1);
+  CHECK(select('G', 'H', 2) == 3);
+  CHECK(select('G', 'H', 3) == 8);
+  CHECK(select('G', 'H', 4) == 12);
+  CHECK(select('G', 'H', 5) == index_npos);
+  CHECK(select('G', 'H', 52) == index_npos);
+
+  CHECK(select('B', 'E', 1) == 0);
+  CHECK(select('B', 'E', 2) == 2);
+  CHECK(select('B', 'E', 3) == 5);
+  CHECK(select('B', 'E', 5) == 7);
+  CHECK(select('B', 'E', 8) == 11);
+  CHECK(select('B', 'E', 9) == 13);
+  CHECK(select('B', 'E', 10) == index_npos);
+  CHECK(select('B', 'E', 99) == index_npos);
+
+  CHECK(select('A', 'H', 1) == 0);
+  CHECK(select('A', 'H', 4) == 3);
+  CHECK(select('A', 'H', 8) == 7);
+  CHECK(select('A', 'H', 12) == 11);
+  CHECK(select('A', 'H', 15) == 14);
+  CHECK(select('A', 'H', 16) == index_npos);
+  CHECK(select('A', 'H', 399) == index_npos);
 }
 
 TEST_SUITE_END();

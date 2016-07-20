@@ -33,6 +33,12 @@ size_type inclusive_rank(const wavelet_tree& wt, less_equal<symbol_id> cond,
 size_type exclusive_rank(const wavelet_tree& wt, less_equal<symbol_id> cond,
                          index_type pos) noexcept;
 
+size_type inclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
+                         index_type pos) noexcept;
+
+size_type exclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
+                         index_type end_pos) noexcept;
+
 /// \brief Counts the number of distinct symbols in the specified range.
 ///
 size_type count_distinct_symbols(const wavelet_tree& wt,
@@ -68,6 +74,19 @@ size_type count_distinct_symbols(const wavelet_tree& wt, index_range range,
 ///
 std::pair<symbol_id, index_type>
 nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept;
+
+/// \brief Returns the index of the \c nth element in the stored sequence that
+/// comply with the given condition.
+///
+/// \returns The index of the \c nth element if it exists, \c index_npos
+/// otherwise.
+///
+/// \par Complexity
+/// <tt>O(log(n)*log(sigma))</tt>, where <tt>n = wt.size()</tt> and <tt>sigma =
+/// alphabet-size</tt>.
+///
+index_type select(const wavelet_tree& wt, between<symbol_id> cond,
+                  size_type nth) noexcept;
 
 } // end namespace brwt
 
