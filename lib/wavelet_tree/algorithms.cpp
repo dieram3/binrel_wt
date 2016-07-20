@@ -1,5 +1,6 @@
 #include <brwt/wavelet_tree/algorithms.h>
 
+#include "bitmask_support.h"                // symbol_id-stuff
 #include <brwt/wavelet_tree/wavelet_tree.h> // wavelet_tree class definition.
 
 namespace brwt {
@@ -367,7 +368,7 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept {
       range = rhs_range;
       node = node.make_rhs();
       nth -= size(lhs_range);
-      symbol |= 1;
+      symbol |= 1u;
     }
     symbol <<= 1;
   }
@@ -375,7 +376,7 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept {
     const auto lhs_range = make_lhs_range(range, node);
     if (nth > size(lhs_range)) {
       nth -= size(lhs_range);
-      symbol |= 1;
+      symbol |= 1u;
     }
   }
   assert(nth > 0);
