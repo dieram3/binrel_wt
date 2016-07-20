@@ -26,6 +26,8 @@ using types::size_type;
 using types::index_type;
 using types::word_type;
 
+constexpr index_type index_npos = -1;
+
 using std::experimental::optional;
 using std::experimental::nullopt;
 
