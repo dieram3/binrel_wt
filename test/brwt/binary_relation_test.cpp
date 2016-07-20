@@ -4,12 +4,15 @@
 #include <algorithm>        // shuffle, for_each
 #include <cassert>          // assert
 #include <initializer_list> // initializer_list
+#include <ostream>          // ostream
 #include <random>           // default_random_engine
+#include <type_traits>      // underlying_type_t, is_enum
 
 // TODO(Diego): Adapt the test data as objects with no associated pairs
 // are allowed now :)
 
 using brwt::binary_relation;
+using brwt::nullopt;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
@@ -20,6 +23,10 @@ static object_id operator"" _obj(unsigned long long x) {
 
 static label_id operator"" _lab(unsigned long long x) {
   return static_cast<label_id>(x);
+}
+
+static pair_type pair(const object_id object, const label_id label) {
+  return pair_type{object, label};
 }
 
 static binary_relation make_test_binary_relation() {
@@ -74,6 +81,35 @@ static binary_relation make_test_binary_relation() {
   std::shuffle(begin(pairs), end(pairs), std::default_random_engine{});
   return binary_relation(pairs);
 }
+
+namespace brwt {
+template <typename T>
+static constexpr auto to_underlying_type(const T value) {
+  static_assert(std::is_enum<T>::value, "");
+  return static_cast<std::underlying_type_t<T>>(value);
+}
+
+static std::ostream& operator<<(std::ostream& os, const object_id value) {
+  return os << to_underlying_type(value);
+}
+
+static std::ostream& operator<<(std::ostream& os, const label_id value) {
+  return os << to_underlying_type(value);
+}
+
+static std::ostream& operator<<(std::ostream& os, const pair_type p) {
+  return os << '(' << p.object << ", " << p.label << ')';
+}
+
+template <typename T>
+static std::ostream& operator<<(std::ostream& os, const optional<T>& opt) {
+  if (opt) {
+    return os << *opt;
+  }
+  return os << "nullopt";
+}
+
+} // end namespace brwt
 
 TEST_SUITE("binary_relation");
 
@@ -150,6 +186,96 @@ TEST_CASE("Rank with min object, max object, max label") {
   CHECK(br.rank(2_obj, 11_obj, 9_lab) == 36);
   CHECK(br.rank(1_obj, 11_obj, 9_lab) == 38);
   CHECK(br.rank(0_obj, 11_obj, 9_lab) == 40);
+}
+
+static auto make_label_major_nth_element() {
+  return [br = make_test_binary_relation()](const auto... args) {
+    using brwt::lab_major;
+    return br.nth_element(args..., lab_major);
+  };
+}
+
+TEST_CASE("[nth_element,lab_major]: Line queries") {
+  const auto nth_element = make_label_major_nth_element();
+
+  // first line.
+  CHECK(nth_element(0_obj, 0_obj, 0_lab, 1) == pair(0_obj, 4_lab));
+  CHECK(nth_element(0_obj, 0_obj, 0_lab, 2) == pair(0_obj, 8_lab));
+  CHECK(nth_element(0_obj, 0_obj, 0_lab, 3) == nullopt);
+  CHECK(nth_element(0_obj, 0_obj, 4_lab, 1) == pair(0_obj, 4_lab));
+  CHECK(nth_element(0_obj, 0_obj, 5_lab, 1) == pair(0_obj, 8_lab));
+  CHECK(nth_element(0_obj, 0_obj, 8_lab, 1) == pair(0_obj, 8_lab));
+
+  // random lines
+  CHECK(nth_element(2_obj, 2_obj, 2_lab, 1) == pair(2_obj, 4_lab));
+  CHECK(nth_element(5_obj, 5_obj, 0_lab, 2) == pair(5_obj, 3_lab));
+  CHECK(nth_element(8_obj, 8_obj, 3_lab, 3) == pair(8_obj, 7_lab));
+  CHECK(nth_element(10_obj, 10_obj, 6_lab, 2) == pair(10_obj, 9_lab));
+}
+
+TEST_CASE("[nth_element,lab_major]: Last pairs and out of range") {
+  const auto nth_element = make_label_major_nth_element();
+
+  CHECK(nth_element(2_obj, 6_obj, 0_lab, 14) == pair(5_obj, 9_lab));
+  CHECK(nth_element(2_obj, 6_obj, 0_lab, 15) == nullopt);
+  CHECK(nth_element(2_obj, 6_obj, 5_lab, 130) == nullopt);
+  CHECK(nth_element(2_obj, 6_obj, 5_lab, 5) == pair(5_obj, 9_lab));
+  CHECK(nth_element(2_obj, 6_obj, 5_lab, 6) == nullopt);
+  CHECK(nth_element(2_obj, 6_obj, 5_lab, 192) == nullopt);
+
+  CHECK(nth_element(4_obj, 9_obj, 0_lab, 24) == pair(8_obj, 9_lab));
+  CHECK(nth_element(4_obj, 9_obj, 0_lab, 25) == nullopt);
+  CHECK(nth_element(4_obj, 9_obj, 7_lab, 9) == pair(8_obj, 9_lab));
+  CHECK(nth_element(4_obj, 9_obj, 7_lab, 10) == nullopt);
+
+  CHECK(nth_element(0_obj, 3_obj, 0_lab, 8) == pair(0_obj, 8_lab));
+  CHECK(nth_element(0_obj, 3_obj, 2_lab, 8) == pair(0_obj, 8_lab));
+  CHECK(nth_element(0_obj, 3_obj, 2_lab, 9) == nullopt);
+
+  CHECK(nth_element(6_obj, 11_obj, 0_lab, 24) == pair(10_obj, 9_lab));
+  CHECK(nth_element(6_obj, 11_obj, 3_lab, 16) == pair(10_obj, 9_lab));
+  CHECK(nth_element(6_obj, 11_obj, 3_lab, 17) == nullopt);
+
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 40) == pair(10_obj, 9_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 41) == nullopt);
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 2323) == nullopt);
+  CHECK(nth_element(0_obj, 11_obj, 4_lab, 24) == pair(10_obj, 9_lab));
+  CHECK(nth_element(0_obj, 11_obj, 4_lab, 25) == nullopt);
+  CHECK(nth_element(0_obj, 11_obj, 4_lab, 5343) == nullopt);
+}
+
+TEST_CASE("[nth_element,lab_major]: Objects ranges") {
+  const auto nth_element = make_label_major_nth_element();
+
+  // range of objects [6, 8]
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 1) == pair(6_obj, 0_lab));
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 2) == pair(7_obj, 1_lab));
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 3) == pair(8_obj, 1_lab));
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 7) == pair(8_obj, 4_lab));
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 8) == pair(7_obj, 6_lab));
+  CHECK(nth_element(6_obj, 8_obj, 0_lab, 12) == pair(8_obj, 9_lab));
+  CHECK(nth_element(6_obj, 8_obj, 4_lab, 1) == pair(8_obj, 4_lab));
+  CHECK(nth_element(6_obj, 8_obj, 4_lab, 2) == pair(7_obj, 6_lab));
+  CHECK(nth_element(6_obj, 8_obj, 4_lab, 6) == pair(8_obj, 9_lab));
+
+  // Random ranges
+  CHECK(nth_element(2_obj, 8_obj, 3_lab, 7) == pair(8_obj, 4_lab));
+  CHECK(nth_element(4_obj, 10_obj, 5_lab, 13) == pair(10_obj, 9_lab));
+  CHECK(nth_element(5_obj, 11_obj, 3_lab, 15) == pair(8_obj, 8_lab));
+  CHECK(nth_element(0_obj, 5_obj, 2_lab, 4) == pair(5_obj, 3_lab));
+  CHECK(nth_element(1_obj, 9_obj, 3_lab, 17) == pair(7_obj, 8_lab));
+  CHECK(nth_element(0_obj, 11_obj, 4_lab, 21) == pair(11_obj, 8_lab));
+
+  // Full range
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 1) == pair(6_obj, 0_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 2) == pair(9_obj, 0_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 3) == pair(5_obj, 1_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 10) == pair(6_obj, 2_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 20) == pair(3_obj, 4_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 30) == pair(9_obj, 7_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 38) == pair(5_obj, 9_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 39) == pair(8_obj, 9_lab));
+  CHECK(nth_element(0_obj, 11_obj, 0_lab, 40) == pair(10_obj, 9_lab));
 }
 
 TEST_CASE("count_distinct_labels, basic") {

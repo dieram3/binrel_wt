@@ -1,8 +1,9 @@
 #ifndef BRWT_COMMON_TYPES_H
 #define BRWT_COMMON_TYPES_H
 
-#include <cstddef> // ptrdiff_t
-#include <cstdint> // uint_fast64_t
+#include <experimental/optional> // optional
+#include <cstddef>               // ptrdiff_t
+#include <cstdint>               // uint_fast64_t
 
 namespace brwt {
 namespace types {
@@ -24,6 +25,9 @@ using word_type = std::uint_fast64_t;
 using types::size_type;
 using types::index_type;
 using types::word_type;
+
+using std::experimental::optional;
+using std::experimental::nullopt;
 
 // wavelet tree types
 
