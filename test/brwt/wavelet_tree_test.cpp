@@ -459,6 +459,8 @@ TEST_CASE("node_proxy: make lhs and rhs") {
 // Extended algorithms
 // ==========================================
 
+// TODO(Diego): Lots of algorithms are not tested. Test them.
+
 static auto make_wavelet_tree_with_3_bpe() {
   return wavelet_tree(create_vector_with_3_bpe());
 }
