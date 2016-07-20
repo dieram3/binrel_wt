@@ -212,21 +212,35 @@ auto binary_relation::rank(object_id min_object, object_id max_object,
   return rank(max_object, max_label) - rank(prev(min_object), max_label);
 }
 
-auto binary_relation::select_label_major(const label_id alpha,
-                                         const object_id x, const object_id y,
-                                         size_type nth) const noexcept
-    -> pair_type {
+auto binary_relation::nth_element(const object_id x, const object_id y,
+                                  const label_id alpha, size_type nth,
+                                  label_major_order_t /*unused*/) const noexcept
+    -> optional<pair_type> {
   assert(x <= y);
+  assert(nth > 0);
 
   if (alpha > 0) {
     nth += rank(x, y, prev(alpha));
   }
 
+  const auto range = make_mapped_range(x, y);
+  if (range.size() < nth) {
+    return nullopt;
+  }
+
   symbol_id symbol{};
   index_type wt_pos{};
-  std::tie(symbol, wt_pos) = nth_element(m_wtree, make_mapped_range(x, y), nth);
-  return {get_associated_object(wt_pos), label_id(symbol)};
+  std::tie(symbol, wt_pos) = brwt::nth_element(m_wtree, range, nth);
+
+  return pair_type{get_associated_object(wt_pos), label_id(symbol)};
 }
+
+// auto binary_relation::nth_element(const object_id x, const label_id alpha,
+//                                   const label_id beta, const size_type nth,
+//                                   object_major_order_t /*unused*/) const
+//     noexcept -> optional<pair_type> {
+//   // TODO(Diego): Implement it.
+// }
 
 auto binary_relation::object_select(const label_id fixed_label,
                                     const object_id object_start,

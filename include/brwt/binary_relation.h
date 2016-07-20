@@ -5,9 +5,19 @@
 #include <brwt/common_types.h>
 #include <brwt/int_vector.h>
 #include <brwt/wavelet_tree.h>
+#include <experimental/optional>
 #include <vector>
 
 namespace brwt {
+
+using std::experimental::optional;
+using std::experimental::nullopt;
+
+struct object_major_order_t {};
+struct label_major_order_t {};
+
+constexpr object_major_order_t obj_major{};
+constexpr label_major_order_t lab_major{};
 
 class binary_relation {
 public:
@@ -43,20 +53,24 @@ public:
                  label_id max_label) const noexcept;
 
   /// \brief Finds the nth pair in the range
+  /// 'access(alpha, max_label, x, y)' when it is ordered by object value, then
+  /// by label value (object major order).
+  ///
+  /// \remark In the literature this operation is known as \e rel_sel_obj_maj
+  ///
+  optional<pair_type> nth_element(object_id x, label_id alpha, label_id beta,
+                                  size_type nth,
+                                  object_major_order_t order) const noexcept;
+
+  /// \brief Finds the nth pair in the range
   /// 'access(alpha, max_label, x, y)' when it is ordered by label value, then
   /// by object value (label major order).
   ///
   /// \remark In the literature this operation is known as \e rel_sel_lab_maj
   ///
-  pair_type select_label_major(label_id alpha, object_id x, object_id y,
-                               size_type nth) const noexcept;
-
-  /// \brief TODO(diego)
-  ///
-  /// \remark In the literature this operation is known as \e rel_sel_obj_maj
-  ///
-  pair_type select_object_major(label_id alpha, label_id beta, object_id x,
-                                size_type nth) const noexcept;
+  optional<pair_type> nth_element(object_id x, object_id y, label_id alpha,
+                                  size_type nth,
+                                  label_major_order_t order) const noexcept;
 
   /// \brief Finds the first relation 'r' greater than or equal to 'rel_start'
   /// in the range of all relations with label in [alpha, beta] such that the
@@ -96,6 +110,8 @@ public:
   ///
   size_type size() const noexcept;
 
+  // TODO(Diego): Decide what to do with num_labels() member fn.
+
 private:
   index_type map(object_id x) const noexcept;
   object_id unmap(index_type wt_pos) const noexcept;
@@ -121,6 +137,21 @@ inline auto binary_relation::num_objects() const noexcept -> size_type {
 inline auto binary_relation::size() const noexcept -> size_type {
   return m_wtree.size();
 };
+
+// ==========================================
+// Non-member helpers
+// ==========================================
+
+constexpr bool operator==(const binary_relation::pair_type& lhs,
+                          const binary_relation::pair_type& rhs) noexcept {
+  return lhs.object == rhs.object && //
+         lhs.label == rhs.label;
+}
+
+constexpr bool operator!=(const binary_relation::pair_type& lhs,
+                          const binary_relation::pair_type& rhs) noexcept {
+  return !(lhs == rhs);
+}
 
 } // end namespace brwt
 
