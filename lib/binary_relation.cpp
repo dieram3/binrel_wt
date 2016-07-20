@@ -50,6 +50,10 @@ static constexpr auto to_underlying_type(const T value) noexcept {
 // binary_relation implementation
 // ==========================================
 
+static constexpr auto as_symbol(const label_id label) noexcept {
+  return static_cast<symbol_id>(label);
+}
+
 static constexpr object_id prev(const object_id x) noexcept {
   assert(to_underlying_type(x) != 0);
   return static_cast<object_id>(to_underlying_type(x) - 1);
@@ -196,7 +200,7 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
 
 auto binary_relation::rank(object_id max_object, label_id max_label) const
     noexcept -> size_type {
-  return exclusive_rank(m_wtree, less_equal<symbol_id>{max_label},
+  return exclusive_rank(m_wtree, less_equal<symbol_id>{as_symbol(max_label)},
                         upper_bound(max_object));
 }
 
@@ -229,10 +233,10 @@ auto binary_relation::object_select(const label_id fixed_label,
                                     const size_type nth) const noexcept
     -> object_id {
 
-  const auto abs_nth =
-      nth + exclusive_rank(m_wtree, fixed_label, lower_bound(object_start));
+  const auto abs_nth = nth + exclusive_rank(m_wtree, as_symbol(fixed_label),
+                                            lower_bound(object_start));
 
-  const auto wt_pos = m_wtree.select(fixed_label, abs_nth);
+  const auto wt_pos = m_wtree.select(as_symbol(fixed_label), abs_nth);
   assert(wt_pos != -1 && "The element was supposed to exist");
 
   // TODO(Diego): Design decision. Determine what to do if wt_pos == -1, that
@@ -248,8 +252,8 @@ auto binary_relation::count_distinct_labels(const object_id x,
                                             const label_id beta) const noexcept
     -> size_type {
   const auto range = make_mapped_range(x, y);
-  return count_distinct_symbols(m_wtree, range,
-                                between<symbol_id>{alpha, beta});
+  const auto cond = between<symbol_id>{as_symbol(alpha), as_symbol(beta)};
+  return count_distinct_symbols(m_wtree, range, cond);
 }
 
 } // end namespace brwt
