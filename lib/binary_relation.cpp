@@ -47,10 +47,6 @@ static constexpr auto to_underlying_type(const T value) noexcept {
 }
 
 // ==========================================
-// wavelet_tree extensions
-// ==========================================
-
-// ==========================================
 // binary_relation implementation
 // ==========================================
 
