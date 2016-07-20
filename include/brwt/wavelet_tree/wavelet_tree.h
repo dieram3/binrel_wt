@@ -1,10 +1,11 @@
 #ifndef BRWT_WAVELET_TREE_WAVELET_TREE_H
 #define BRWT_WAVELET_TREE_WAVELET_TREE_H
 
-#include <brwt/bitmap.h>     // bitmap
-#include <brwt/int_vector.h> // int_vector
-#include <cstddef>           // ptrdiff_t
-#include <utility>           // pair
+#include <brwt/bitmap.h>       // bitmap
+#include <brwt/common_types.h> // symbol_id, size_type, index_type
+#include <brwt/int_vector.h>   // int_vector
+#include <cstddef>             // ptrdiff_t
+#include <utility>             // pair
 
 namespace brwt {
 
@@ -20,15 +21,6 @@ namespace brwt {
 ///
 class wavelet_tree {
 public:
-  /// Unsigned type used to represent symbol codes.
-  using symbol_id = bit_vector::block_type;
-
-  /// Signed vocabulary type used to indicate quantities.
-  using size_type = std::ptrdiff_t;
-
-  /// Signed vocabulary type used to indicate positions.
-  using index_type = size_type;
-
   class node_proxy;
 
 public:
@@ -151,7 +143,7 @@ public:
   /// \brief Checks whether the node has no materialized children.
   ///
   bool is_leaf() const noexcept {
-    return level_mask == 1;
+    return level_mask == static_cast<symbol_id>(1);
   }
 
   /// \brief Checks if the next bit of the symbol is handled by the left child.
