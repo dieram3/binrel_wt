@@ -97,8 +97,6 @@ public:
   size_type size() const noexcept;
 
 private:
-  using index_type = wavelet_tree::index_type;
-
   index_type map(object_id x) const noexcept;
   object_id unmap(index_type wt_pos) const noexcept;
 
