@@ -3,9 +3,14 @@
 
 #include <cassert>     // assert
 #include <limits>      // numeric_limits
-#include <type_traits> // is_unsigned
+#include <type_traits> // is_same, is_unsigned
 
 namespace brwt {
+
+template <typename T>
+constexpr bool is_word_type =
+    std::is_same<T, unsigned>::value || std::is_same<T, unsigned long>::value ||
+    std::is_same<T, unsigned long long>::value;
 
 constexpr int pop_count(unsigned x) noexcept {
   return __builtin_popcount(x);
@@ -54,7 +59,7 @@ constexpr int count_trailing_zeros(unsigned long long x) noexcept {
 template <typename T>
 constexpr T lsb_mask(const int count) noexcept {
   // TODO(Diego): Consider rename this function to low_mask
-  static_assert(std::is_unsigned<T>::value, "The mask type must be unsigned");
+  static_assert(is_word_type<T>, "");
   assert(count < std::numeric_limits<T>::digits);
   return (T{1} << count) - 1;
 }
@@ -67,9 +72,39 @@ constexpr T lsb_mask(const int count) noexcept {
 ///
 template <typename T>
 constexpr int used_bits(const T x) {
-  static_assert(std::is_unsigned<T>::value, "");
+  static_assert(is_word_type<T>, "");
   assert(x != 0);
   return std::numeric_limits<T>::digits - count_leading_zeros(x);
+}
+
+template <typename T>
+constexpr int rank_1(const T value) noexcept {
+  static_assert(is_word_type<T>, "");
+  return pop_count(value);
+}
+
+template <typename T>
+constexpr int rank_0(const T value) noexcept {
+  static_assert(is_word_type<T>, "");
+  return rank_1(~value);
+}
+
+template <typename T>
+constexpr int rank_1(const T value, const int pos) noexcept {
+  static_assert(is_word_type<T>, "");
+  assert(pos >= 0 && pos < std::numeric_limits<T>::digits);
+
+  return (pos + 1 == std::numeric_limits<T>::digits)
+             ? rank_1(value)
+             : rank_1(value & lsb_mask<T>(pos + 1));
+}
+
+template <typename T>
+constexpr int rank_0(const T value, const int pos) noexcept {
+  static_assert(is_word_type<T>, "");
+  assert(pos >= 0 && pos < std::numeric_limits<T>::digits);
+
+  return rank_1(~value, pos);
 }
 
 } // end namespace brwt
