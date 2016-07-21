@@ -25,6 +25,8 @@ public:
   explicit bit_vector(const std::string& s);
 
   size_type length() const noexcept;
+  size_type size() const noexcept;
+  size_type num_blocks() const noexcept;
   size_type allocated_bytes() const noexcept;
 
   bool get(size_type pos) const noexcept;
@@ -47,6 +49,14 @@ private:
 
 inline auto bit_vector::length() const noexcept -> size_type {
   return m_len;
+}
+
+inline auto bit_vector::size() const noexcept -> size_type {
+  return m_len;
+}
+
+inline auto bit_vector::num_blocks() const noexcept -> size_type {
+  return static_cast<size_type>(blocks.size());
 }
 
 inline auto bit_vector::get_block(const size_type num_block) const noexcept

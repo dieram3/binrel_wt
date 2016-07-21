@@ -5,6 +5,9 @@
 #include <ostream>   // ostream
 #include <string>    // string
 
+// TODO(Diego): Test size() instead of length(). Remove length(). Test
+// num_blocks().
+
 using brwt::bit_vector;
 static_assert(bit_vector::bits_per_block >= 64, "");
 
