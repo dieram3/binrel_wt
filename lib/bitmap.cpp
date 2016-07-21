@@ -1,19 +1,19 @@
 #include <brwt/bit_vector.h>
 #include <brwt/bitmap.h>
 
-#include <brwt/bit_hacks.h> // pop_count
+#include <brwt/bit_hacks.h> // pop_count, rank_0, rank_1, used_bits
 #include <brwt/utility.h>   // ceil_div
 
 #include <algorithm> // min
 #include <cassert>   // assert
-#include <cmath>     // log2, ceil
-#include <utility>   // move
+#include <utility>   // move, pair
 
-using brwt::bitmap;
-using brwt::bit_vector;
+namespace brwt {
 
 using value_type = bit_vector::block_type;
-using size_type = bitmap::size_type;
+
+// TODO(Diego): Rewrite some code. A bit of pessimization was made to fix the
+// errors quickly.
 
 // ==========================================
 // helper functions
@@ -23,16 +23,17 @@ template <typename T, typename Pred>
 static T binary_search(T a, T b, Pred pred) {
   while (a != b) {
     const T mid = a + (b - a) / 2;
-    if (pred(mid))
+    if (pred(mid)) {
       a = mid + 1;
-    else
+    } else {
       b = mid;
+    }
   }
   return a;
 }
 
-static constexpr value_type make_mask(const size_type count) noexcept {
-  return brwt::lsb_mask<value_type>(static_cast<int>(count));
+static constexpr index_type operator"" _idx(unsigned long long pos) {
+  return static_cast<index_type>(pos);
 }
 
 // ==========================================
@@ -45,149 +46,135 @@ static constexpr size_type bits_per_super_block =
     blocks_per_super_block * bits_per_block;
 
 bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
-  const size_type n = vec.length();
 
-  const size_type num_super_blocks = ceil_div(n, bits_per_super_block) - 1;
-  {
-    const int bits = static_cast<int>(std::ceil(std::log2(n)));
-    super_blocks = int_vector(num_super_blocks, bits);
-  }
+  const auto step = blocks_per_super_block; // measured in blocks.
+  super_blocks = [this] {
+    // num super-blocks
+    const size_type count = ceil_div(sequence.num_blocks(), step);
+    // bits per element
+    const int bpe = used_bits(static_cast<word_type>(sequence.size()));
+    return int_vector(count, bpe);
+  }();
 
-  size_type sum = 0;
-
-  for (size_type i = 0; i < num_super_blocks; ++i) {
-    const auto base = i * bits_per_super_block;
-    for (size_type j = 0; j != bits_per_super_block; j += bits_per_block) {
-      const auto pos = base + j;
-      sum += pop_count(sequence.get_block(pos / bits_per_block));
-    }
-    super_blocks[i] = static_cast<value_type>(sum);
-  }
-}
-
-bitmap::index_type bitmap::select_1(const size_type nth) const {
-  assert(nth > 0);
-
-  const auto num_blocks = length() / bits_per_block;
-  const auto num_super_blocks = super_blocks.length();
-
-  // lower bound in super blocks
-  index_type idx = 0;
-  size_type count = 0;
-  {
-    index_type first = 0;
-    index_type last = num_super_blocks;
-
-    auto valid_block = [&](index_type current_idx) {
-      const auto ones_count = static_cast<size_type>(super_blocks[current_idx]);
-      return ones_count < nth;
-    };
-
-    auto super_block_idx = binary_search(first, last, valid_block);
-
-    if (super_block_idx > 0 && valid_block(super_block_idx - 1)) {
-      idx = super_block_idx * bits_per_super_block;
-      count = static_cast<size_type>(super_blocks[super_block_idx - 1]);
-    }
-  }
-
-  // sequential search in blocks (at most 10 popcounts)
-  {
-    auto first = idx / bits_per_block;
-    auto last = std::min(first + blocks_per_super_block, num_blocks);
-
+  auto sum_blocks = [&](index_type first, const index_type last) {
+    size_type res = 0;
     for (; first != last; ++first) {
-      auto ones_count = pop_count(sequence.get_block(first));
-      if (count + ones_count > nth) {
-        break;
-      }
-      count += ones_count;
+      res += pop_count(sequence.get_block(first));
     }
+    return res;
+  };
 
-    idx = first * bits_per_block;
-
-    if (count < nth) {
-      auto next_block = sequence.get_block(first);
-
-      auto valid_bits_count = [&](const size_type bits) {
-        auto ones_count = pop_count(next_block & make_mask(bits));
-        return count + ones_count < nth;
-      };
-
-      auto max_bits = std::min(bits_per_block, length() - idx);
-      auto num_bits = binary_search(size_type{0}, max_bits, valid_bits_count);
-
-      assert(num_bits > 0);
-
-      idx += (num_bits - 1);
-      count += pop_count(next_block & make_mask(num_bits));
-    }
+  size_type acc_sum = 0;
+  for (size_type i = 0; i < super_blocks.size(); ++i) {
+    const auto first = i * step;
+    const auto last = std::min(first + step, sequence.num_blocks());
+    acc_sum += sum_blocks(first, last);
+    super_blocks[i] = static_cast<word_type>(acc_sum);
   }
-
-  return (count == nth) ? idx : -1;
 }
 
-bitmap::index_type bitmap::select_0(const index_type nth) const {
+template <typename Rank>
+static std::pair<index_type, size_type>
+rank_find(const bit_vector& vec, const size_type start, const size_type value,
+          const Rank rank) {
+  size_type sum = 0;
+  for (size_type i = start; i < vec.num_blocks(); ++i) {
+    const auto tpm = sum + rank(vec.get_block(i));
+    if (tpm >= value) {
+      return std::make_pair(i, sum);
+    }
+    sum = tpm;
+  }
+  return std::make_pair(vec.num_blocks(), sum);
+}
+
+template <typename T>
+static int select_1(const T value, const int nth) {
+  static_assert(std::is_unsigned<T>::value, "");
+  assert(rank_1(value) >= nth);
+  auto not_enough = [value, nth](const int pos) {
+    return rank_1(value, pos) < nth;
+  };
+  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+}
+
+template <typename T>
+static int select_0(const T value, const int nth) {
+  static_assert(std::is_unsigned<T>::value, "");
+  assert(rank_0(value) >= nth);
+  auto not_enough = [value, nth](const int pos) {
+    return rank_0(value, pos) < nth;
+  };
+  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+}
+
+bitmap::index_type bitmap::select_1(size_type nth) const {
   assert(nth > 0);
 
-  const auto num_blocks = length() / bits_per_block;
-  const auto num_super_blocks = super_blocks.length();
+  if (nth > num_ones()) {
+    return index_npos; // The answer does not exist.
+  }
 
-  index_type idx = 0;
-  size_type count = 0;
-  {
-    index_type first = 0;
-    index_type last = num_super_blocks;
-
-    auto valid_block = [&](index_type current_idx) {
-      const auto zeros_count =
-          bits_per_super_block * (current_idx + 1) -
-          static_cast<size_type>(super_blocks[current_idx]);
-      return zeros_count < nth;
+  const auto sb_idx = [&] {
+    auto ones_sb = [this](const index_type pos) {
+      return static_cast<size_type>(super_blocks[pos]);
     };
+    auto not_enough = [&](const index_type pos) { return ones_sb(pos) < nth; };
+    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
+    nth -= (pos == 0 ? 0 : ones_sb(pos - 1));
+    return pos;
+  }();
+  assert(sb_idx < super_blocks.size());
+  assert(nth > 0 && nth <= bits_per_super_block);
 
-    auto super_block_idx = binary_search(first, last, valid_block);
+  const auto seq_idx = [&] {
+    const auto start = sb_idx * blocks_per_super_block;
+    const auto pair = rank_find(sequence, start, nth, [](const auto value) {
+      return brwt::rank_1(value);
+    });
+    nth -= pair.second; // exclusive_count
+    return pair.first;  // idx where the accumulated pop count was >= nth
+  }();
+  assert(nth > 0 && nth <= std::numeric_limits<word_type>::digits);
 
-    if (super_block_idx > 0 && valid_block(super_block_idx - 1)) {
-      idx = super_block_idx * bits_per_super_block;
-      count = bits_per_super_block * (super_block_idx) -
-              static_cast<size_type>(super_blocks[super_block_idx - 1]);
-    }
+  return seq_idx * bits_per_block +
+         brwt::select_1(sequence.get_block(seq_idx), static_cast<int>(nth));
+}
+
+bitmap::index_type bitmap::select_0(size_type nth) const {
+  assert(nth > 0);
+
+  if (nth > num_zeros()) {
+    return index_npos; // The answer does not exist.
   }
 
-  // sequential search in blocks (at most 10 popcounts)
-  {
-    auto first = idx / bits_per_block;
-    auto last = std::min(first + blocks_per_super_block, num_blocks);
+  const auto sb_idx = [&] {
+    // TODO(Diego): It seems that std::min can be removed safely.
+    auto zeros_sb = [this](const index_type pos) {
+      return std::min((pos + 1) * bits_per_super_block, size()) -
+             static_cast<size_type>(super_blocks[pos]);
+    };
+    auto not_enough = [&](const index_type pos) { return zeros_sb(pos) < nth; };
+    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
+    nth -= (pos == 0 ? 0 : zeros_sb(pos - 1));
+    return pos;
+  }();
+  assert(sb_idx < super_blocks.size());
+  assert(nth > 0 && nth <= bits_per_super_block);
 
-    for (; first < last; ++first) {
-      auto zeros_count = bits_per_block - pop_count(sequence.get_block(first));
-      if (count + zeros_count > nth) {
-        break;
-      }
-      count += zeros_count;
-    }
+  const auto seq_idx = [&] {
+    const auto start = sb_idx * blocks_per_super_block;
+    const auto pair = rank_find(sequence, start, nth, [](const auto elem) {
+      return brwt::rank_0(elem);
+    });
+    nth -= pair.second; // exclusive_count
+    return pair.first;  // idx where the accumulated pop count was >= nth
+  }();
+  assert(seq_idx < sequence.num_blocks());
+  assert(nth > 0 && nth <= std::numeric_limits<word_type>::digits);
 
-    idx = first * bits_per_block;
-
-    if (count < nth) {
-      auto next_block = sequence.get_block(first);
-
-      auto valid_bits_count = [&](const size_type bits) {
-        auto zeros_count = bits - pop_count(next_block & make_mask(bits));
-        return count + zeros_count < nth;
-      };
-
-      auto max_bits = std::min(bits_per_block, length() - idx);
-      auto num_bits = binary_search(size_type{0}, max_bits, valid_bits_count);
-      assert(num_bits > 0);
-
-      idx += (num_bits - 1);
-      count += num_bits - pop_count(next_block & make_mask(num_bits));
-    }
-  }
-
-  return (count == nth) ? idx : -1;
+  return seq_idx * bits_per_block +
+         brwt::select_0(sequence.get_block(seq_idx), static_cast<int>(nth));
 }
 
 bitmap::size_type bitmap::rank_1(const index_type pos) const {
@@ -209,3 +196,5 @@ bitmap::size_type bitmap::rank_1(const index_type pos) const {
 
   return sum;
 }
+
+} // end namespace brwt

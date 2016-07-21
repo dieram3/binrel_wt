@@ -1,17 +1,17 @@
 #ifndef BRWT_BITMAP_H
 #define BRWT_BITMAP_H
 
-#include <brwt/bit_vector.h> // bit_vector
-#include <brwt/int_vector.h> // int_vector
-#include <cstddef>           // ptrdiff_t
-#include <vector>            // vector
+#include <brwt/bit_vector.h>   // bit_vector
+#include <brwt/common_types.h> // index_type, size_type
+#include <brwt/int_vector.h>   // int_vector
+#include <cassert>             // assert
 
 namespace brwt {
 
 class bitmap {
 public:
-  using index_type = std::ptrdiff_t;
-  using size_type = index_type;
+  using index_type = brwt::index_type;
+  using size_type = brwt::size_type;
 
 public:
   bitmap() = default;
@@ -26,6 +26,10 @@ public:
   index_type select_1(size_type nth) const;
 
   size_type length() const;
+  size_type size() const;
+
+  size_type num_ones() const;
+  size_type num_zeros() const;
 
 private:
   bit_vector sequence;
@@ -46,6 +50,22 @@ inline bitmap::size_type bitmap::rank_0(const index_type pos) const {
 
 inline bitmap::size_type bitmap::length() const {
   return sequence.length();
+}
+
+inline bitmap::size_type bitmap::size() const {
+  return sequence.length();
+}
+
+inline bitmap::size_type bitmap::num_ones() const {
+  if (size() == 0) {
+    return 0;
+  }
+  assert(super_blocks.size() > 0);
+  return static_cast<size_type>(super_blocks[super_blocks.size() - 1]);
+}
+
+inline bitmap::size_type bitmap::num_zeros() const {
+  return size() - num_ones();
 }
 
 } // end namespace brwt

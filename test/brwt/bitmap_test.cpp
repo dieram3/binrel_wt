@@ -186,7 +186,7 @@ TEST_CASE("bitmap::select_1()") {
 
     CHECK(bm1.select_1(7) == 11);
     CHECK(bm1.select_1(23) == 37);
-    CHECK(bm1.select_1(39) == 64);
+    CHECK(bm1.select_1(39) == 63);
 
     CHECK(bm2.select_1(19) == 30);
     CHECK(bm2.select_1(150) == 250);
