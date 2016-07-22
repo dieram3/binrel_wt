@@ -42,6 +42,9 @@ public:
   ///
   explicit binary_relation(const std::vector<pair_type>& pairs);
 
+  /// \name Relation view
+  /// @{
+
   /// \brief Counts the number of pairs in the specified range.
   ///
   size_type rank(object_id max_object, label_id max_label) const noexcept;
@@ -84,27 +87,67 @@ public:
   ///
   pair_type lower_bound_object_major(label_id alpha, label_id beta,
                                      pair_type pair_start) const noexcept;
+  /// @}
 
-  /// \brief Returns the object of nth pair in the range of all relations
-  /// with label 'fixed_label' and object >= 'object_start' such that the
-  /// relation is in object major order.
+  /// \name Object view
+  /// @{
+
+  /// \brief Returns the number of objects less than or equal to \p x that are
+  /// associated with the given label.
   ///
-  /// The nth object in the range
-  /// (access(fixed_label, fixed_label, object_start, n)) sorted by objects.
+  /// \remark This operation is also known as \c obj_rnk1.
   ///
-  /// \pre n > 0
+  size_type obj_rank(object_id x, label_id fixed_label) const noexcept;
+
+  /// \brief Returns the number of objects less than \p x that  are associated
+  /// with the given label.
   ///
-  /// \remark In the literature this operation is known as \e obj_sel1
+  size_type obj_exclusive_rank(object_id x, label_id fixed_label) const
+      noexcept;
+
+  /// \brief Returns the number of objects less than or equal to \p x that are
+  /// associated with a label in the given range.
   ///
-  object_id object_select(label_id fixed_label, object_id object_start,
-                          size_type nth) const noexcept;
+  /// \remark This operation is also known as <tt>obj_rnk</tt>.
+  ///
+  size_type obj_rank(object_id x, label_id min_label, label_id max_label) const
+      noexcept;
+
+  /// \brief Returns the number of objects less than \p x that are associated
+  /// with a label in the given range.
+  ///
+  size_type obj_exclusive_rank(object_id x, label_id min_label,
+                               label_id max_label) const noexcept;
+
+  /// \brief Returns the \e nth smallest object associated with the given label,
+  /// not less than the \e start object.
+  ///
+  /// Technically, returns the \e nth smallest object in the range
+  /// \c obj_access(fixed_label, fixed_label, object_start, n).
+  ///
+  /// \pre <tt>nth > 0</tt>
+  ///
+  /// \returns The \e nth object if it exists, otherwise returns \c nullopt.
+  ///
+  /// \remark This operation is also known as \c obj_sel1.
+  ///
+  optional<object_id> obj_select(object_id object_start, label_id fixed_label,
+                                 size_type nth) const noexcept;
+  /// @}
+
+  /// \name Label view
+  /// @{
 
   /// \brief Count the number of labels in the range lab_acc(alpha, beta, x, y).
   ///
-  /// \remark In the literature this operation is known as \e lab_num
+  /// \remark This operation is also known as \c lab_num.
   ///
   size_type count_distinct_labels(object_id x, object_id y, label_id alpha,
                                   label_id beta) const noexcept;
+  /// @}
+
+  /// \name Miscellaneous
+  /// @{
 
   /// \brief Returns the number of different objects.
   ///
@@ -115,6 +158,8 @@ public:
   size_type size() const noexcept;
 
   // TODO(Diego): Decide what to do with num_labels() member fn.
+
+  /// @}
 
 private:
   index_type map(object_id x) const noexcept;
@@ -146,12 +191,24 @@ inline auto binary_relation::size() const noexcept -> size_type {
 // Non-member helpers
 // ==========================================
 
+/// \brief Compares \p lhs and \p rhs for equality.
+///
+/// \returns \c true if the respective parts of \c lhs and \c rhs are equal, \c
+/// false otherwise.
+///
+/// \relates binary_relation::pair_type
+///
 constexpr bool operator==(const binary_relation::pair_type& lhs,
                           const binary_relation::pair_type& rhs) noexcept {
-  return lhs.object == rhs.object && //
-         lhs.label == rhs.label;
+  return lhs.object == rhs.object && lhs.label == rhs.label;
 }
 
+/// \brief Compares \p lhs and \p rhs for inequality.
+///
+/// \returns <tt>!(lhs == rhs)</tt>
+///
+/// \relates binary_relation::pair_type
+///
 constexpr bool operator!=(const binary_relation::pair_type& lhs,
                           const binary_relation::pair_type& rhs) noexcept {
   return !(lhs == rhs);
