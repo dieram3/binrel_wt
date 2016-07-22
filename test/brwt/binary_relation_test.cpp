@@ -326,6 +326,7 @@ TEST_CASE("[nth_element,obj_major]: One column test") {
   CHECK(nth_element(5_obj, 8_lab, 8_lab, 3) == pair(8_obj, 8_lab));
   CHECK(nth_element(5_obj, 8_lab, 8_lab, 4) == pair(11_obj, 8_lab));
   CHECK(nth_element(5_obj, 8_lab, 8_lab, 5) == nullopt);
+  CHECK(nth_element(5_obj, 8_lab, 8_lab, 42) == nullopt);
 }
 
 TEST_CASE("[nth_element,obj_major]: Left range test") {
@@ -337,6 +338,7 @@ TEST_CASE("[nth_element,obj_major]: Left range test") {
   CHECK(nth_element(0_obj, 0_lab, 4_lab, 23) == pair(11_obj, 2_lab));
   CHECK(nth_element(0_obj, 0_lab, 4_lab, 24) == pair(11_obj, 4_lab));
   CHECK(nth_element(0_obj, 0_lab, 4_lab, 25) == nullopt);
+  CHECK(nth_element(0_obj, 0_lab, 4_lab, 42) == nullopt);
 
   CHECK(nth_element(6_obj, 0_lab, 4_lab, 1) == pair(6_obj, 0_lab));
   CHECK(nth_element(6_obj, 0_lab, 4_lab, 2) == pair(6_obj, 2_lab));
@@ -344,11 +346,13 @@ TEST_CASE("[nth_element,obj_major]: Left range test") {
   CHECK(nth_element(6_obj, 0_lab, 4_lab, 13) == pair(11_obj, 2_lab));
   CHECK(nth_element(6_obj, 0_lab, 4_lab, 14) == pair(11_obj, 4_lab));
   CHECK(nth_element(6_obj, 0_lab, 4_lab, 15) == nullopt);
+  CHECK(nth_element(6_obj, 0_lab, 4_lab, 42) == nullopt);
 
   CHECK(nth_element(11_obj, 0_lab, 4_lab, 1) == pair(11_obj, 1_lab));
   CHECK(nth_element(11_obj, 0_lab, 4_lab, 2) == pair(11_obj, 2_lab));
   CHECK(nth_element(11_obj, 0_lab, 4_lab, 3) == pair(11_obj, 4_lab));
   CHECK(nth_element(11_obj, 0_lab, 4_lab, 4) == nullopt);
+  CHECK(nth_element(11_obj, 0_lab, 4_lab, 42) == nullopt);
 }
 
 TEST_CASE("[nth_element,obj_major]: Right range test") {
@@ -360,6 +364,7 @@ TEST_CASE("[nth_element,obj_major]: Right range test") {
   CHECK(nth_element(0_obj, 5_lab, 9_lab, 15) == pair(10_obj, 9_lab));
   CHECK(nth_element(0_obj, 5_lab, 9_lab, 16) == pair(11_obj, 8_lab));
   CHECK(nth_element(0_obj, 5_lab, 9_lab, 17) == nullopt);
+  CHECK(nth_element(0_obj, 5_lab, 9_lab, 42) == nullopt);
 
   CHECK(nth_element(6_obj, 5_lab, 9_lab, 1) == pair(7_obj, 6_lab));
   CHECK(nth_element(6_obj, 5_lab, 9_lab, 2) == pair(7_obj, 8_lab));
@@ -367,9 +372,11 @@ TEST_CASE("[nth_element,obj_major]: Right range test") {
   CHECK(nth_element(6_obj, 5_lab, 9_lab, 9) == pair(10_obj, 9_lab));
   CHECK(nth_element(6_obj, 5_lab, 9_lab, 10) == pair(11_obj, 8_lab));
   CHECK(nth_element(6_obj, 5_lab, 9_lab, 11) == nullopt);
+  CHECK(nth_element(6_obj, 5_lab, 9_lab, 42) == nullopt);
 
   CHECK(nth_element(11_obj, 5_lab, 9_lab, 1) == pair(11_obj, 8_lab));
   CHECK(nth_element(11_obj, 5_lab, 9_lab, 2) == nullopt);
+  CHECK(nth_element(11_obj, 5_lab, 9_lab, 42) == nullopt);
 }
 
 TEST_CASE("[nth_element,obj_major]: Center range test") {
@@ -381,6 +388,7 @@ TEST_CASE("[nth_element,obj_major]: Center range test") {
   CHECK(nth_element(0_obj, 2_lab, 7_lab, 24) == pair(11_obj, 2_lab));
   CHECK(nth_element(0_obj, 2_lab, 7_lab, 25) == pair(11_obj, 4_lab));
   CHECK(nth_element(0_obj, 2_lab, 7_lab, 26) == nullopt);
+  CHECK(nth_element(0_obj, 2_lab, 7_lab, 42) == nullopt);
 
   CHECK(nth_element(6_obj, 2_lab, 7_lab, 1) == pair(6_obj, 2_lab));
   CHECK(nth_element(6_obj, 2_lab, 7_lab, 2) == pair(7_obj, 3_lab));
@@ -388,10 +396,12 @@ TEST_CASE("[nth_element,obj_major]: Center range test") {
   CHECK(nth_element(6_obj, 2_lab, 7_lab, 13) == pair(11_obj, 2_lab));
   CHECK(nth_element(6_obj, 2_lab, 7_lab, 14) == pair(11_obj, 4_lab));
   CHECK(nth_element(6_obj, 2_lab, 7_lab, 15) == nullopt);
+  CHECK(nth_element(6_obj, 2_lab, 7_lab, 42) == nullopt);
 
   CHECK(nth_element(11_obj, 2_lab, 7_lab, 1) == pair(11_obj, 2_lab));
   CHECK(nth_element(11_obj, 2_lab, 7_lab, 2) == pair(11_obj, 4_lab));
   CHECK(nth_element(11_obj, 2_lab, 7_lab, 3) == nullopt);
+  CHECK(nth_element(11_obj, 2_lab, 7_lab, 42) == nullopt);
 }
 
 TEST_CASE("[nth_element,obj_major]: Tiny range test") {
@@ -405,6 +415,7 @@ TEST_CASE("[nth_element,obj_major]: Tiny range test") {
   CHECK(nth_element(0_obj, 5_lab, 7_lab, 6) == pair(9_obj, 7_lab));
   CHECK(nth_element(0_obj, 5_lab, 7_lab, 7) == pair(10_obj, 7_lab));
   CHECK(nth_element(0_obj, 5_lab, 7_lab, 8) == nullopt);
+  CHECK(nth_element(0_obj, 5_lab, 7_lab, 42) == nullopt);
 
   CHECK(nth_element(6_obj, 5_lab, 7_lab, 1) == pair(7_obj, 6_lab));
   CHECK(nth_element(6_obj, 5_lab, 7_lab, 2) == pair(8_obj, 7_lab));
@@ -412,6 +423,7 @@ TEST_CASE("[nth_element,obj_major]: Tiny range test") {
   CHECK(nth_element(6_obj, 5_lab, 7_lab, 4) == pair(9_obj, 7_lab));
   CHECK(nth_element(6_obj, 5_lab, 7_lab, 5) == pair(10_obj, 7_lab));
   CHECK(nth_element(6_obj, 5_lab, 7_lab, 6) == nullopt);
+  CHECK(nth_element(6_obj, 5_lab, 7_lab, 42) == nullopt);
 
   CHECK(nth_element(11_obj, 5_lab, 7_lab, 1) == nullopt);
   CHECK(nth_element(11_obj, 5_lab, 7_lab, 2) == nullopt);
@@ -421,28 +433,30 @@ TEST_CASE("[nth_element,obj_major]: Tiny range test") {
 TEST_CASE("[nth_element,obj_major]: Full range test") {
   const auto nth_element = make_object_major_nth_element();
 
-  // full range check
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 1) == pair(0_obj, 4_lab));
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 2) == pair(0_obj, 8_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 3) == pair(1_obj, 2_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 4) == pair(1_obj, 4_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 5) == pair(2_obj, 4_lab));
-
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 11) == pair(4_obj, 7_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 14) == pair(5_obj, 3_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 19) == pair(7_obj, 1_lab));
+  CHECK(nth_element(0_obj, 0_lab, 9_lab, 8) == pair(3_obj, 6_lab));
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 24) == pair(8_obj, 3_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 30) == pair(9_obj, 2_lab));
-
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 36) == pair(10_obj, 9_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 37) == pair(11_obj, 1_lab));
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 38) == pair(11_obj, 2_lab));
+  CHECK(nth_element(0_obj, 0_lab, 9_lab, 31) == pair(9_obj, 6_lab));
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 39) == pair(11_obj, 4_lab));
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 40) == pair(11_obj, 8_lab));
-
   CHECK(nth_element(0_obj, 0_lab, 9_lab, 41) == nullopt);
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 50) == nullopt);
-  CHECK(nth_element(0_obj, 0_lab, 9_lab, 1220) == nullopt);
+
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 1) == pair(6_obj, 0_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 2) == pair(6_obj, 2_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 10) == pair(8_obj, 7_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 23) == pair(11_obj, 4_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 24) == pair(11_obj, 8_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 25) == nullopt);
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 42) == nullopt);
+
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 1) == pair(11_obj, 1_lab));
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 2) == pair(11_obj, 2_lab));
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 3) == pair(11_obj, 4_lab));
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 4) == pair(11_obj, 8_lab));
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 5) == nullopt);
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 42) == nullopt);
+  CHECK(nth_element(11_obj, 0_lab, 9_lab, 3141) == nullopt);
 }
 
 // ==========================================
