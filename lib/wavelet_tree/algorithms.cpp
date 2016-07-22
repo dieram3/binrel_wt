@@ -173,6 +173,13 @@ size_type exclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
                         end_pos);
 }
 
+size_type rank(const wavelet_tree& wt, const index_range range,
+               const between<symbol_id> cond) noexcept {
+  // TODO(Diego): It can be implemented faster.
+  return exclusive_rank(wt, cond, end(range)) -
+         exclusive_rank(wt, cond, begin(range));
+}
+
 namespace count_symbols_detail {
 
 // TODO(diego): Optimization. Some overloads of count_symbols generate children

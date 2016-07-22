@@ -39,6 +39,17 @@ size_type inclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
 size_type exclusive_rank(const wavelet_tree& wt, between<symbol_id> cond,
                          index_type end_pos) noexcept;
 
+/// \brief Counts the number of symbols in the given range such that the
+/// symbol-id satisfies the given condition.
+///
+/// \note This is the more generic version of the rank algorithm.
+///
+/// \par Complexity
+/// <tt>O(log(sigma))</tt>, where <tt>sigma = log(wt alphabet-size)</tt>
+///
+size_type rank(const wavelet_tree& wt, index_range range,
+               between<symbol_id> cond) noexcept;
+
 /// \brief Counts the number of distinct symbols in the specified range.
 ///
 size_type count_distinct_symbols(const wavelet_tree& wt,
