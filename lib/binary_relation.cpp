@@ -272,7 +272,7 @@ auto binary_relation::nth_element(const object_id x, const label_id alpha,
   }();
 
   // TODO(Diego): It seems that several lower_bound, upper_bound pairs are
-  // recomputed when some member functions use others. Consider to implement a
+  // recomputed when some member functions use others. Consider implementing a
   // lazy propagation mechanism to avoid this.
   return nth_element(fixed_object, fixed_object, alpha, abs_nth, lab_major);
 }
