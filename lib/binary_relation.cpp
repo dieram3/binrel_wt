@@ -192,6 +192,9 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
     max_label = std::max(max_label, pair.label);
   });
 
+  // TODO(Diego): Check that the vector list is unique. Consider to sort by
+  // labels as second instance.
+
   namespace detail = pairs_constructor_detail;
   const auto num_pairs = static_cast<size_type>(pairs.size());
   const auto objects_frequency =
