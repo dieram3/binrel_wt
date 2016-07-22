@@ -15,10 +15,11 @@ template <typename T, typename Pred>
 T int_binary_search(T a, T b, Pred pred) {
   while (a != b) {
     const T mid = a + (b - a) / 2;
-    if (pred(mid))
+    if (pred(mid)) {
       a = mid + 1;
-    else
+    } else {
       b = mid;
+    }
   }
   return a;
 }
