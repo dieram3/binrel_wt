@@ -54,6 +54,10 @@ static constexpr auto as_symbol(const label_id label) noexcept {
   return static_cast<symbol_id>(label);
 }
 
+static constexpr auto as_label(const symbol_id symbol) noexcept {
+  return static_cast<label_id>(symbol);
+}
+
 static constexpr object_id prev(const object_id x) noexcept {
   assert(to_underlying_type(x) != 0);
   return static_cast<object_id>(to_underlying_type(x) - 1);
@@ -212,6 +216,16 @@ auto binary_relation::rank(object_id min_object, object_id max_object,
   return rank(max_object, max_label) - rank(prev(min_object), max_label);
 }
 
+auto binary_relation::rank(object_id max_object, label_id min_label,
+                           label_id max_label) const noexcept -> size_type {
+  if (min_label == 0) {
+    return rank(max_object, max_label);
+  }
+  const auto cond =
+      between<symbol_id>{as_symbol(min_label), as_symbol(max_label)};
+  return exclusive_rank(m_wtree, cond, upper_bound(max_object));
+}
+
 auto binary_relation::nth_element(const object_id x, const object_id y,
                                   const label_id alpha, size_type nth,
                                   label_major_order_t /*unused*/) const noexcept
@@ -231,16 +245,37 @@ auto binary_relation::nth_element(const object_id x, const object_id y,
   symbol_id symbol{};
   index_type wt_pos{};
   std::tie(symbol, wt_pos) = brwt::nth_element(m_wtree, range, nth);
-
-  return pair_type{get_associated_object(wt_pos), label_id(symbol)};
+  return pair_type{get_associated_object(wt_pos), as_label(symbol)};
 }
 
-// auto binary_relation::nth_element(const object_id x, const label_id alpha,
-//                                   const label_id beta, const size_type nth,
-//                                   object_major_order_t /*unused*/) const
-//     noexcept -> optional<pair_type> {
-//   // TODO(Diego): Implement it.
-// }
+auto binary_relation::nth_element(const object_id x, const label_id alpha,
+                                  const label_id beta, const size_type nth,
+                                  object_major_order_t /*unused*/) const
+    noexcept -> optional<pair_type> {
+
+  const auto first = lower_bound(x);
+  const auto cond = between<symbol_id>{as_symbol(alpha), as_symbol(beta)};
+  const auto wt_pos = [&] {
+    const auto abs_nth = nth + exclusive_rank(m_wtree, cond, first);
+    return brwt::select(m_wtree, cond, abs_nth);
+  }();
+  if (wt_pos == index_npos) {
+    return nullopt;
+  }
+
+  const auto fixed_object = get_associated_object(wt_pos);
+  assert(fixed_object >= x);
+
+  const auto abs_nth = nth - [&] {
+    const auto range = index_range{first, lower_bound(fixed_object)};
+    return brwt::rank(m_wtree, range, cond);
+  }();
+
+  // TODO(Diego): It seems that several lower_bound, upper_bound pairs are
+  // recomputed when some member functions use others. Consider implementing a
+  // lazy propagation mechanism to avoid this.
+  return nth_element(fixed_object, fixed_object, alpha, abs_nth, lab_major);
+}
 
 auto binary_relation::object_select(const label_id fixed_label,
                                     const object_id object_start,

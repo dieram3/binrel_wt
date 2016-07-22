@@ -51,6 +51,11 @@ public:
   size_type rank(object_id min_object, object_id max_object,
                  label_id max_label) const noexcept;
 
+  /// \brief Counts the number of pairs in the specified range.
+  ///
+  size_type rank(object_id max_object, label_id min_label,
+                 label_id max_label) const noexcept;
+
   /// \brief Finds the nth pair in the range
   /// 'access(alpha, max_label, x, y)' when it is ordered by object value, then
   /// by label value (object major order).
