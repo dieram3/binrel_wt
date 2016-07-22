@@ -447,7 +447,9 @@ TEST_CASE("[nth_element,obj_major]: Full range test") {
 
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 1) == pair(6_obj, 0_lab));
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 2) == pair(6_obj, 2_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 5) == pair(7_obj, 6_lab));
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 10) == pair(8_obj, 7_lab));
+  CHECK(nth_element(6_obj, 0_lab, 9_lab, 17) == pair(10_obj, 3_lab));
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 23) == pair(11_obj, 4_lab));
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 24) == pair(11_obj, 8_lab));
   CHECK(nth_element(6_obj, 0_lab, 9_lab, 25) == nullopt);
