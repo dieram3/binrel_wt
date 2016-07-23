@@ -7,6 +7,7 @@
 #include <ostream>          // ostream
 #include <random>           // default_random_engine
 #include <type_traits>      // underlying_type_t, is_enum
+#include <utility>          // pair
 
 // TODO(Diego): Adapt the test data as objects with no associated pairs
 // are allowed now :)
@@ -14,6 +15,7 @@
 using brwt::binary_relation;
 using brwt::nullopt;
 using brwt::index_type;
+using brwt::size_type;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
@@ -30,7 +32,8 @@ static pair_type pair(const object_id object, const label_id label) {
   return pair_type{object, label};
 }
 
-static binary_relation make_test_binary_relation() {
+static binary_relation
+make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
   std::vector<pair_type> pairs;
   pairs.reserve(40);
 
@@ -68,19 +71,38 @@ static binary_relation make_test_binary_relation() {
   add_pairs(3_obj, {2, 4, 6});
   add_pairs(4_obj, {2, 4, 7, 8});
   add_pairs(5_obj, {1, 3, 8, 9});
-  add_pairs(6_obj, {0, 2});
+  if (!remove_labels_from_obj_6) {
+    add_pairs(6_obj, {0, 2});
+  }
   add_pairs(7_obj, {1, 3, 6, 8});
   add_pairs(8_obj, {1, 3, 4, 7, 8, 9});
   add_pairs(9_obj, {0, 2, 6, 7});
   add_pairs(10_obj, {3, 4, 7, 9});
   add_pairs(11_obj, {1, 2, 4, 8});
 
-  assert(pairs.size() == 40);
+  assert(pairs.size() == (remove_labels_from_obj_6 ? 38 : 40));
   assert(std::none_of(begin(pairs), end(pairs),
                       [](const pair_type& p) { return p.label == 5_lab; }));
 
   std::shuffle(begin(pairs), end(pairs), std::default_random_engine{});
   return binary_relation(pairs);
+}
+
+static auto make_test_binary_relation_2() {
+  //    |0|1|2|3|4|5|6|7|8|9|
+  //  0 |_|_|_|_|x|_|_|_|x|_|
+  //  1 |_|_|x|_|x|_|_|_|_|_|
+  //  2 |_|_|_|_|x|_|_|_|_|_|
+  //  3 |_|_|x|_|x|_|x|_|_|_|
+  //  4 |_|_|x|_|x|_|_|x|x|_|
+  //  5 |_|x|_|x|_|_|_|_|x|x|
+  //  6 |_|_|_|_|_|_|_|_|_|_|
+  //  7 |_|x|_|x|_|_|x|_|x|_|
+  //  8 |_|x|_|x|x|_|_|x|x|x|
+  //  9 |x|_|x|_|_|_|x|x|_|_|
+  // 10 |_|_|_|x|x|_|_|x|_|x|
+  // 11 |_|x|x|_|x|_|_|_|x|_|
+  return make_test_binary_relation(true); // remove labels from obj 6
 }
 
 namespace brwt {
@@ -120,13 +142,13 @@ TEST_CASE("vector of pairs ctor") {
   };
   binary_relation binrel(pairs); // does not hang
   CHECK(binrel.size() == 4);
-  CHECK(binrel.num_objects() == 2);
+  CHECK(binrel.object_alphabet_size() == 2);
 }
 
 TEST_CASE("size and num_objects") {
   const auto binrel = make_test_binary_relation();
   CHECK(binrel.size() == 40);
-  CHECK(binrel.num_objects() == 12);
+  CHECK(binrel.object_alphabet_size() == 12);
 }
 
 TEST_CASE("Rank with max object, max label") {
@@ -463,6 +485,182 @@ TEST_CASE("[nth_element,obj_major]: Full range test") {
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 5) == nullopt);
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 42) == nullopt);
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 3141) == nullopt);
+}
+
+// ==========================================
+// obj[_exclusive]_rank with fixed_label
+// ==========================================
+
+TEST_CASE("[obj_rank, fixed_label]: Left, center, empty and right") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 0_lab) == p(0, 0));
+  CHECK(rank_pair(8_obj, 0_lab) == p(0, 0));
+  CHECK(rank_pair(9_obj, 0_lab) == p(0, 1));
+  CHECK(rank_pair(10_obj, 0_lab) == p(1, 1));
+  CHECK(rank_pair(11_obj, 0_lab) == p(1, 1));
+
+  CHECK(rank_pair(0_obj, 3_lab) == p(0, 0));
+  CHECK(rank_pair(4_obj, 3_lab) == p(0, 0));
+  CHECK(rank_pair(5_obj, 3_lab) == p(0, 1));
+  CHECK(rank_pair(6_obj, 3_lab) == p(1, 1));
+  CHECK(rank_pair(7_obj, 3_lab) == p(1, 2));
+  CHECK(rank_pair(8_obj, 3_lab) == p(2, 3));
+  CHECK(rank_pair(9_obj, 3_lab) == p(3, 3));
+  CHECK(rank_pair(10_obj, 3_lab) == p(3, 4));
+  CHECK(rank_pair(11_obj, 3_lab) == p(4, 4));
+
+  CHECK(rank_pair(0_obj, 5_lab) == p(0, 0));
+  CHECK(rank_pair(5_obj, 5_lab) == p(0, 0));
+  CHECK(rank_pair(11_obj, 5_lab) == p(0, 0));
+
+  CHECK(rank_pair(0_obj, 9_lab) == p(0, 0));
+  CHECK(rank_pair(4_obj, 9_lab) == p(0, 0));
+  CHECK(rank_pair(5_obj, 9_lab) == p(0, 1));
+  CHECK(rank_pair(6_obj, 9_lab) == p(1, 1));
+  CHECK(rank_pair(7_obj, 9_lab) == p(1, 1));
+  CHECK(rank_pair(8_obj, 9_lab) == p(1, 2));
+  CHECK(rank_pair(9_obj, 9_lab) == p(2, 2));
+  CHECK(rank_pair(10_obj, 9_lab) == p(2, 3));
+  CHECK(rank_pair(11_obj, 9_lab) == p(3, 3));
+}
+
+TEST_CASE("[obj_rank, fixed_label]: First and last object associated") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 4_lab) == p(0, 1));
+  CHECK(rank_pair(1_obj, 4_lab) == p(1, 2));
+  CHECK(rank_pair(2_obj, 4_lab) == p(2, 3));
+  CHECK(rank_pair(3_obj, 4_lab) == p(3, 4));
+  CHECK(rank_pair(4_obj, 4_lab) == p(4, 5));
+  CHECK(rank_pair(5_obj, 4_lab) == p(5, 5));
+  CHECK(rank_pair(6_obj, 4_lab) == p(5, 5));
+  CHECK(rank_pair(7_obj, 4_lab) == p(5, 5));
+  CHECK(rank_pair(8_obj, 4_lab) == p(5, 6));
+  CHECK(rank_pair(9_obj, 4_lab) == p(6, 6));
+  CHECK(rank_pair(10_obj, 4_lab) == p(6, 7));
+  CHECK(rank_pair(11_obj, 4_lab) == p(7, 8));
+}
+
+// ==========================================
+// obj[_exclusive]_rank with label range
+// ==========================================
+
+TEST_CASE("[obj_rank,label_range]: Single label range") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 0_lab, 0_lab) == p(0, 0));
+  CHECK(rank_pair(8_obj, 0_lab, 0_lab) == p(0, 0));
+  CHECK(rank_pair(9_obj, 0_lab, 0_lab) == p(0, 1));
+  CHECK(rank_pair(10_obj, 0_lab, 0_lab) == p(1, 1));
+  CHECK(rank_pair(11_obj, 0_lab, 0_lab) == p(1, 1));
+
+  CHECK(rank_pair(0_obj, 4_lab, 4_lab) == p(0, 1));
+  CHECK(rank_pair(4_obj, 4_lab, 4_lab) == p(4, 5));
+  CHECK(rank_pair(5_obj, 4_lab, 4_lab) == p(5, 5));
+  CHECK(rank_pair(9_obj, 4_lab, 4_lab) == p(6, 6));
+  CHECK(rank_pair(10_obj, 4_lab, 4_lab) == p(6, 7));
+  CHECK(rank_pair(11_obj, 4_lab, 4_lab) == p(7, 8));
+
+  CHECK(rank_pair(0_obj, 5_lab, 5_lab) == p(0, 0));
+  CHECK(rank_pair(5_obj, 5_lab, 5_lab) == p(0, 0));
+  CHECK(rank_pair(11_obj, 5_lab, 5_lab) == p(0, 0));
+
+  CHECK(rank_pair(0_obj, 9_lab, 9_lab) == p(0, 0));
+  CHECK(rank_pair(7_obj, 9_lab, 9_lab) == p(1, 1));
+  CHECK(rank_pair(8_obj, 9_lab, 9_lab) == p(1, 2));
+  CHECK(rank_pair(9_obj, 9_lab, 9_lab) == p(2, 2));
+  CHECK(rank_pair(10_obj, 9_lab, 9_lab) == p(2, 3));
+  CHECK(rank_pair(11_obj, 9_lab, 9_lab) == p(3, 3));
+}
+
+TEST_CASE("[obj_rank,label_range]: Left range") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 0_lab, 3_lab) == p(0, 0));
+  CHECK(rank_pair(1_obj, 0_lab, 3_lab) == p(0, 1));
+  CHECK(rank_pair(2_obj, 0_lab, 3_lab) == p(1, 1));
+  CHECK(rank_pair(3_obj, 0_lab, 3_lab) == p(1, 2));
+  CHECK(rank_pair(4_obj, 0_lab, 3_lab) == p(2, 3));
+  CHECK(rank_pair(5_obj, 0_lab, 3_lab) == p(3, 5));
+  CHECK(rank_pair(6_obj, 0_lab, 3_lab) == p(5, 5));
+  CHECK(rank_pair(7_obj, 0_lab, 3_lab) == p(5, 7));
+  CHECK(rank_pair(8_obj, 0_lab, 3_lab) == p(7, 9));
+  CHECK(rank_pair(9_obj, 0_lab, 3_lab) == p(9, 11));
+  CHECK(rank_pair(10_obj, 0_lab, 3_lab) == p(11, 12));
+  CHECK(rank_pair(11_obj, 0_lab, 3_lab) == p(12, 14));
+}
+
+TEST_CASE("[obj_rank,label_range]: Right range") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 6_lab, 9_lab) == p(0, 1));
+  CHECK(rank_pair(1_obj, 6_lab, 9_lab) == p(1, 1));
+  CHECK(rank_pair(2_obj, 6_lab, 9_lab) == p(1, 1));
+  CHECK(rank_pair(3_obj, 6_lab, 9_lab) == p(1, 2));
+  CHECK(rank_pair(4_obj, 6_lab, 9_lab) == p(2, 4));
+  CHECK(rank_pair(5_obj, 6_lab, 9_lab) == p(4, 6));
+  CHECK(rank_pair(6_obj, 6_lab, 9_lab) == p(6, 6));
+  CHECK(rank_pair(7_obj, 6_lab, 9_lab) == p(6, 8));
+  CHECK(rank_pair(8_obj, 6_lab, 9_lab) == p(8, 11));
+  CHECK(rank_pair(9_obj, 6_lab, 9_lab) == p(11, 13));
+  CHECK(rank_pair(10_obj, 6_lab, 9_lab) == p(13, 15));
+  CHECK(rank_pair(11_obj, 6_lab, 9_lab) == p(15, 16));
+}
+
+TEST_CASE("[obj_rank,label_range]: Center range") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 2_lab, 7_lab) == p(0, 1));
+  CHECK(rank_pair(1_obj, 2_lab, 7_lab) == p(1, 3));
+  CHECK(rank_pair(2_obj, 2_lab, 7_lab) == p(3, 4));
+  CHECK(rank_pair(3_obj, 2_lab, 7_lab) == p(4, 7));
+  CHECK(rank_pair(4_obj, 2_lab, 7_lab) == p(7, 10));
+  CHECK(rank_pair(5_obj, 2_lab, 7_lab) == p(10, 11));
+  CHECK(rank_pair(6_obj, 2_lab, 7_lab) == p(11, 11));
+  CHECK(rank_pair(7_obj, 2_lab, 7_lab) == p(11, 13));
+  CHECK(rank_pair(8_obj, 2_lab, 7_lab) == p(13, 16));
+  CHECK(rank_pair(9_obj, 2_lab, 7_lab) == p(16, 19));
+  CHECK(rank_pair(10_obj, 2_lab, 7_lab) == p(19, 22));
+  CHECK(rank_pair(11_obj, 2_lab, 7_lab) == p(22, 24));
+}
+
+TEST_CASE("[obj_rank,label_range]: Full range") {
+  using p = std::pair<size_type, size_type>;
+  auto rank_pair = [br = make_test_binary_relation_2()](auto... args) {
+    return p(br.obj_exclusive_rank(args...), br.obj_rank(args...));
+  };
+
+  CHECK(rank_pair(0_obj, 0_lab, 9_lab) == p(0, 2));
+  CHECK(rank_pair(1_obj, 0_lab, 9_lab) == p(2, 4));
+  CHECK(rank_pair(2_obj, 0_lab, 9_lab) == p(4, 5));
+  CHECK(rank_pair(3_obj, 0_lab, 9_lab) == p(5, 8));
+  CHECK(rank_pair(4_obj, 0_lab, 9_lab) == p(8, 12));
+  CHECK(rank_pair(5_obj, 0_lab, 9_lab) == p(12, 16));
+  CHECK(rank_pair(6_obj, 0_lab, 9_lab) == p(16, 16));
+  CHECK(rank_pair(7_obj, 0_lab, 9_lab) == p(16, 20));
+  CHECK(rank_pair(8_obj, 0_lab, 9_lab) == p(20, 26));
+  CHECK(rank_pair(9_obj, 0_lab, 9_lab) == p(26, 30));
+  CHECK(rank_pair(10_obj, 0_lab, 9_lab) == p(30, 34));
+  CHECK(rank_pair(11_obj, 0_lab, 9_lab) == p(34, 38));
 }
 
 // ==========================================
