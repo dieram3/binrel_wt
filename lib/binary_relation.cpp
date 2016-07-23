@@ -102,6 +102,14 @@ auto binary_relation::lower_bound(const object_id x) const noexcept
   }
   const auto flag_pos = m_bitmap.select_1(x);
   return m_bitmap.rank_0(flag_pos);
+
+  // TODO(Diego): When benchmarks are available, remove bitmap ranks from
+  // lower_bound, upper_bound and get_associated_object. They can be obtained
+  // with a simple substraction using the result of select.
+  // Note that the change is simple to do. However, it will be more interesting
+  // doing it when benchmarks are available :)
+
+  // return (flag_pos + 1) - x;
 }
 
 /// Returns the position of the first element in the wavelet tree such that its
