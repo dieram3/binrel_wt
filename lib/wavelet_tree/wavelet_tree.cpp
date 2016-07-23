@@ -28,7 +28,7 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 // ==========================================
 
 wavelet_tree::wavelet_tree(const int_vector& sequence)
-    : table{}, seq_len{sequence.length()}, bits_per_symbol{sequence.get_bpe()} {
+    : table{}, seq_len{sequence.size()}, bits_per_symbol{sequence.get_bpe()} {
   assert(bits_per_symbol >= 1);
   using std::size_t;
   using value_type = int_vector::value_type;
@@ -39,7 +39,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
   const auto alphabet_size = max_symbol_id() + 1;
   std::vector<size_type> next_pos(2 * alphabet_size);
 
-  for (size_type i = 0; i < sequence.length(); ++i) {
+  for (size_type i = 0; i < sequence.size(); ++i) {
     const auto symbol = sequence[i];
     ++next_pos[alphabet_size + symbol];
   }
@@ -81,9 +81,9 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
     assert(j == alphabet_size + symbol);
     assert(base_symbol == symbol);
     assert(num_symbols == 1);
-    assert(level_pos == bit_seq.length());
+    assert(level_pos == bit_seq.size());
   };
-  for (size_type i = 0; i < sequence.length(); ++i) {
+  for (size_type i = 0; i < sequence.size(); ++i) {
     push_symbol(sequence[i]);
   }
 

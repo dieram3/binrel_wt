@@ -22,18 +22,18 @@ TEST_SUITE("int_vector");
 
 TEST_CASE("int_vector::int_vector()") {
   const int_vector v{};
-  CHECK(v.length() == 0);
+  CHECK(v.size() == 0);
   CHECK(v.get_bpe() == 0);
   CHECK(v.allocated_bytes() == 0);
 }
 
 TEST_CASE("int_vector::int_vector(size_type, int)") {
   const int_vector v(/*count=*/10, /*bpe=*/3);
-  CHECK(v.length() == 10);
+  CHECK(v.size() == 10);
   CHECK(v.get_bpe() == 3);
   CHECK(v.allocated_bytes() >= 8);
 
-  for (int i = 0; i < v.length(); ++i) {
+  for (int i = 0; i < v.size(); ++i) {
     CHECK(v[i] == 0);
   }
 
@@ -51,7 +51,7 @@ TEST_CASE("int_vector::set_value") {
     int_vector vec(/*count=*/100, /*bpe=*/10);
     // The maximum storable value is 1023.
 
-    for (int i = 0; i < vec.length(); ++i) {
+    for (int i = 0; i < vec.size(); ++i) {
       vec[i] = static_cast<unsigned>(i * 10);
     }
 
@@ -98,12 +98,12 @@ TEST_CASE("int_vector::set_value") {
   }
 }
 
-TEST_CASE("int_vector::length") {
-  CHECK(int_vector(10, 14).length() == 10);
-  CHECK(int_vector(10, 41).length() == 10);
-  CHECK(int_vector(0, 14).length() == 0);
-  CHECK(int_vector(42, 0).length() == 42);
-  CHECK(int_vector(42, 25).length() == 42);
+TEST_CASE("int_vector::size") {
+  CHECK(int_vector(10, 14).size() == 10);
+  CHECK(int_vector(10, 41).size() == 10);
+  CHECK(int_vector(0, 14).size() == 0);
+  CHECK(int_vector(42, 0).size() == 42);
+  CHECK(int_vector(42, 25).size() == 42);
 }
 
 TEST_CASE("int_vector::get_bpe()") {

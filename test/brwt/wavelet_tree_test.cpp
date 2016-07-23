@@ -60,7 +60,7 @@ static int_vector create_vector_with_3_bpe() {
 }
 
 static auto to_std_vector(const int_vector& vec) {
-  std::vector<symbol_id> res(to_unsigned(vec.length()));
+  std::vector<symbol_id> res(to_unsigned(vec.size()));
   for (size_t i = 0; i < res.size(); ++i) {
     res[i] = static_cast<symbol_id>(vec[to_signed(i)]);
   }
