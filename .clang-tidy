@@ -10,8 +10,7 @@ cppcoreguidelines-*,\
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
 google-*,\
 -google-runtime-int,\
--google-runtime-references,\
--google-readability-braces-around-statements,
+-google-runtime-references,
 llvm-*,\
 -llvm-include-order,
 misc-*,
@@ -37,6 +36,8 @@ CheckOptions:
     value:           lower_case
   - key:             readability-identifier-naming.FunctionCase
     value:           lower_case
+  - key:             readability-identifier-naming.TemplateParameterCase
+    value:           CamelCase
   - key:             readability-identifier-naming.UnionCase
     value:           lower_case
   - key:             readability-identifier-naming.VariableCase
