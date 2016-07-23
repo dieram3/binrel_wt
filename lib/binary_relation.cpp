@@ -6,7 +6,6 @@
 #include <cassert>            // assert
 #include <cstddef>            // size_t
 #include <iterator>           // begin, end
-#include <numeric>            // partial_sum
 #include <tuple>              // tie
 #include <type_traits>        // is_enum, underlying_type_t
 #include <utility>            // pair, make_pair, move
@@ -66,6 +65,12 @@ static constexpr object_id prev(const object_id x) noexcept {
 static constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_underlying_type(alpha) != 0);
   return static_cast<label_id>(to_underlying_type(alpha) - 1);
+}
+
+static constexpr auto between_symbols(const label_id min,
+                                      const label_id max) noexcept {
+  assert(min <= max);
+  return between<symbol_id>{as_symbol(min), as_symbol(max)};
 }
 
 [[deprecated("when there is no pair with object_id=x, this function does not "
@@ -169,7 +174,7 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
                                       vector<size_type> objects_frequency,
                                       const label_id max_label) {
   int_vector seq(/*count=*/static_cast<size_type>(pairs.size()),
-                 /*bpe=*/used_bits(types::word_type{max_label}));
+                 /*bpe=*/used_bits(static_cast<word_type>(max_label)));
 
   // The exclusive_scan and the for_each are an inline counting sort.
   inplace_exclusive_scan(objects_frequency, size_type{0});
@@ -280,21 +285,52 @@ auto binary_relation::nth_element(const object_id x, const label_id alpha,
   return nth_element(fixed_object, fixed_object, alpha, abs_nth, lab_major);
 }
 
-auto binary_relation::object_select(const label_id fixed_label,
-                                    const object_id object_start,
-                                    const size_type nth) const noexcept
-    -> object_id {
+// ===------------------------------------------===
+//                  Object view
+// ===------------------------------------------===
 
-  const auto abs_nth = nth + exclusive_rank(m_wtree, as_symbol(fixed_label),
-                                            lower_bound(object_start));
+auto binary_relation::obj_exclusive_rank(const object_id x,
+                                         const label_id fixed_label) const
+    noexcept -> size_type {
+  return brwt::exclusive_rank(m_wtree, as_symbol(fixed_label), lower_bound(x));
+}
 
+auto binary_relation::obj_rank(const object_id x,
+                               const label_id fixed_label) const noexcept
+    -> size_type {
+  return brwt::exclusive_rank(m_wtree, as_symbol(fixed_label), upper_bound(x));
+}
+
+auto binary_relation::obj_exclusive_rank(const object_id x,
+                                         const label_id min_label,
+                                         const label_id max_label) const
+    noexcept -> size_type {
+
+  assert(min_label <= max_label);
+  return brwt::exclusive_rank(m_wtree, between_symbols(min_label, max_label),
+                              lower_bound(x));
+}
+
+auto binary_relation::obj_rank(const object_id x, const label_id min_label,
+                               const label_id max_label) const noexcept
+    -> size_type {
+  assert(min_label <= max_label);
+  return brwt::exclusive_rank(m_wtree, between_symbols(min_label, max_label),
+                              upper_bound(x));
+}
+
+auto binary_relation::obj_select(const object_id object_start,
+                                 const label_id fixed_label,
+                                 const size_type nth) const noexcept
+    -> optional<object_id> {
+  assert(nth > 0);
+
+  const auto abs_nth = nth + obj_exclusive_rank(object_start, fixed_label);
   const auto wt_pos = m_wtree.select(as_symbol(fixed_label), abs_nth);
-  assert(wt_pos != -1 && "The element was supposed to exist");
 
-  // TODO(Diego): Design decision. Determine what to do if wt_pos == -1, that
-  // is, if the searched element does not exist. Note that returning -1 is not
-  // possible as the return type is an object id, not an index.
-
+  if (wt_pos == index_npos) {
+    return nullopt;
+  }
   return get_associated_object(wt_pos);
 }
 
