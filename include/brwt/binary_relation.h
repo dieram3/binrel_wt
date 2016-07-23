@@ -181,6 +181,7 @@ private:
 
   index_type lower_bound(object_id x) const noexcept;
   index_type upper_bound(object_id x) const noexcept;
+  auto equal_range(object_id x) const noexcept;
   auto make_mapped_range(object_id x, object_id y) const noexcept;
   object_id get_associated_object(index_type wt_pos) const noexcept;
 
