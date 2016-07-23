@@ -6,8 +6,10 @@
 #include <initializer_list> // initializer_list
 #include <ostream>          // ostream
 #include <random>           // default_random_engine
-#include <type_traits>      // underlying_type_t, is_enum
-#include <utility>          // pair
+#include <stdexcept>        // logic_error
+#include <type_traits>      // underlying_type_t, is_enum, decay_t
+#include <utility>          // pair, move
+#include <vector>           // vector
 
 // TODO(Diego): Adapt the test data as objects with no associated pairs
 // are allowed now :)
@@ -133,6 +135,50 @@ static std::ostream& operator<<(std::ostream& os, const optional<T>& opt) {
 }
 
 } // end namespace brwt
+
+template <typename Select>
+static auto make_select_list(const Select& select) {
+  using value_type = std::decay_t<decltype(*select(1))>;
+  std::vector<value_type> list;
+  for (size_type nth = 1; nth < 1000; ++nth) {
+    const auto opt = select(nth);
+    if (!opt) {
+      return list;
+    }
+    list.push_back(std::move(*opt));
+  }
+  throw std::logic_error("Something was wrong with the select function");
+}
+
+static auto as_objects(std::initializer_list<int> ilist) {
+  std::vector<object_id> vec;
+  for (const int elem : ilist) {
+    vec.push_back(static_cast<object_id>(elem));
+  }
+  assert(vec.size() == ilist.size());
+  return vec;
+}
+
+TEST_CASE("as_objects test") {
+  {
+    const auto v = as_objects({3, 4, 0, 4, 5});
+    REQUIRE(v.size() == 5);
+    CHECK(v[0] == 3_obj);
+    CHECK(v[1] == 4_obj);
+    CHECK(v[2] == 0_obj);
+    CHECK(v[3] == 4_obj);
+    CHECK(v[4] == 5_obj);
+  }
+  {
+    const auto v = as_objects({42});
+    REQUIRE(v.size() == 1);
+    CHECK(v[0] == 42_obj);
+  }
+  {
+    const auto v = as_objects({});
+    CHECK(v.empty());
+  }
+}
 
 TEST_SUITE("binary_relation");
 
@@ -661,6 +707,57 @@ TEST_CASE("[obj_rank,label_range]: Full range") {
   CHECK(rank_pair(9_obj, 0_lab, 9_lab) == p(26, 30));
   CHECK(rank_pair(10_obj, 0_lab, 9_lab) == p(30, 34));
   CHECK(rank_pair(11_obj, 0_lab, 9_lab) == p(34, 38));
+}
+
+// ==========================================
+// obj_select with fixed label
+// ==========================================
+
+TEST_CASE("[obj_select,fixed_label]") {
+  auto select_list = [br = make_test_binary_relation_2()](
+      const object_id start, const label_id label) {
+
+    auto select = [&](const size_type nth) {
+      return br.obj_select(start, label, nth);
+    };
+    return make_select_list(select);
+  };
+
+  // Left column
+  CHECK(select_list(0_obj, 0_lab) == as_objects({9}));
+  CHECK(select_list(5_obj, 0_lab) == as_objects({9}));
+  CHECK(select_list(9_obj, 0_lab) == as_objects({9}));
+  CHECK(select_list(10_obj, 0_lab).empty());
+  CHECK(select_list(11_obj, 0_lab).empty());
+
+  // Right column.
+  CHECK(select_list(0_obj, 9_lab) == as_objects({5, 8, 10}));
+  CHECK(select_list(5_obj, 9_lab) == as_objects({5, 8, 10}));
+  CHECK(select_list(8_obj, 9_lab) == as_objects({8, 10}));
+  CHECK(select_list(9_obj, 9_lab) == as_objects({10}));
+  CHECK(select_list(10_obj, 9_lab) == as_objects({10}));
+  CHECK(select_list(11_obj, 9_lab).empty());
+
+  // Center column with few objects.
+  CHECK(select_list(0_obj, 3_lab) == as_objects({5, 7, 8, 10}));
+  CHECK(select_list(5_obj, 3_lab) == as_objects({5, 7, 8, 10}));
+  CHECK(select_list(7_obj, 3_lab) == as_objects({7, 8, 10}));
+  CHECK(select_list(8_obj, 3_lab) == as_objects({8, 10}));
+  CHECK(select_list(10_obj, 3_lab) == as_objects({10}));
+  CHECK(select_list(11_obj, 3_lab).empty());
+
+  // Center column with many objects.
+  CHECK(select_list(0_obj, 4_lab) == as_objects({0, 1, 2, 3, 4, 8, 10, 11}));
+  CHECK(select_list(3_obj, 4_lab) == as_objects({3, 4, 8, 10, 11}));
+  CHECK(select_list(4_obj, 4_lab) == as_objects({4, 8, 10, 11}));
+  CHECK(select_list(9_obj, 4_lab) == as_objects({10, 11}));
+  CHECK(select_list(10_obj, 4_lab) == as_objects({10, 11}));
+  CHECK(select_list(11_obj, 4_lab) == as_objects({11}));
+
+  // Empty column.
+  CHECK(select_list(0_obj, 5_lab).empty());
+  CHECK(select_list(5_obj, 5_lab).empty());
+  CHECK(select_list(11_obj, 5_lab).empty());
 }
 
 // ==========================================
