@@ -22,8 +22,8 @@ class binary_relation {
 public:
   // member types
   using size_type = types::size_type;
-  enum object_id : types::word_type {};
-  enum label_id : types::word_type {};
+  enum object_id : types::size_type {};
+  enum label_id : types::size_type {};
 
   struct pair_type {
     // TODO(Diego): Consider renaming pair_type.
@@ -149,15 +149,21 @@ public:
   /// \name Miscellaneous
   /// @{
 
-  /// \brief Returns the number of different objects.
-  ///
-  size_type num_objects() const noexcept;
-
   /// \brief Returns the number of pairs in the binary relation.
   ///
   size_type size() const noexcept;
 
-  // TODO(Diego): Decide what to do with num_labels() member fn.
+  /// \brief Returns the size of the object alphabet.
+  ///
+  [[deprecated]] size_type num_objects() const noexcept;
+
+  /// \brief Returns the size of the object alphabet.
+  ///
+  size_type object_alphabet_size() const noexcept;
+
+  /// \brief Returns the size of the label alphabet.
+  ///
+  size_type label_alphabet_size() const noexcept;
 
   /// @}
 
@@ -179,13 +185,22 @@ private:
 // Inline definitions
 // ==========================================
 
+inline auto binary_relation::size() const noexcept -> size_type {
+  return m_wtree.size();
+}
+
 inline auto binary_relation::num_objects() const noexcept -> size_type {
+  return object_alphabet_size();
+}
+
+inline auto binary_relation::object_alphabet_size() const noexcept
+    -> size_type {
   return m_bitmap.length() - size();
 }
 
-inline auto binary_relation::size() const noexcept -> size_type {
-  return m_wtree.size();
-};
+inline auto binary_relation::label_alphabet_size() const noexcept -> size_type {
+  return m_wtree.max_symbol_id() + 1;
+}
 
 // ==========================================
 // Non-member helpers
