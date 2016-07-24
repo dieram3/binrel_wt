@@ -1,5 +1,6 @@
 add_unittest("brwt"
   "detail/iterator_test.cpp"
+  "detail/utility_test.cpp"
   "binary_relation_test.cpp"
   "bit_hacks_test.cpp"
   "bit_vector_test.cpp"
