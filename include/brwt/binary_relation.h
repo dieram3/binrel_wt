@@ -85,10 +85,16 @@ public:
   /// The order of all pairs is defined by \p order (which in this overload is
   /// \e object-major-order).
   ///
-  /// \returns The found pair if it exists, otherwise returns \c nullopt.
+  /// \returns The first pair that satisfies the given conditions. If no such
+  /// pair exists, returns \c nullopt.
   ///
   /// \pre <tt>start.label >= min_label && start.label <= max_label</tt>
   /// \pre <tt>min_label <= max_label</tt>
+  ///
+  /// \par Time complexity
+  /// If <tt>min_label == max_label</tt>, the time complexity is
+  /// \f$O(\log\sigma)\f$. Otherwise, it is at most
+  /// \f$O(\log{n}\log{\sigma})\f$.
   ///
   /// \remark This operation is also known as \c rel_min_obj_maj.
   ///
