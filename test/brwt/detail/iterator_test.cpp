@@ -1,9 +1,12 @@
 #include "doctest.h"
 #include <brwt/detail/iterator.h>
+
 #include <algorithm>   // miscellaneous algorithms for testing :)
 #include <cstddef>     // size_t, ptrdiff_t
+#include <iterator>    // iterator_traits
 #include <memory>      // unique_ptr
 #include <type_traits> // is_same, is_convertible
+#include <utility>     // pair
 
 using brwt::detail::random_access_iterator;
 
@@ -11,7 +14,7 @@ namespace {
 template <typename T>
 class dyn_array {
 public:
-  // Public types
+  // public types
 
   using value_type = T;
   using size_type = std::size_t;
@@ -22,7 +25,7 @@ public:
   using reference = T&;
   using const_reference = const T&;
 
-  // ctors
+  // constructors
 
   dyn_array() = default;
   explicit dyn_array(size_type count)
@@ -82,11 +85,14 @@ namespace {
 template <typename T, typename U>
 constexpr bool same = std::is_same<T, U>::value;
 
-template <typename From, typename To>
-constexpr bool convertible = std::is_convertible<From, To>::value;
-
 template <typename T, typename... Args>
 constexpr bool constructible = std::is_constructible<T, Args...>::value;
+
+template <typename T, typename U>
+constexpr bool assignable = std::is_assignable<T, U>::value;
+
+template <typename From, typename To>
+constexpr bool convertible = std::is_convertible<From, To>::value;
 } // end namespace
 
 template <typename Container>
@@ -95,10 +101,14 @@ static void test_iterators_types_and_conversions() {
   using const_iterator = typename Container::const_iterator;
 
   static_assert(!same<iterator, const_iterator>, "");
-  static_assert(convertible<iterator, const_iterator>, "");
-  static_assert(!convertible<const_iterator, iterator>, "");
 
   static_assert(!constructible<iterator, const_iterator>, "");
+  static_assert(constructible<const_iterator, iterator>, "");
+  static_assert(!assignable<iterator, const_iterator>, "");
+  static_assert(assignable<const_iterator, iterator>, "");
+
+  static_assert(convertible<iterator, const_iterator>, "");
+  static_assert(!convertible<const_iterator, iterator>, "");
 
   {
     Container c{};
@@ -125,6 +135,10 @@ void test_iterator_properties() {
   static_assert(std::is_trivially_move_assignable<I>::value, "");
   static_assert(std::is_trivially_destructible<I>::value, "");
 
+  static_assert(same<typename std::iterator_traits<I>::iterator_category,
+                     std::random_access_iterator_tag>,
+                "");
+
   using D = typename I::difference_type;
 
   I mut_it{}; // mutable iterator
@@ -134,7 +148,7 @@ void test_iterator_properties() {
   // element access
   static_assert(same<decltype(*it), typename I::reference>, "");
   static_assert(same<decltype(it[d]), typename I::reference>, "");
-  // operator->() is deleted
+  static_assert(same<decltype(it.operator->()), typename I::pointer>, "");
 
   // modifiers
   static_assert(same<decltype(++mut_it), I&>, "");
@@ -228,12 +242,42 @@ TEST_CASE("Element access: Modify") {
   CHECK(b[3] == 30);
 }
 
+TEST_CASE("operator->()") {
+  using p = std::pair<int, char>;
+  dyn_array<p> seq = {{1, 'a'}, {2, 'b'}, {3, 'c'}, {4, 'd'}};
+
+  auto i = seq.begin();
+  CHECK(i->first == 1);
+  CHECK(i->second == 'a');
+
+  i->first = 10;
+  CHECK(*i == p(10, 'a'));
+  CHECK(i->first == 10);
+  CHECK(i->second == 'a');
+
+  i->second = 'A';
+  CHECK(*i == p(10, 'A'));
+  CHECK(i->first == 10);
+  CHECK(i->second == 'A');
+
+  for (; i != seq.end(); ++i) {
+    i->first *= 11;
+    i->second += 2;
+  }
+
+  CHECK(seq[0] == p(110, 'C'));
+  CHECK(seq[1] == p(22, 'd'));
+  CHECK(seq[2] == p(33, 'e'));
+  CHECK(seq[3] == p(44, 'f'));
+}
+
 namespace {
 class iterator_fixture {
   dyn_array<int> seq = {10, 20, 30};
 
 protected:
   using iterator = decltype(seq)::iterator;
+  using const_iterator = decltype(seq)::const_iterator;
 
   iterator_fixture() {
     REQUIRE(&*i0 == &seq[0]);
@@ -258,7 +302,7 @@ protected:
   const iterator i2 = seq.begin() + 2;
   const iterator i3 = seq.begin() + 3;
 
-  const iterator j0 = i0;
+  const const_iterator j0 = i0;
 
   iterator i{};
 };
