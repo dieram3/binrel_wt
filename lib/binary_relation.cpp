@@ -77,6 +77,14 @@ static constexpr auto between_symbols(const label_id min,
   return between<symbol_id>{as_symbol(min), as_symbol(max)};
 }
 
+static constexpr optional<pair_type>
+optional_pair(const optional<object_id>& obj, const label_id label) {
+  if (obj) {
+    return pair_type{*obj, label};
+  }
+  return nullopt;
+}
+
 [[deprecated("when there is no pair with object_id=x, this function does not "
              "work as expected")]] auto
 binary_relation::map(const object_id x) const noexcept -> index_type {
@@ -315,6 +323,11 @@ auto binary_relation::lower_bound(const pair_type start,
   // call to nth_element(lab_major), and the upper_bound of start.object is
   // computed again in the call to nth_element(obj_major). Find a solution to
   // avoid this :)
+
+  if (min_label == max_label) {
+    // min_label (or max_label) is a fixed label.
+    return optional_pair(obj_select(start.object, min_label, 1), min_label);
+  }
 
   if (brwt::rank(m_wtree, equal_range(start.object),
                  between_symbols(start.label, max_label)) > 0) {
