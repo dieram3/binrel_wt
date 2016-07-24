@@ -79,14 +79,28 @@ public:
                                   size_type nth,
                                   label_major_order_t order) const noexcept;
 
-  /// \brief Finds the first relation 'r' greater than or equal to 'rel_start'
-  /// in the range of all relations with label in [alpha, beta] such that the
-  /// range is ordered in object major order.
+  /// \brief Finds the first pair not less than \p start, such that its label
+  /// value is in the given range.
   ///
-  /// \remark In the literature this operation is known as \e rel_min_obj_maj
+  /// The order of all pairs is defined by \p order (which in this overload is
+  /// \e object-major-order).
   ///
-  pair_type lower_bound_object_major(label_id alpha, label_id beta,
-                                     pair_type pair_start) const noexcept;
+  /// \returns The first pair that satisfies the given conditions. If no such
+  /// pair exists, returns \c nullopt.
+  ///
+  /// \pre <tt>start.label >= min_label && start.label <= max_label</tt>
+  /// \pre <tt>min_label <= max_label</tt>
+  ///
+  /// \par Time complexity
+  /// If <tt>min_label == max_label</tt>, the time complexity is
+  /// \f$O(\log\sigma)\f$. Otherwise, it is at most
+  /// \f$O(\log{n}\log{\sigma})\f$.
+  ///
+  /// \remark This operation is also known as \c rel_min_obj_maj.
+  ///
+  optional<pair_type> lower_bound(pair_type start, label_id min_label,
+                                  label_id max_label,
+                                  object_major_order_t order) const noexcept;
   /// @}
 
   /// \name Object view
@@ -173,6 +187,7 @@ private:
 
   index_type lower_bound(object_id x) const noexcept;
   index_type upper_bound(object_id x) const noexcept;
+  auto equal_range(object_id x) const noexcept;
   auto make_mapped_range(object_id x, object_id y) const noexcept;
   object_id get_associated_object(index_type wt_pos) const noexcept;
 

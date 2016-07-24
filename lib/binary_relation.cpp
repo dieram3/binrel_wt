@@ -62,6 +62,10 @@ static constexpr object_id prev(const object_id x) noexcept {
   return static_cast<object_id>(to_underlying_type(x) - 1);
 }
 
+static constexpr object_id next(const object_id x) noexcept {
+  return static_cast<object_id>(to_underlying_type(x) + 1);
+}
+
 static constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_underlying_type(alpha) != 0);
   return static_cast<label_id>(to_underlying_type(alpha) - 1);
@@ -71,6 +75,14 @@ static constexpr auto between_symbols(const label_id min,
                                       const label_id max) noexcept {
   assert(min <= max);
   return between<symbol_id>{as_symbol(min), as_symbol(max)};
+}
+
+static constexpr optional<pair_type>
+optional_pair(const optional<object_id>& obj, const label_id label) {
+  if (obj) {
+    return pair_type{*obj, label};
+  }
+  return nullopt;
 }
 
 [[deprecated("when there is no pair with object_id=x, this function does not "
@@ -123,6 +135,12 @@ auto binary_relation::upper_bound(const object_id x) const noexcept
     -> index_type {
   const auto flag_pos = m_bitmap.select_1(x + 1);
   return m_bitmap.rank_0(flag_pos);
+}
+
+/// Returns the range of elements in the wavelet tree with (object == x)
+///
+auto binary_relation::equal_range(const object_id x) const noexcept {
+  return index_range{lower_bound(x), upper_bound(x)};
 }
 
 /// Returns the range of elements with: (object >= x && object <= y)
@@ -291,6 +309,34 @@ auto binary_relation::nth_element(const object_id x, const label_id alpha,
   // recomputed when some member functions use others. Consider implementing a
   // lazy propagation mechanism to avoid this.
   return nth_element(fixed_object, fixed_object, alpha, abs_nth, lab_major);
+}
+
+auto binary_relation::lower_bound(const pair_type start,
+                                  const label_id min_label,
+                                  const label_id max_label,
+                                  object_major_order_t /*unused*/) const
+    noexcept -> optional<pair_type> {
+  assert(start.label >= min_label && start.label <= max_label);
+  assert(min_label <= max_label);
+
+  // TODO(Diego): The equal_range of start.object is computed again in the
+  // call to nth_element(lab_major), and the upper_bound of start.object is
+  // computed again in the call to nth_element(obj_major). Find a solution to
+  // avoid this :)
+
+  if (min_label == max_label) {
+    // min_label (or max_label) is a fixed label.
+    return optional_pair(obj_select(start.object, min_label, 1), min_label);
+  }
+
+  if (brwt::rank(m_wtree, equal_range(start.object),
+                 between_symbols(start.label, max_label)) > 0) {
+    return nth_element(start.object, start.object, start.label, 1, lab_major);
+  }
+  if (start.object + 1 == object_alphabet_size()) {
+    return nullopt;
+  }
+  return nth_element(next(start.object), min_label, max_label, 1, obj_major);
 }
 
 // ===------------------------------------------===

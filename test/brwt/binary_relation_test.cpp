@@ -11,8 +11,8 @@
 #include <utility>          // pair, move
 #include <vector>           // vector
 
-// TODO(Diego): Adapt the test data as objects with no associated pairs
-// are allowed now :)
+// TODO(Diego): Remove the use of make_test_binary_relation. Use
+// make_test_binary_relation_2 instead.
 
 using brwt::binary_relation;
 using brwt::nullopt;
@@ -531,6 +531,260 @@ TEST_CASE("[nth_element,obj_major]: Full range test") {
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 5) == nullopt);
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 42) == nullopt);
   CHECK(nth_element(11_obj, 0_lab, 9_lab, 3141) == nullopt);
+}
+
+// ==========================================
+// lower_bound in object major order
+// ==========================================
+
+TEST_CASE("[lower_bound,obj_major]: Left, right and empty columns") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, p.label, p.label, obj_major);
+  };
+
+  // left column
+  CHECK(lower_bound({0_obj, 0_lab}) == pair(9_obj, 0_lab));
+  CHECK(lower_bound({5_obj, 0_lab}) == pair(9_obj, 0_lab));
+  CHECK(lower_bound({8_obj, 0_lab}) == pair(9_obj, 0_lab));
+  CHECK(lower_bound({9_obj, 0_lab}) == pair(9_obj, 0_lab));
+  CHECK(lower_bound({10_obj, 0_lab}) == nullopt);
+  CHECK(lower_bound({11_obj, 0_lab}) == nullopt);
+
+  // right column
+  CHECK(lower_bound({0_obj, 9_lab}) == pair(5_obj, 9_lab));
+  CHECK(lower_bound({4_obj, 9_lab}) == pair(5_obj, 9_lab));
+  CHECK(lower_bound({5_obj, 9_lab}) == pair(5_obj, 9_lab));
+  CHECK(lower_bound({6_obj, 9_lab}) == pair(8_obj, 9_lab));
+  CHECK(lower_bound({7_obj, 9_lab}) == pair(8_obj, 9_lab));
+  CHECK(lower_bound({8_obj, 9_lab}) == pair(8_obj, 9_lab));
+  CHECK(lower_bound({9_obj, 9_lab}) == pair(10_obj, 9_lab));
+  CHECK(lower_bound({10_obj, 9_lab}) == pair(10_obj, 9_lab));
+  CHECK(lower_bound({11_obj, 9_lab}) == nullopt);
+
+  // empty column
+  CHECK(lower_bound({0_obj, 5_lab}) == nullopt);
+  CHECK(lower_bound({5_obj, 5_lab}) == nullopt);
+  CHECK(lower_bound({11_obj, 5_lab}) == nullopt);
+}
+
+TEST_CASE("[lower_bound,obj_major]: Center columns") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, p.label, p.label, obj_major);
+  };
+
+  // column-id = 3
+  CHECK(lower_bound({0_obj, 3_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({6_obj, 3_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({7_obj, 3_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({8_obj, 3_lab}) == pair(8_obj, 3_lab));
+  CHECK(lower_bound({9_obj, 3_lab}) == pair(10_obj, 3_lab));
+  CHECK(lower_bound({10_obj, 3_lab}) == pair(10_obj, 3_lab));
+  CHECK(lower_bound({11_obj, 3_lab}) == nullopt);
+
+  // column-id = 4
+  CHECK(lower_bound({0_obj, 4_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({1_obj, 4_lab}) == pair(1_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 4_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({3_obj, 4_lab}) == pair(3_obj, 4_lab));
+  CHECK(lower_bound({4_obj, 4_lab}) == pair(4_obj, 4_lab));
+  CHECK(lower_bound({5_obj, 4_lab}) == pair(8_obj, 4_lab));
+  CHECK(lower_bound({6_obj, 4_lab}) == pair(8_obj, 4_lab));
+  CHECK(lower_bound({7_obj, 4_lab}) == pair(8_obj, 4_lab));
+  CHECK(lower_bound({8_obj, 4_lab}) == pair(8_obj, 4_lab));
+  CHECK(lower_bound({9_obj, 4_lab}) == pair(10_obj, 4_lab));
+  CHECK(lower_bound({10_obj, 4_lab}) == pair(10_obj, 4_lab));
+  CHECK(lower_bound({11_obj, 4_lab}) == pair(11_obj, 4_lab));
+}
+
+TEST_CASE("[lower_bound,obj_major]: Left range") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, 0_lab, 4_lab, obj_major);
+  };
+
+  // first row
+  CHECK(lower_bound({0_obj, 0_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 1_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 2_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 3_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 4_lab}) == pair(0_obj, 4_lab));
+
+  // middle rows
+  CHECK(lower_bound({1_obj, 0_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({1_obj, 1_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({1_obj, 2_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({1_obj, 3_lab}) == pair(1_obj, 4_lab));
+  CHECK(lower_bound({1_obj, 4_lab}) == pair(1_obj, 4_lab));
+
+  CHECK(lower_bound({2_obj, 0_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 2_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 4_lab}) == pair(2_obj, 4_lab));
+
+  CHECK(lower_bound({5_obj, 0_lab}) == pair(5_obj, 1_lab));
+  CHECK(lower_bound({5_obj, 1_lab}) == pair(5_obj, 1_lab));
+  CHECK(lower_bound({5_obj, 2_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({5_obj, 3_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({5_obj, 4_lab}) == pair(7_obj, 1_lab));
+
+  CHECK(lower_bound({9_obj, 0_lab}) == pair(9_obj, 0_lab));
+  CHECK(lower_bound({9_obj, 2_lab}) == pair(9_obj, 2_lab));
+  CHECK(lower_bound({9_obj, 4_lab}) == pair(10_obj, 3_lab));
+
+  // empty row
+  CHECK(lower_bound({6_obj, 0_lab}) == pair(7_obj, 1_lab));
+  CHECK(lower_bound({6_obj, 2_lab}) == pair(7_obj, 1_lab));
+  CHECK(lower_bound({6_obj, 4_lab}) == pair(7_obj, 1_lab));
+
+  // last row
+  CHECK(lower_bound({11_obj, 0_lab}) == pair(11_obj, 1_lab));
+  CHECK(lower_bound({11_obj, 1_lab}) == pair(11_obj, 1_lab));
+  CHECK(lower_bound({11_obj, 2_lab}) == pair(11_obj, 2_lab));
+  CHECK(lower_bound({11_obj, 3_lab}) == pair(11_obj, 4_lab));
+  CHECK(lower_bound({11_obj, 4_lab}) == pair(11_obj, 4_lab));
+}
+
+TEST_CASE("[lower_bound,obj_major]: Right range") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, 5_lab, 9_lab, obj_major);
+  };
+
+  // first row
+  CHECK(lower_bound({0_obj, 5_lab}) == pair(0_obj, 8_lab));
+  CHECK(lower_bound({0_obj, 6_lab}) == pair(0_obj, 8_lab));
+  CHECK(lower_bound({0_obj, 7_lab}) == pair(0_obj, 8_lab));
+  CHECK(lower_bound({0_obj, 8_lab}) == pair(0_obj, 8_lab));
+  CHECK(lower_bound({0_obj, 9_lab}) == pair(3_obj, 6_lab));
+
+  // middle rows
+  CHECK(lower_bound({3_obj, 5_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({3_obj, 6_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({3_obj, 7_lab}) == pair(4_obj, 7_lab));
+  CHECK(lower_bound({3_obj, 8_lab}) == pair(4_obj, 7_lab));
+  CHECK(lower_bound({3_obj, 9_lab}) == pair(4_obj, 7_lab));
+
+  CHECK(lower_bound({5_obj, 5_lab}) == pair(5_obj, 8_lab));
+  CHECK(lower_bound({5_obj, 7_lab}) == pair(5_obj, 8_lab));
+  CHECK(lower_bound({5_obj, 9_lab}) == pair(5_obj, 9_lab));
+
+  CHECK(lower_bound({7_obj, 5_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({7_obj, 6_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({7_obj, 7_lab}) == pair(7_obj, 8_lab));
+  CHECK(lower_bound({7_obj, 8_lab}) == pair(7_obj, 8_lab));
+  CHECK(lower_bound({7_obj, 9_lab}) == pair(8_obj, 7_lab));
+
+  CHECK(lower_bound({9_obj, 5_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({9_obj, 7_lab}) == pair(9_obj, 7_lab));
+  CHECK(lower_bound({9_obj, 9_lab}) == pair(10_obj, 7_lab));
+
+  // empty rows
+  CHECK(lower_bound({1_obj, 5_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({1_obj, 7_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({1_obj, 9_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({2_obj, 6_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({2_obj, 8_lab}) == pair(3_obj, 6_lab));
+
+  CHECK(lower_bound({6_obj, 5_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({6_obj, 8_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({6_obj, 9_lab}) == pair(7_obj, 6_lab));
+
+  // last row
+  CHECK(lower_bound({11_obj, 5_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 6_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 7_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 8_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 9_lab}) == nullopt);
+}
+
+TEST_CASE("[lower_bound,obj_major]: Center range") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, 2_lab, 7_lab, obj_major);
+  };
+
+  // first row
+  CHECK(lower_bound({0_obj, 2_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 3_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 4_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 5_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({0_obj, 6_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({0_obj, 7_lab}) == pair(1_obj, 2_lab));
+
+  // middle rows
+  CHECK(lower_bound({2_obj, 2_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 3_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 4_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 5_lab}) == pair(3_obj, 2_lab));
+  CHECK(lower_bound({2_obj, 6_lab}) == pair(3_obj, 2_lab));
+  CHECK(lower_bound({2_obj, 7_lab}) == pair(3_obj, 2_lab));
+
+  CHECK(lower_bound({5_obj, 2_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({5_obj, 3_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({5_obj, 4_lab}) == pair(7_obj, 3_lab));
+
+  CHECK(lower_bound({7_obj, 2_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({7_obj, 3_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({7_obj, 4_lab}) == pair(7_obj, 6_lab));
+
+  CHECK(lower_bound({9_obj, 5_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({9_obj, 6_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({9_obj, 7_lab}) == pair(9_obj, 7_lab));
+
+  // empty row
+  CHECK(lower_bound({6_obj, 2_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({6_obj, 5_lab}) == pair(7_obj, 3_lab));
+  CHECK(lower_bound({6_obj, 7_lab}) == pair(7_obj, 3_lab));
+
+  // last row
+  CHECK(lower_bound({11_obj, 2_lab}) == pair(11_obj, 2_lab));
+  CHECK(lower_bound({11_obj, 3_lab}) == pair(11_obj, 4_lab));
+  CHECK(lower_bound({11_obj, 4_lab}) == pair(11_obj, 4_lab));
+  CHECK(lower_bound({11_obj, 5_lab}) == nullopt);
+  CHECK(lower_bound({11_obj, 6_lab}) == nullopt);
+  CHECK(lower_bound({11_obj, 7_lab}) == nullopt);
+}
+
+TEST_CASE("[lower_bound,obj_major]: Full range") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, 0_lab, 9_lab, obj_major);
+  };
+
+  // first row
+  CHECK(lower_bound({0_obj, 0_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 3_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 4_lab}) == pair(0_obj, 4_lab));
+  CHECK(lower_bound({0_obj, 5_lab}) == pair(0_obj, 8_lab));
+
+  // middle rows
+  CHECK(lower_bound({1_obj, 1_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({1_obj, 2_lab}) == pair(1_obj, 2_lab));
+  CHECK(lower_bound({1_obj, 3_lab}) == pair(1_obj, 4_lab));
+  CHECK(lower_bound({1_obj, 4_lab}) == pair(1_obj, 4_lab));
+  CHECK(lower_bound({1_obj, 5_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({1_obj, 9_lab}) == pair(2_obj, 4_lab));
+
+  CHECK(lower_bound({2_obj, 4_lab}) == pair(2_obj, 4_lab));
+  CHECK(lower_bound({2_obj, 5_lab}) == pair(3_obj, 2_lab));
+  CHECK(lower_bound({4_obj, 3_lab}) == pair(4_obj, 4_lab));
+  CHECK(lower_bound({5_obj, 3_lab}) == pair(5_obj, 3_lab));
+  CHECK(lower_bound({7_obj, 4_lab}) == pair(7_obj, 6_lab));
+
+  // empty row
+  CHECK(lower_bound({6_obj, 0_lab}) == pair(7_obj, 1_lab));
+  CHECK(lower_bound({6_obj, 5_lab}) == pair(7_obj, 1_lab));
+  CHECK(lower_bound({6_obj, 9_lab}) == pair(7_obj, 1_lab));
+
+  // last row
+  CHECK(lower_bound({11_obj, 0_lab}) == pair(11_obj, 1_lab));
+  CHECK(lower_bound({11_obj, 1_lab}) == pair(11_obj, 1_lab));
+  CHECK(lower_bound({11_obj, 2_lab}) == pair(11_obj, 2_lab));
+  CHECK(lower_bound({11_obj, 3_lab}) == pair(11_obj, 4_lab));
+  CHECK(lower_bound({11_obj, 7_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 8_lab}) == pair(11_obj, 8_lab));
+  CHECK(lower_bound({11_obj, 9_lab}) == nullopt);
 }
 
 // ==========================================
