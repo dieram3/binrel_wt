@@ -1,20 +1,20 @@
 #ifndef BRWT_DETAIL_ITERATOR_H
 #define BRWT_DETAIL_ITERATOR_H
 
-#include <cassert>     // assert
-#include <iterator>    // random_access_iterator_tag
-#include <memory>      // addressof
-#include <type_traits> // remove_const_t
+#include <brwt/detail/utility.h> // reference_traits
+#include <cassert>               // assert
+#include <iterator>              // random_access_iterator_tag
+#include <memory>                // addressof
+#include <type_traits>           // remove_const_t
 
 namespace brwt {
 namespace detail {
 
-/// \brief Random-access iterator to provide iterators for classes that have
-/// overloaded the subscript operator.
+/// \brief This class provide \e random-access iterators to containers that have
+/// overloaded the subscript operator (\c operator[]).
 ///
-/// Note that this iterator class is not totally generic. For example, it has
-/// deleted the operator->() as in the library, no entity can be pointed (we use
-/// proxies to refer a range of bits).
+/// Note that this class satisfies the \c RandomAccessIterator concept.
+///
 ///
 template <typename Container, typename ValueType, typename Reference,
           typename DifferenceType>
@@ -24,7 +24,7 @@ public:
 
   using value_type = ValueType;
   using reference = Reference;
-  using pointer = void;
+  using pointer = typename reference_traits<reference>::pointer;
   using difference_type = DifferenceType;
   using iterator_category = std::random_access_iterator_tag;
 
@@ -38,7 +38,8 @@ public:
   constexpr random_access_iterator() = default;
 
   template <typename Ref>
-  constexpr random_access_iterator(const non_const_iterator<Ref>& other)
+  constexpr /*implicit*/ random_access_iterator( // NOLINT
+      const non_const_iterator<Ref>& other)
       : m_cont{other.m_cont}, m_pos{other.m_pos} {}
 
   // element access
@@ -48,7 +49,9 @@ public:
     return (*m_cont)[static_cast<sz>(m_pos)];
   }
 
-  pointer operator->() const = delete;
+  pointer operator->() const {
+    return reference_traits<reference>::as_pointer(*(*this));
+  }
 
   reference operator[](difference_type n) const noexcept {
     using sz = typename Container::size_type;
