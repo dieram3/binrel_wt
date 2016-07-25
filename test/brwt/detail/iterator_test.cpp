@@ -8,6 +8,8 @@
 #include <type_traits> // is_same, is_convertible
 #include <utility>     // pair
 
+// TODO(Diego): Review random_access_iterator in more detail when possible.
+
 using brwt::detail::random_access_iterator;
 
 namespace {

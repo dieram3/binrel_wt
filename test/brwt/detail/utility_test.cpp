@@ -8,6 +8,8 @@
 #include <iterator>               // distance, begin, end
 #include <type_traits>            // conditional_t
 
+// TODO(Diego): Review reference_traits in more detail when possible.
+
 using brwt::detail::reference_traits;
 
 namespace {
