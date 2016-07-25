@@ -433,10 +433,7 @@ index_type select(const wavelet_tree& wt, const between<symbol_id> cond,
 
 namespace select_first_detail {
 
-// ==========================
 // index maps
-// ==========================
-
 static index_type make_lhs_pos(const node_proxy& node,
                                const index_type pos) noexcept {
   return exclusive_rank_0(node, pos);
@@ -461,10 +458,7 @@ static index_type map_lhs_pos(const node_proxy& node,
   return node.select_0(nth);
 }
 
-// ==========================
 // node_proxy extensions
-// ==========================
-
 static bool has_left_branch(const node_proxy& node) noexcept {
   return exclusive_rank_0(node, node.size()) > 0;
 }
@@ -473,10 +467,11 @@ static bool has_right_branch(const node_proxy& node) noexcept {
   return exclusive_rank_1(node, node.size()) > 0;
 }
 
-// ==========================
 // merge leaf divisions results
-// ==========================
 
+// Returns the index of the first node element at or after \p pos, whose
+// associated symbol is in the given range. If no such element exists, returns
+// index_npos.
 static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
                                  const greater_equal<symbol_id> cond) noexcept {
   assert(node.is_leaf());
@@ -505,9 +500,26 @@ static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
   return index_npos;
 }
 
-// ==========================
+static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
+                                 const symbol_id min_symbol,
+                                 const symbol_id max_symbol) {
+  assert(node.is_leaf());
+
+  if (node.is_lhs_symbol(min_symbol) && node.is_rhs_symbol(max_symbol)) {
+    return pos;
+  }
+
+  if (node.is_lhs_symbol(max_symbol)) {
+    return map_lhs_pos(node, pos);
+  }
+
+  return map_rhs_pos(node, pos);
+}
+
 // convenience functions
-// ==========================
+
+// maps the position of the smallest left child to the current node. Uses the
+// given selection function to determine the smallest child.
 template <class SelectionFunction>
 static index_type map_left_child(const node_proxy& node, const index_type pos,
                                  SelectionFunction&& fn) noexcept {
@@ -515,6 +527,8 @@ static index_type map_left_child(const node_proxy& node, const index_type pos,
   return nth == 0 ? index_npos : node.select_0(nth);
 }
 
+// maps the position of the smallest right child to the current node. Uses the
+// given selection function to determine the smallest child.
 template <class SelectionFunction>
 static index_type map_right_child(const node_proxy& node, index_type pos,
                                   SelectionFunction&& fn) noexcept {
@@ -592,19 +606,11 @@ static index_type select_first(node_proxy node, index_type pos,
   assert(pos >= 0 && pos <= node.size());
 
   if (node.is_leaf()) {
-    if (node.is_lhs_symbol(min_symbol) && node.is_rhs_symbol(max_symbol)) {
-      return pos;
-    }
-
-    if (node.is_lhs_symbol(max_symbol)) {
-      return map_lhs_pos(node, pos);
-    }
-
-    return map_rhs_pos(node, pos);
+    return merge_leaf_div(node, pos, min_symbol, max_symbol);
   }
 
-  // check if interval [min_symbol, max_symbol] is fully cover
-  // by either a left branch or a right branch.
+  // Checks whether the interval [min_symbol, max_symbol] is fully covered by
+  // either the left branch or the right branch
   if (node.is_lhs_symbol(max_symbol)) {
     auto select = [&](const node_proxy& n, index_type p) {
       return select_first(n, p, min_symbol, max_symbol);
@@ -640,6 +646,8 @@ static index_type select_first(node_proxy node, index_type pos,
 
 index_type select_first(const wavelet_tree& wt, index_type start,
                         between<symbol_id> cond) noexcept {
+  assert(cond.min_value >= 0 && cond.max_value >= 0 &&
+         cond.max_value <= wt.max_symbol_id());
   return select_first_detail::select_first(wt.make_root(), start,
                                            cond.min_value, cond.max_value);
 }
