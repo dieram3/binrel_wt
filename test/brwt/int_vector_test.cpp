@@ -266,6 +266,129 @@ TEST_CASE("int_vector::clear") {
   CHECK(seq.get_bpe() == 0);
 }
 
+TEST_CASE("int_vector::erase(iterator)") {
+  int_vector seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  REQUIRE(seq.size() == 10);
+
+  // Erase the first element.
+  auto it = seq.erase(seq.cbegin());
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.begin());
+  CHECK(*it == 2);
+  CHECK(std_vec(seq) == std_vec({2, 3, 4, 5, 6, 7, 8, 9, 10}));
+
+  // Erase the last element.
+  it = seq.erase(seq.cend() - 1);
+  CHECK(seq.size() == 8);
+  CHECK(it == seq.end());
+  CHECK(std_vec(seq) == std_vec({2, 3, 4, 5, 6, 7, 8, 9}));
+
+  // Erase an element in the middle.
+  it = seq.erase(seq.cbegin() + 4); // The element with value 6
+  CHECK(seq.size() == 7);
+  CHECK(it == seq.begin() + 4);
+  CHECK(*it == 7);
+  CHECK(std_vec(seq) == std_vec({2, 3, 4, 5, 7, 8, 9}));
+
+  // Erase all.
+  while (!seq.empty()) {
+    it = seq.erase(seq.cend() - 1);
+  }
+
+  CHECK(seq.size() == 0);
+  CHECK(it == seq.end());
+  CHECK(std_vec(seq) == std_vec({}));
+
+  // Finally, checks whether the bpe remains unchanged.
+  CHECK(seq.get_bpe() == 4); // 9 uses 4 bits
+}
+
+namespace {
+class erase_fixture {
+protected:
+  erase_fixture() {
+    assert(seq.size() == 10);
+  }
+  ~erase_fixture() {
+    REQUIRE(seq.get_bpe() == 4); // The bpe must not change.
+  }
+
+  int_vector seq = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+  int_vector::iterator it{};
+};
+} // end namespace
+
+TEST_CASE_FIXTURE(erase_fixture,
+                  "int_vector::erase(iter, iter): Remove from left") {
+
+  it = seq.erase(seq.cbegin(), seq.cbegin() + 1); // Just one
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.begin());
+  CHECK(*it == 2);
+  CHECK(std_vec(seq) == std_vec({2, 3, 4, 5, 6, 7, 8, 9, 10}));
+
+  it = seq.erase(seq.cbegin(), seq.cbegin()); // Empty
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.begin());
+  CHECK(*it == 2);
+  CHECK(std_vec(seq) == std_vec({2, 3, 4, 5, 6, 7, 8, 9, 10}));
+
+  it = seq.erase(seq.cbegin(), seq.cbegin() + 3); // Three elements.
+  CHECK(seq.size() == 6);
+  CHECK(it == seq.begin());
+  CHECK(*it == 5);
+  CHECK(std_vec(seq) == std_vec({5, 6, 7, 8, 9, 10}));
+}
+
+TEST_CASE_FIXTURE(erase_fixture,
+                  "int_vector::erase(iter, iter): Remove from right") {
+
+  it = seq.erase(seq.cend() - 1, seq.cend()); // Just one
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.end());
+  CHECK(std_vec(seq) == std_vec({1, 2, 3, 4, 5, 6, 7, 8, 9}));
+
+  it = seq.erase(seq.cend(), seq.cend()); // Empty
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.end());
+  CHECK(std_vec(seq) == std_vec({1, 2, 3, 4, 5, 6, 7, 8, 9}));
+
+  it = seq.erase(seq.cend() - 3, seq.cend()); // Three elements
+  CHECK(seq.size() == 6);
+  CHECK(it == seq.end());
+  CHECK(std_vec(seq) == std_vec({1, 2, 3, 4, 5, 6}));
+}
+
+TEST_CASE_FIXTURE(erase_fixture,
+                  "int_vector::erase(iter, iter): Remove from center") {
+  it = seq.erase(seq.cbegin() + 2, seq.cbegin() + 3);
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.cbegin() + 2);
+  CHECK(*it == 4);
+  CHECK(std_vec(seq) == std_vec({1, 2, 4, 5, 6, 7, 8, 9, 10}));
+
+  it = seq.erase(seq.cbegin() + 4, seq.cbegin() + 4); // Empty
+  CHECK(seq.size() == 9);
+  CHECK(it == seq.cbegin() + 4);
+  CHECK(*it == 6);
+  CHECK(std_vec(seq) == std_vec({1, 2, 4, 5, 6, 7, 8, 9, 10}));
+
+  it = seq.erase(seq.cbegin() + 3, seq.cbegin() + 6); // Three elements
+  CHECK(seq.size() == 6);
+  CHECK(it == seq.cbegin() + 3);
+  CHECK(*it == 8);
+  CHECK(std_vec(seq) == std_vec({1, 2, 4, 8, 9, 10}));
+}
+
+TEST_CASE_FIXTURE(erase_fixture, "int_vector::erase(iter, iter): Remove all") {
+  it = seq.erase(seq.cbegin(), seq.cend());
+  CHECK(seq.size() == 0);
+  CHECK(it == seq.begin());
+  CHECK(it == seq.end());
+  CHECK(seq.begin() == seq.end());
+  CHECK(std_vec(seq) == std_vec({}));
+}
+
 TEST_CASE("int_vector:: member swap") {
   int_vector a = {10, 20, 30, 40};
   int_vector b = {1, 2, 3, 4, 5, 6, 7};
