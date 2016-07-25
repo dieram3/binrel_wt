@@ -42,7 +42,7 @@ public:
 
   template <typename Ref>
   constexpr /*implicit*/ random_access_iterator( // NOLINT
-      const non_const_iterator<Ref>& other)
+      const non_const_iterator<Ref>& other) noexcept
       : m_cont{other.m_cont}, m_pos{other.m_pos} {}
 
   // element access
@@ -142,7 +142,7 @@ public:
   }
 
 private:
-  constexpr random_access_iterator(Container& c, difference_type pos)
+  constexpr random_access_iterator(Container& c, difference_type pos) noexcept
       : m_cont{std::addressof(c)}, m_pos{pos} {}
 
   // frienship to allow the container using the private constructor.
