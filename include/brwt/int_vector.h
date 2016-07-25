@@ -264,6 +264,8 @@ private:
     return bit_seq.get_chunk(pos * bits_per_element, bits_per_element);
   }
   void set_value(size_type pos, value_type value) noexcept;
+
+  size_type index_of(const_iterator pos) const noexcept;
   iterator non_const(const_iterator pos) noexcept;
 
 private:

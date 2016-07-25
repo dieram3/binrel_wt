@@ -3,7 +3,7 @@
 #include <brwt/bit_hacks.h> // lsb_mask, used_bits
 #include <algorithm>        // for_each, max, copy
 #include <cassert>          // assert
-#include <iterator>         // begin, end, distance
+#include <iterator>         // begin, end
 #include <limits>           // numeric_limits
 #include <stdexcept>        // domain_error
 
@@ -35,9 +35,16 @@ auto int_vector::set_value(const size_type pos, const value_type value) noexcept
   bit_seq.set_chunk(pos * bits_per_element, bits_per_element, value);
 }
 
+auto int_vector::index_of(const_iterator pos) const noexcept -> size_type {
+  assert(pos >= cbegin() && pos <= cend());
+
+  return pos - cbegin();
+}
+
 auto int_vector::non_const(const_iterator pos) noexcept -> iterator {
   assert(pos >= begin() && pos <= end());
-  return begin() + (pos - cbegin());
+
+  return begin() + index_of(pos);
 }
 
 int_vector::int_vector(const size_type count, const int bpe)
@@ -70,7 +77,7 @@ auto int_vector::erase(const_iterator first, const_iterator last) noexcept
 
   // Note that num_elems must be updated at the end because of cend() usage.
   const auto new_end = std::copy(last, cend(), non_const(first));
-  num_elems = std::distance(begin(), new_end);
+  num_elems = index_of(new_end);
 
   return non_const(first);
 }
