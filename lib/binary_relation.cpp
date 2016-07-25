@@ -260,9 +260,9 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
 
   m_wtree = detail::make_wavelet_tree(pairs, max_label, objects_frequency);
 
-  // Now that we have the true frequencies (because removing of duplicates), we
+  // Now that objects_frequency has been updated to contain the frequencies
+  // of objects after ignoring duplicates pairs (done by make_wavelet_tree), we
   // can construct the bitmap.
-
   const auto num_unique_pairs = m_wtree.size();
   m_bitmap = detail::make_bitmap(objects_frequency, num_unique_pairs);
 
