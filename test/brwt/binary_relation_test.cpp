@@ -44,8 +44,8 @@ make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
     std::for_each(begin(labels), end(labels), [&](const auto label) {
       const auto p = pair(object, static_cast<label_id>(label));
 
-      // Add the pair multiple times to verify that the constructor manages well
-      // inputs with duplicate entries.
+      // Add the pair multiple times to ensure that the constructor manages
+      // correctly inputs with duplicate entries.
       pairs.push_back(p);
       pairs.push_back(p);
       pairs.push_back(p);
