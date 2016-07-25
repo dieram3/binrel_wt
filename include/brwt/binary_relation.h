@@ -16,8 +16,17 @@ struct label_major_order_t {};
 constexpr object_major_order_t obj_major{};
 constexpr label_major_order_t lab_major{};
 
-// class definition
-
+/// \brief Representation of a binary relation between \e objects and \e labels.
+///
+/// The following variables are used to define time and space complexities.
+/// - \f$t\f$ The size of the binary relation.
+/// - \f$n\f$ The size of the object alphabet.
+/// - \f$\sigma\f$ The size of the label alphabet.
+///
+/// \par Space complexity
+/// The total space used by this structure is \f$(t + n)(1 + o(1)) +
+/// (t \log{\sigma})(1 + o(1))\f$ bits.
+///
 class binary_relation {
 public:
   // member types
@@ -37,8 +46,20 @@ public:
 
   /// \brief Constructs a binary relation with the given sequence of pairs.
   ///
-  /// \post The number of objects will be equal to the max object plus 1.
-  /// \post The number of labels will be equal to the max label plus 1.
+  /// The input sequence is not required to satisfy any order and can contain
+  /// duplicate elements (they will be discarded).
+  ///
+  /// \post \c size() will be equal to the number of unique pairs.
+  /// \post \c object_alphabet_size() will be equal to the maximum object-id in
+  /// \p pairs plus 1.
+  /// \post \c label_alphabet_size() will be less than or equal to the first
+  /// power of two not less than the maximum label-id in \p pairs.
+  ///
+  /// \par Complexity
+  /// The time complexity is linearithmic in \c pairs.size(), plus
+  /// \f$O(t \log{\sigma})\f$, plus \f$O(n + t)\f$.
+  /// The space complexity of the extra storage used by this constructor is
+  /// \f$O(n)\f$.
   ///
   explicit binary_relation(const std::vector<pair_type>& pairs);
 
