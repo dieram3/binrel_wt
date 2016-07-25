@@ -125,14 +125,14 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept;
 index_type select(const wavelet_tree& wt, between<symbol_id> cond,
                   size_type nth) noexcept;
 
-/// \brief Returns the index of the first element greater than \c start in the
-/// stored sequence that comply with the given condition.
+/// \brief Finds the first element at or after \p start such that its label
+/// value is in the given range.
 ///
-/// \returns The index of the first element if it exists, \c index_npos
-/// otherwise.
+/// \returns The index of the first element that satisfies the given conditions.
+/// If no such element exists, returns \c index_npos.
 ///
 /// \par Complexity
-/// <tt>O(log(sigma))</tt>, where  <tt>sigma = alphabet-size</tt>.
+/// <tt>O(log(sigma))</tt>, where <tt>sigma = alphabet-size</tt>.
 ///
 /// \relates wavelet_tree
 ///
