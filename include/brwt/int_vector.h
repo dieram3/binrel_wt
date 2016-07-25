@@ -78,8 +78,10 @@ public:
 
   /// \brief Constructs the sequence with the given initializer list.
   ///
-  /// \post <tt>get_bpe() == (ilist.size() == 0? 0 :
-  /// bits-needed-for-max-element)</tt>.
+  /// \post If \p ilist is empty, \c get_bpe() will be equal to 0. Otherwise, if
+  /// the maximum element from \p ilist is 0, \c get_bpe() will be equal to 1.
+  /// Otherwise, \c get_bpe() will be equal to the number of bits used by the
+  /// maximum element (as defined by \c brwt::used_bits()).
   ///
   /// \par Time complexity
   /// Linear in <tt>ilist.size()</tt>.

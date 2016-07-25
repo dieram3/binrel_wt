@@ -1,7 +1,7 @@
 #include <brwt/int_vector.h> // int_vector
 
 #include <brwt/bit_hacks.h> // lsb_mask, used_bits
-#include <algorithm>        // for_each, max, copy
+#include <algorithm>        // for_each, max_element, copy
 #include <cassert>          // assert
 #include <iterator>         // begin, end
 #include <limits>           // numeric_limits
@@ -10,12 +10,12 @@
 namespace brwt {
 
 template <typename InputIt>
-static int needed_bits(InputIt first, InputIt last) {
-  int ans = 0;
-  std::for_each(first, last, [&ans](const auto value) {
-    ans = std::max(ans, used_bits(value));
-  });
-  return ans;
+static int needed_bits(const InputIt first, const InputIt last) {
+  if (first == last) {
+    return 0;
+  }
+  const auto max = *std::max_element(first, last);
+  return max == 0 ? 1 : used_bits(max);
 }
 
 template <typename InputRange>

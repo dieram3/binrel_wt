@@ -64,23 +64,35 @@ TEST_CASE("int_vector::int_vector(size_type, int)") {
 }
 
 TEST_CASE("int_vector::int_vector(initializer_list<value_type>)") {
-  {
+  SUBCASE("Empty initializer_list") {
     std::initializer_list<value_t> empty{};
-    int_vector seq = empty;
+    const int_vector seq = empty;
     CHECK(seq.size() == 0);
     CHECK(seq.get_bpe() == 0);
   }
-  {
-    int_vector seq = {10, 20, 30, 40}; // 40 needs 6 bits.
+  SUBCASE("Basic test 1") {
+    const int_vector seq = {10, 20, 30, 40}; // 40 needs 6 bits.
     CHECK(seq.size() == 4);
     CHECK(seq.get_bpe() == 6);
     CHECK(std_vec(seq) == std_vec({10, 20, 30, 40}));
   }
-  {
-    int_vector seq = {2, 4, 256, 3, 100, 255, 30}; // 256 needs 9 bits.
+  SUBCASE("Basic test 2") {
+    const int_vector seq = {2, 4, 256, 3, 100, 255, 30}; // 256 needs 9 bits.
     CHECK(seq.size() == 7);
     CHECK(seq.get_bpe() == 9);
     CHECK(std_vec(seq) == std_vec({2, 4, 256, 3, 100, 255, 30}));
+  }
+  SUBCASE("All zero except one") {
+    const int_vector seq = {0, 0, 0, 0, 1, 0, 0, 0, 0, 0};
+    CHECK(seq.size() == 10);
+    CHECK(seq.get_bpe() == 1);
+    CHECK(std_vec(seq) == std_vec({0, 0, 0, 0, 1, 0, 0, 0, 0, 0}));
+  }
+  SUBCASE("All zero") {
+    const int_vector seq = {0, 0, 0, 0, 0, 0};
+    CHECK(seq.size() == 6);
+    CHECK(seq.get_bpe() == 1);
+    CHECK(std_vec(seq) == std_vec({0, 0, 0, 0, 0, 0}));
   }
 }
 
