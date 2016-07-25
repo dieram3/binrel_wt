@@ -42,7 +42,13 @@ make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
   auto add_pairs = [&](const object_id object,
                        const std::initializer_list<unsigned> labels) {
     std::for_each(begin(labels), end(labels), [&](const auto label) {
-      pairs.push_back({object, static_cast<label_id>(label)});
+      const auto p = pair(object, static_cast<label_id>(label));
+
+      // Add the pair multiple times to verify that the constructor manages well
+      // inputs with duplicate entries.
+      pairs.push_back(p);
+      pairs.push_back(p);
+      pairs.push_back(p);
     });
   };
 
@@ -82,7 +88,7 @@ make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
   add_pairs(10_obj, {3, 4, 7, 9});
   add_pairs(11_obj, {1, 2, 4, 8});
 
-  assert(pairs.size() == (remove_labels_from_obj_6 ? 38 : 40));
+  assert(pairs.size() == 3 * (remove_labels_from_obj_6 ? 38 : 40));
   assert(std::none_of(begin(pairs), end(pairs),
                       [](const pair_type& p) { return p.label == 5_lab; }));
 
@@ -183,18 +189,48 @@ TEST_CASE("as_objects test") {
 TEST_SUITE("binary_relation");
 
 TEST_CASE("vector of pairs ctor") {
-  std::vector<pair_type> pairs = {
-      {0_obj, 1_lab}, {1_obj, 2_lab}, {0_obj, 3_lab}, {0_obj, 4_lab},
-  };
-  binary_relation binrel(pairs); // does not hang
-  CHECK(binrel.size() == 4);
-  CHECK(binrel.object_alphabet_size() == 2);
+  using vec_t = std::vector<pair_type>;
+  SUBCASE("Empty vector") {
+    const vec_t pairs{};
+    const binary_relation br(pairs);
+    CHECK(br.size() == 0);
+    CHECK(br.object_alphabet_size() == 0);
+    CHECK(br.label_alphabet_size() <= 1);
+  }
+  SUBCASE("Vector with unordered unique entries") {
+    const vec_t pairs = {{0_obj, 1_lab}, {1_obj, 2_lab}, {0_obj, 2_lab},
+                         {0_obj, 4_lab}, {3_obj, 4_lab}, {3_obj, 2_lab},
+                         {2_obj, 1_lab}, {0_obj, 5_lab}, {5_obj, 0_lab}};
+    const binary_relation br(pairs);
+    CHECK(br.size() == 9);
+    CHECK(br.object_alphabet_size() == 6);
+    CHECK(br.label_alphabet_size() <= 8);
+  }
+  SUBCASE("Vector with unordered duplicate entries") {
+    const vec_t pairs = {
+        {0_obj, 1_lab}, {1_obj, 2_lab}, {0_obj, 2_lab}, {0_obj, 4_lab},
+        {3_obj, 4_lab}, {3_obj, 2_lab}, {2_obj, 1_lab}, {0_obj, 5_lab},
+        {5_obj, 0_lab}, {0_obj, 4_lab}, {3_obj, 4_lab}, {0_obj, 5_lab},
+        {0_obj, 1_lab}, {3_obj, 2_lab}, {0_obj, 4_lab}, {1_obj, 2_lab},
+        {3_obj, 2_lab}, {3_obj, 2_lab}, {3_obj, 2_lab}, {0_obj, 4_lab}};
+    const binary_relation br(pairs);
+    CHECK(br.size() == 9);
+    CHECK(br.object_alphabet_size() == 6);
+    CHECK(br.label_alphabet_size() <= 8);
+  }
+  SUBCASE("Main test vector") {
+    const auto br = make_test_binary_relation_2();
+    CHECK(br.size() == 38);
+    CHECK(br.object_alphabet_size() == 12); // max object is 11
+    CHECK(br.label_alphabet_size() <= 16);  // max label is 9
+  }
 }
 
-TEST_CASE("size and num_objects") {
-  const auto binrel = make_test_binary_relation();
-  CHECK(binrel.size() == 40);
+TEST_CASE("size and alphabets size") {
+  const auto binrel = make_test_binary_relation_2();
+  CHECK(binrel.size() == 38);
   CHECK(binrel.object_alphabet_size() == 12);
+  CHECK(binrel.label_alphabet_size() <= 16);
 }
 
 TEST_CASE("Rank with max object, max label") {
