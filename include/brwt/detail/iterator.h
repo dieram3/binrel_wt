@@ -36,7 +36,7 @@ public:
       random_access_iterator<std::remove_const_t<Container>, value_type, Ref,
                              difference_type>;
 
-  // ctors
+  // constructors
 
   constexpr random_access_iterator() = default;
 
