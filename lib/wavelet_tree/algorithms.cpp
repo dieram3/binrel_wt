@@ -610,7 +610,7 @@ static index_type select_first(node_proxy node, index_type pos,
   }
 
   // Checks whether the interval [min_symbol, max_symbol] is fully covered by
-  // either the left branch or the right branch
+  // either the left branch or the right branch.
   if (node.is_lhs_symbol(max_symbol)) {
     auto select = [&](const node_proxy& n, index_type p) {
       return select_first(n, p, min_symbol, max_symbol);
@@ -623,7 +623,7 @@ static index_type select_first(node_proxy node, index_type pos,
     return map_right_child(node, pos, select);
   }
 
-  // merge results from both branches
+  // Merge results from both branches.
   auto select_ge = [&](const node_proxy& n, index_type p) {
     return select_first(n, p, greater_equal<symbol_id>{min_symbol});
   };
@@ -646,7 +646,7 @@ static index_type select_first(node_proxy node, index_type pos,
 
 index_type select_first(const wavelet_tree& wt, index_type start,
                         between<symbol_id> cond) noexcept {
-  assert(cond.min_value >= 0 && cond.max_value >= 0 &&
+  assert(cond.min_value >= 0 && cond.min_value <= cond.max_value &&
          cond.max_value <= wt.max_symbol_id());
   return select_first_detail::select_first(wt.make_root(), start,
                                            cond.min_value, cond.max_value);
