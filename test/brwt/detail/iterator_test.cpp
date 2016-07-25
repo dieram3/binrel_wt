@@ -6,7 +6,7 @@
 #include <iterator>    // iterator_traits
 #include <memory>      // unique_ptr
 #include <type_traits> // is_same, is_convertible
-#include <utility>     // pair
+#include <utility>     // pair, swap
 
 // TODO(Diego): Review random_access_iterator in more detail when possible.
 
@@ -175,6 +175,10 @@ void test_iterator_properties() {
   static_assert(same<decltype(it > it), bool>, "");
   static_assert(same<decltype(it <= it), bool>, "");
   static_assert(same<decltype(it >= it), bool>, "");
+
+  // Check swappable property.
+  using std::swap;
+  static_assert(noexcept(swap(mut_it, mut_it)), "");
 }
 
 // ===------------------------------------------------------===
