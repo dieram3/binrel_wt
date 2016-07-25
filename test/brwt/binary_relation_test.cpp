@@ -188,7 +188,7 @@ TEST_CASE("as_objects test") {
 
 TEST_SUITE("binary_relation");
 
-TEST_CASE("vector of pairs ctor") {
+TEST_CASE("Vector of pairs constructor") {
   using vec_t = std::vector<pair_type>;
   SUBCASE("Empty vector") {
     const vec_t pairs{};
@@ -218,6 +218,21 @@ TEST_CASE("vector of pairs ctor") {
     CHECK(br.object_alphabet_size() == 6);
     CHECK(br.label_alphabet_size() <= 8);
   }
+  SUBCASE("Vector where the max-label is a power of two") {
+    const vec_t pairs = {{0_obj, 4_lab}, {10_obj, 8_lab}, {3_obj, 8_lab}};
+    const binary_relation br(pairs);
+    CHECK(br.size() == 3);
+    CHECK(br.object_alphabet_size() == 11);
+    CHECK(br.label_alphabet_size() > 8);
+    CHECK(br.label_alphabet_size() <= 16);
+  }
+  SUBCASE("Vector where the max-label is a power of two minus one") {
+    const vec_t pairs = {{54_obj, 5_lab}, {10_obj, 31_lab}, {42_obj, 7_lab}};
+    const binary_relation br(pairs);
+    CHECK(br.size() == 3);
+    CHECK(br.object_alphabet_size() == 55);
+    CHECK(br.label_alphabet_size() == 32);
+  }
   SUBCASE("Main test vector") {
     const auto br = make_test_binary_relation_2();
     CHECK(br.size() == 38);
@@ -226,7 +241,7 @@ TEST_CASE("vector of pairs ctor") {
   }
 }
 
-TEST_CASE("size and alphabets size") {
+TEST_CASE("Size and alphabets size") {
   const auto binrel = make_test_binary_relation_2();
   CHECK(binrel.size() == 38);
   CHECK(binrel.object_alphabet_size() == 12);
