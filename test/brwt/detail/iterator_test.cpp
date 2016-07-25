@@ -179,7 +179,7 @@ void test_iterator_properties() {
 //                  Test cases
 // ===------------------------------------------------------===
 
-TEST_SUITE("detail::iterator");
+TEST_SUITE("detail::random_access_iterator");
 
 TEST_CASE("iterator: Static tests") {
   using container = dyn_array<int>;
@@ -282,19 +282,19 @@ protected:
   using const_iterator = decltype(seq)::const_iterator;
 
   iterator_fixture() {
-    REQUIRE(&*i0 == &seq[0]);
-    REQUIRE(&*i1 == &seq[1]);
-    REQUIRE(&*i2 == &seq[2]);
+    assert(&*i0 == &seq[0]);
+    assert(&*i1 == &seq[1]);
+    assert(&*i2 == &seq[2]);
 
-    REQUIRE(i0 == seq.begin());
-    REQUIRE(i3 == seq.end());
+    assert(i0 == seq.begin());
+    assert(i3 == seq.end());
 
-    REQUIRE(i0 != i1);
-    REQUIRE(i0 != i2);
-    REQUIRE(i0 != i3);
-    REQUIRE(i1 != i2);
-    REQUIRE(i1 != i3);
-    REQUIRE(i2 != i3);
+    assert(i0 != i1);
+    assert(i0 != i2);
+    assert(i0 != i3);
+    assert(i1 != i2);
+    assert(i1 != i3);
+    assert(i2 != i3);
   }
 
   // member data
