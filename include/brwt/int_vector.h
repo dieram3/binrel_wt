@@ -1,8 +1,12 @@
 #ifndef BRWT_INT_VECTOR_H
 #define BRWT_INT_VECTOR_H
 
-#include <brwt/bit_vector.h> // bit_vector
-#include <cassert>           // assert
+#include <brwt/bit_vector.h>      // bit_vector
+#include <brwt/detail/iterator.h> // random_access_iterator
+#include <algorithm>              // equal
+#include <cassert>                // assert
+#include <cstddef>                // ptrdiff_t
+#include <initializer_list>       // initializer_list
 
 namespace brwt {
 
@@ -10,6 +14,7 @@ class int_vector {
 public:
   using value_type = bit_vector::block_type;
   using size_type = bit_vector::size_type;
+  using difference_type = std::ptrdiff_t;
 
   /// \brief Class to provide an l-value reference to a particular element from
   /// the array.
@@ -17,9 +22,10 @@ public:
   private:
     reference(int_vector& vec, size_type pos) noexcept
         : vector{vec}, elem_pos{pos} {}
-    reference(const reference&) = default;
 
   public:
+    reference(const reference&) = default;
+
     reference& operator=(const value_type value) noexcept {
       vector.set_value(elem_pos, value);
       return *this;
@@ -38,7 +44,14 @@ public:
     friend int_vector;
   };
 
-  friend reference;
+  using const_reference = value_type;
+
+  using iterator = detail::random_access_iterator<int_vector, value_type,
+                                                  reference, difference_type>;
+
+  using const_iterator =
+      detail::random_access_iterator<const int_vector, value_type,
+                                     const_reference, difference_type>;
 
 public:
   /// \brief Constructs an empty vector.
@@ -63,6 +76,19 @@ public:
   ///
   int_vector(size_type count, int bpe);
 
+  /// \brief Constructs the sequence with the given initializer list.
+  ///
+  /// \post <tt>get_bpe() == (ilist.size() == 0? 0 :
+  /// bits-needed-for-max-element)</tt>.
+  ///
+  /// \par Time complexity
+  /// Linear in <tt>ilist.size()</tt>.
+  ///
+  int_vector(std::initializer_list<value_type> ilist);
+
+  /// \name Element access
+  /// @{
+
   /// \brief Returns a proxy to the element at the given position.
   ///
   /// \param pos The position of the element to access.
@@ -74,16 +100,57 @@ public:
     return reference(*this, pos);
   }
 
-  /// \brief Return the value of the element at a given position.
+  /// \brief Returns the value of the element at the given position.
   ///
   /// \param pos The position of the element to access.
   ///
   /// \par Time complexity
   /// Constant.
   ///
-  value_type operator[](size_type pos) const noexcept {
+  const_reference operator[](size_type pos) const noexcept {
     return get_value(pos);
   }
+
+  /// \brief Returns a \c reference to the first element.
+  ///
+  /// \pre <tt>!empty()</tt>
+  ///
+  reference front() noexcept {
+    assert(!empty());
+    return reference(*this, 0);
+  }
+
+  /// \brief Returns the value of the first element.
+  ///
+  /// \pre <tt>!empty()</tt>
+  ///
+  const_reference front() const noexcept {
+    assert(!empty());
+    return get_value(0);
+  }
+
+  /// \brief Returns a reference to the last element.
+  ///
+  /// \pre <tt>!empty()</tt>
+  ///
+  reference back() noexcept {
+    assert(!empty());
+    return reference(*this, size() - 1);
+  }
+
+  /// \brief Returns the value of the last element.
+  ///
+  /// \pre <tt>!empty()</tt>
+  ///
+  const_reference back() const noexcept {
+    assert(!empty());
+    return get_value(size() - 1);
+  }
+
+  /// @}
+
+  /// \name Capacity
+  /// @{
 
   /// \brief Returns the number of elements of the array.
   ///
@@ -92,6 +159,12 @@ public:
   ///
   size_type size() const noexcept {
     return num_elems;
+  }
+
+  /// \brief Checks whether the sequence is empty.
+  ///
+  bool empty() const noexcept {
+    return size() == 0;
   }
 
   /// \brief Returns the number of bits per element.
@@ -112,8 +185,59 @@ public:
     return bit_seq.allocated_bytes();
   }
 
+  /// @}
+
+  /// \name Iterators
+  /// @{
+
+  iterator begin() noexcept {
+    return iterator(*this, 0);
+  }
+  const_iterator begin() const noexcept {
+    return const_iterator(*this, 0);
+  }
+  const_iterator cbegin() const noexcept {
+    return const_iterator(*this, 0);
+  }
+
+  iterator end() noexcept {
+    return iterator(*this, size());
+  }
+  const_iterator end() const noexcept {
+    return const_iterator(*this, size());
+  }
+  const_iterator cend() const noexcept {
+    return const_iterator(*this, size());
+  }
+
+  /// @}
+
+  /// \name Modifiers
+  /// @{
+
+  /// \brief Clears the contents.
+  ///
+  void clear() noexcept {
+    bit_seq = bit_vector(); // TODO(Diego): use bit_seq.clear() when possible.
+    num_elems = 0;
+    bits_per_element = 0;
+  }
+
+  /// \brief Swaps the contents.
+  ///
+  void swap(int_vector& other) noexcept {
+    using std::swap;
+    swap(bit_seq, other.bit_seq);
+    swap(num_elems, other.num_elems);
+    swap(bits_per_element, other.bits_per_element);
+  }
+
+  /// @}
 private:
-  value_type get_value(size_type pos) const noexcept;
+  value_type get_value(const size_type pos) const noexcept {
+    assert(pos >= 0 && pos < num_elems && "Out of range");
+    return bit_seq.get_chunk(pos * bits_per_element, bits_per_element);
+  }
   void set_value(size_type pos, value_type value) noexcept;
 
 private:
@@ -123,13 +247,73 @@ private:
 };
 
 // ==========================================
-// Inline definitions
+// Non-member functions
 // ==========================================
 
-inline int_vector::value_type int_vector::get_value(const size_type pos) const
-    noexcept {
-  assert(pos >= 0 && pos < num_elems && "Out of range");
-  return bit_seq.get_chunk(pos * bits_per_element, bits_per_element);
+/// \brief Swaps the contents of \p lhs and \p rhs.
+///
+/// \relates int_vector
+///
+inline void swap(int_vector& lhs, int_vector& rhs) noexcept {
+  lhs.swap(rhs);
+}
+
+/// \brief Compares \p lhs and \p rhs for equality.
+///
+/// Two vectors are equal if they have the same size and the same contents. The
+/// number of bits per element is not taken into account.
+///
+/// \relates int_vector
+///
+inline bool operator==(const int_vector& lhs, const int_vector& rhs) {
+  return lhs.size() == rhs.size() &&
+         std::equal(lhs.begin(), lhs.end(), rhs.begin());
+}
+
+/// \brief Compares \p lhs and \p rhs for inequality.
+///
+/// \returns <tt>!(lhs == rhs)</tt>
+///
+/// \relates int_vector
+///
+inline bool operator!=(const int_vector& lhs, const int_vector& rhs) {
+  return !(lhs == rhs);
+}
+
+/// \brief Swaps the values of the elements that \p lhs and \p rhs are referring
+/// to.
+///
+/// \relates int_vector::reference
+///
+inline void swap(int_vector::reference lhs, int_vector::reference rhs) {
+  using value_t = int_vector::value_type;
+  value_t tmp = lhs;
+  lhs = rhs;
+  rhs = tmp;
+}
+
+/// \brief Swaps the values of the elements that \p lhs and \p rhs are referring
+/// to.
+///
+/// \relates int_vector::reference
+///
+inline void swap(int_vector::reference lhs, int_vector::value_type& rhs) {
+  using value_t = int_vector::value_type;
+  value_t tmp = lhs;
+  lhs = rhs;
+  rhs = tmp;
+}
+
+/// \brief Swaps the values of the elements that \p lhs and \p rhs are referring
+/// to.
+///
+/// \relates int_vector::reference
+///
+inline void swap(int_vector::value_type& lhs, int_vector::reference rhs) {
+  using value_t = int_vector::value_type;
+  value_t tmp = lhs;
+  lhs = rhs;
+  rhs = tmp;
 }
 
 } // end namespace brwt
