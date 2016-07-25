@@ -21,11 +21,13 @@ public:
   using value_type = T;
   using size_type = std::size_t;
   using difference_type = std::ptrdiff_t;
-  using iterator = random_access_iterator<dyn_array, T, T&, difference_type>;
-  using const_iterator =
-      random_access_iterator<const dyn_array, T, T, difference_type>;
   using reference = T&;
   using const_reference = const T&;
+  using iterator =
+      random_access_iterator<dyn_array, T, reference, difference_type>;
+  using const_iterator =
+      random_access_iterator<const dyn_array, T, const_reference,
+                             difference_type>;
 
   // constructors
 
@@ -298,15 +300,14 @@ protected:
   }
 
   // member data
+  const_iterator i{};
 
-  const iterator i0 = seq.begin();
-  const iterator i1 = seq.begin() + 1;
-  const iterator i2 = seq.begin() + 2;
-  const iterator i3 = seq.begin() + 3;
+  const const_iterator i0 = seq.begin();
+  const const_iterator i1 = seq.begin() + 1;
+  const const_iterator i2 = seq.begin() + 2;
+  const const_iterator i3 = seq.begin() + 3;
 
-  const const_iterator j0 = i0;
-
-  iterator i{};
+  const iterator j0 = seq.begin();
 };
 } // end namespace
 
