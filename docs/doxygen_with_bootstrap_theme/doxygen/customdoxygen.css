@@ -398,7 +398,8 @@ table.memberdecls {
 
 .mdescLeft, .mdescRight {
   padding: 0px 8px 4px 8px;
-  color: #555;
+  color: #777;
+  border-top: none !important;
 }
 
 .memItemLeft, .memTemplItemLeft {
