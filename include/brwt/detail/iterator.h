@@ -13,8 +13,11 @@ namespace detail {
 /// \brief This class provide \e random-access iterators to containers that have
 /// overloaded the subscript operator (\c operator[]).
 ///
-/// Note that this class satisfies the \c RandomAccessIterator concept.
+/// For the sake of performance, two iterators can be compared if and only if
+/// they refer to the same container, otherwise it is undefined behaviour. This
+/// makes possible to compare them by using only its stored position.
 ///
+/// \note This class fully satisfies the \c RandomAccessIterator concept.
 ///
 template <typename Container, typename ValueType, typename Reference,
           typename DifferenceType>
@@ -53,7 +56,7 @@ public:
     return reference_traits<reference>::as_pointer(*(*this));
   }
 
-  reference operator[](difference_type n) const noexcept {
+  reference operator[](difference_type n) const {
     using sz = typename Container::size_type;
     return (*m_cont)[static_cast<sz>(m_pos + n)];
   }
@@ -142,10 +145,10 @@ private:
   constexpr random_access_iterator(Container& c, difference_type pos)
       : m_cont{std::addressof(c)}, m_pos{pos} {}
 
-  // The container class can use the container constructor.
+  // frienship to allow the container using the private constructor.
   friend Container;
 
-  // for non-const to const conversion.
+  // frienship to allow non-const to const conversion.
   template <typename C, typename V, typename R, typename D>
   friend class random_access_iterator;
 
