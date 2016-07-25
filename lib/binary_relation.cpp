@@ -2,7 +2,7 @@
 
 #include <brwt/bit_hacks.h>   // used_bits
 #include <brwt/index_range.h> // index_range
-#include <algorithm>          // max, for_each
+#include <algorithm>          // max, for_each, sort, unique
 #include <cassert>            // assert
 #include <cstddef>            // size_t
 #include <iterator>           // begin, end
@@ -35,7 +35,7 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 }
 
 template <typename InputRange, typename UnaryFunction>
-static UnaryFunction for_each(const InputRange& range, UnaryFunction f) {
+static UnaryFunction for_each(InputRange&& range, UnaryFunction f) {
   return std::for_each(std::begin(range), std::end(range), f);
 }
 
@@ -175,6 +175,56 @@ static auto count_objects_frequency(const vector<pair_type>& pairs,
   return frequency;
 }
 
+template <typename ForwardRange, typename T>
+static void inplace_exclusive_scan(ForwardRange& range, const T init) {
+  exclusive_scan(std::begin(range), std::end(range), std::begin(range), init);
+}
+
+static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
+                                      const label_id max_label,
+                                      vector<size_type>& objects_frequency) {
+  int_vector seq(/*count=*/static_cast<size_type>(pairs.size()),
+                 /*bpe=*/used_bits(static_cast<word_type>(max_label)));
+
+  // The first step is constructing the sequence of labels ordered by their
+  // associated object value. The inplace_exclusive_scan and the for_each are an
+  // inline counting sort to do this.
+  inplace_exclusive_scan(objects_frequency, size_type{0});
+  for_each(pairs, [&](const pair_type& p) {
+    const auto next_pos = objects_frequency[p.object]++;
+    seq[next_pos] = p.label;
+  });
+
+  assert(objects_frequency.back() == seq.size());
+
+  // Then, we have to sort each object range by label value and remove
+  // duplicates. The one thing we know is the end of each object range (which is
+  // stored in objects_frequency as a byproduct of the counting sort).
+  auto first = seq.begin();
+  auto seq_end = seq.begin();
+  for_each(objects_frequency, [&](size_type& freq) {
+    // First, remove duplicates. Note that at this point, freq contains the
+    // accumulated frequency of all pairs until the current object.
+    const auto last = seq.begin() + freq;
+    std::sort(first, last);
+    const auto unique_end = std::unique(first, last);
+    seq_end = std::copy(first, unique_end, seq_end);
+
+    // Then, use freq to keep the number of distinct pairs associated to the
+    // current object (necessary for constructing the bitmap).
+    freq = std::distance(first, unique_end);
+
+    // Then, update first. Note that the end of the current object range is the
+    // begin of the next object range.
+    first = last;
+  });
+
+  // Finally, erase unused elements (because removing of duplicates) and
+  // construct the wavelet tree.
+  seq.erase(seq_end, seq.end());
+  return wavelet_tree(std::move(seq));
+}
+
 static bitmap make_bitmap(const vector<size_type>& objects_frequency,
                           const size_type num_pairs) {
   auto bit_seq = [&] {
@@ -191,31 +241,13 @@ static bitmap make_bitmap(const vector<size_type>& objects_frequency,
   return bitmap(std::move(bit_seq));
 }
 
-template <typename ForwardRange, typename T>
-static void inplace_exclusive_scan(ForwardRange& range, const T init) {
-  exclusive_scan(std::begin(range), std::end(range), std::begin(range), init);
-}
-
-static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
-                                      vector<size_type> objects_frequency,
-                                      const label_id max_label) {
-  int_vector seq(/*count=*/static_cast<size_type>(pairs.size()),
-                 /*bpe=*/used_bits(static_cast<word_type>(max_label)));
-
-  // The exclusive_scan and the for_each are an inline counting sort.
-  inplace_exclusive_scan(objects_frequency, size_type{0});
-  for_each(pairs, [&](const pair_type& p) {
-    const auto next_pos = objects_frequency[p.object]++;
-    seq[next_pos] = p.label;
-  });
-
-  assert(objects_frequency.back() == seq.size());
-
-  return wavelet_tree(std::move(seq));
-}
 } // end namespace pairs_constructor_detail
 
 binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
+  if (pairs.empty()) {
+    return;
+  }
+
   object_id max_object{};
   label_id max_label{};
   for_each(pairs, [&](const pair_type& pair) {
@@ -223,17 +255,21 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
     max_label = std::max(max_label, pair.label);
   });
 
-  // TODO(Diego): Check that the vector list is unique. Consider to sort by
-  // labels as second instance.
-
   namespace detail = pairs_constructor_detail;
-  const auto num_pairs = static_cast<size_type>(pairs.size());
-  const auto objects_frequency =
-      detail::count_objects_frequency(pairs, max_object);
+  auto objects_frequency = detail::count_objects_frequency(pairs, max_object);
 
-  m_bitmap = detail::make_bitmap(objects_frequency, num_pairs);
-  m_wtree =
-      detail::make_wavelet_tree(pairs, std::move(objects_frequency), max_label);
+  m_wtree = detail::make_wavelet_tree(pairs, max_label, objects_frequency);
+
+  // Now that objects_frequency has been updated to contain the frequencies
+  // of objects after ignoring duplicates pairs (done by make_wavelet_tree), we
+  // can construct the bitmap.
+  const auto num_unique_pairs = m_wtree.size();
+  m_bitmap = detail::make_bitmap(objects_frequency, num_unique_pairs);
+
+  // TODO(Diego): Assert for m_wtree.sigma() when available.
+  assert(m_wtree.size() == num_unique_pairs);
+  assert(m_bitmap.num_zeros() == num_unique_pairs);
+  assert(m_bitmap.num_ones() == max_object + 1);
 }
 
 auto binary_relation::rank(object_id max_object, label_id max_label) const
