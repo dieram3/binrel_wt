@@ -1,7 +1,7 @@
 #include "doctest.h"
 #include <brwt/detail/iterator.h>
 
-#include <algorithm>   // miscellaneous algorithms for testing :)
+#include <algorithm>   // find, reverse, sort
 #include <cstddef>     // size_t, ptrdiff_t
 #include <iterator>    // iterator_traits
 #include <memory>      // unique_ptr
