@@ -217,11 +217,36 @@ public:
 
   /// \brief Clears the contents.
   ///
+  /// \par Time complexity
+  /// Constant.
+  ///
   void clear() noexcept {
-    bit_seq = bit_vector(); // TODO(Diego): use bit_seq.clear() when possible.
+    // bit_seq is leaved as is.
     num_elems = 0;
     bits_per_element = 0;
   }
+
+  /// \brief Removes the element at \p pos.
+  ///
+  /// \pre The iterator \p pos must be valid and dereferenceable.
+  ///
+  /// \returns Iterator following the element removed.
+  ///
+  /// \par Time complexity
+  /// Linear in <tt>std::distance(pos, end())</tt>.
+  ///
+  iterator erase(const_iterator pos) noexcept;
+
+  /// \brief Removes the elements in the range <tt>[first, last)</tt>.
+  ///
+  /// \returns Iterator following the last element removed.
+  ///
+  /// \par Time complexity
+  /// Linear in <tt>std::distance(last, end())</tt>. Note that no element in the
+  /// range needs to be destroyed as they are built-in integers (and therefore
+  /// are trivially destructible).
+  ///
+  iterator erase(const_iterator first, const_iterator last) noexcept;
 
   /// \brief Swaps the contents.
   ///
@@ -239,6 +264,7 @@ private:
     return bit_seq.get_chunk(pos * bits_per_element, bits_per_element);
   }
   void set_value(size_type pos, value_type value) noexcept;
+  iterator non_const(const_iterator pos) noexcept;
 
 private:
   bit_vector bit_seq;
