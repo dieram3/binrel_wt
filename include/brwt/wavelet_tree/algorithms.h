@@ -125,6 +125,19 @@ nth_element(const wavelet_tree& wt, index_range range, size_type nth) noexcept;
 index_type select(const wavelet_tree& wt, between<symbol_id> cond,
                   size_type nth) noexcept;
 
+/// \brief Returns the index of the first element greater than \c start in the
+/// stored sequence that comply with the given condition.
+///
+/// \returns The index of the first element if it exists, \c index_npos
+/// otherwise.
+///
+/// \par Complexity
+/// <tt>O(log(sigma))</tt>, where  <tt>sigma = alphabet-size</tt>.
+///
+/// \relates wavelet_tree
+///
+index_type select_first(const wavelet_tree& wt, index_type start,
+                        between<symbol_id> cond) noexcept;
 } // end namespace brwt
 
 #endif // BRWT_WAVELET_TREE_ALGORITHMS_H
