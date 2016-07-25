@@ -18,7 +18,7 @@ constexpr label_major_order_t lab_major{};
 
 /// \brief Representation of a binary relation between \e objects and \e labels.
 ///
-/// The following variables are used to define time and space complexities.
+/// The following variables are used to document time and space complexities.
 /// - \f$t\f$ The size of the binary relation.
 /// - \f$n\f$ The size of the object alphabet.
 /// - \f$\sigma\f$ The size of the label alphabet.
