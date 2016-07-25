@@ -203,20 +203,19 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   auto first = seq.begin();
   auto seq_end = seq.begin();
   for_each(objects_frequency, [&](size_type& freq) {
-    // At this point, freq contains the accumulated frequency of all pairs until
-    // the current object.
+    // First, remove duplicates. Note that at this point, freq contains the
+    // accumulated frequency of all pairs until the current object.
     const auto last = seq.begin() + freq;
     std::sort(first, last);
     const auto unique_end = std::unique(first, last);
-
-    // After removing duplicates, freq will be assigned to the number of
-    // distinct pairs associated to the current object (necessary for
-    // constructing the bitmap).
-    freq = std::distance(first, unique_end);
     seq_end = std::copy(first, unique_end, seq_end);
 
-    // Then, update first. The end of the current object range is the begin
-    // of the next object range.
+    // Then, use freq to keep the number of distinct pairs associated to the
+    // current object (necessary for constructing the bitmap).
+    freq = std::distance(first, unique_end);
+
+    // Then, update first. Note that the end of the current object range is the
+    // begin of the next object range.
     first = last;
   });
 
