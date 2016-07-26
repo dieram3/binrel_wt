@@ -467,13 +467,9 @@ static bool has_right_branch(const node_proxy& node) noexcept {
   return exclusive_rank_1(node, node.size()) > 0;
 }
 
-// merge leaf divisions results
-
-// Returns the index of the first node element at or after \p pos, whose
-// associated symbol is in the given range. If no such element exists, returns
-// index_npos.
-static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
-                                 const greater_equal<symbol_id> cond) noexcept {
+static index_type
+select_first_leaf(const node_proxy& node, const index_type pos,
+                  const greater_equal<symbol_id> cond) noexcept {
   assert(node.is_leaf());
 
   const auto min_symbol = cond.min_value;
@@ -486,8 +482,9 @@ static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
   return index_npos;
 }
 
-static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
-                                 const less_equal<symbol_id> cond) noexcept {
+static index_type select_first_leaf(const node_proxy& node,
+                                    const index_type pos,
+                                    const less_equal<symbol_id> cond) noexcept {
   assert(node.is_leaf());
 
   const auto max_symbol = cond.max_value;
@@ -500,16 +497,17 @@ static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
   return index_npos;
 }
 
-static index_type merge_leaf_div(const node_proxy& node, const index_type pos,
-                                 const symbol_id min_symbol,
-                                 const symbol_id max_symbol) {
+static index_type select_first_leaf(const node_proxy& node,
+                                    const index_type pos,
+                                    const between<symbol_id> cond) {
   assert(node.is_leaf());
 
-  if (node.is_lhs_symbol(min_symbol) && node.is_rhs_symbol(max_symbol)) {
+  if (node.is_lhs_symbol(cond.min_value) &&
+      node.is_rhs_symbol(cond.max_value)) {
     return pos;
   }
 
-  if (node.is_lhs_symbol(max_symbol)) {
+  if (node.is_lhs_symbol(cond.max_value)) {
     return map_lhs_pos(node, pos);
   }
 
@@ -545,7 +543,7 @@ static index_type select_first(node_proxy node, index_type pos,
   assert(pos >= 0 && pos <= node.size());
 
   if (node.is_leaf()) {
-    return merge_leaf_div(node, pos, cond);
+    return select_first_leaf(node, pos, cond);
   }
 
   auto select = [&](const node_proxy& n, index_type p) {
@@ -575,7 +573,7 @@ static size_type select_first(node_proxy node, index_type pos,
   assert(pos >= 0 && pos <= node.size());
 
   if (node.is_leaf()) {
-    return merge_leaf_div(node, pos, cond);
+    return select_first_leaf(node, pos, cond);
   }
 
   auto select = [&](const node_proxy& n, index_type p) {
@@ -601,34 +599,33 @@ static size_type select_first(node_proxy node, index_type pos,
 }
 
 static index_type select_first(node_proxy node, index_type pos,
-                               const symbol_id min_symbol,
-                               const symbol_id max_symbol) noexcept {
+                               const between<symbol_id> cond) noexcept {
   assert(pos >= 0 && pos <= node.size());
 
   if (node.is_leaf()) {
-    return merge_leaf_div(node, pos, min_symbol, max_symbol);
+    return select_first_leaf(node, pos, cond);
   }
 
   // Checks whether the interval [min_symbol, max_symbol] is fully covered by
   // either the left branch or the right branch.
-  if (node.is_lhs_symbol(max_symbol)) {
+  if (node.is_lhs_symbol(cond.max_value)) {
     auto select = [&](const node_proxy& n, index_type p) {
-      return select_first(n, p, min_symbol, max_symbol);
+      return select_first(n, p, cond);
     };
     return map_left_child(node, pos, select);
-  } else if (node.is_rhs_symbol(min_symbol)) {
+  } else if (node.is_rhs_symbol(cond.min_value)) {
     auto select = [&](const node_proxy& n, index_type p) {
-      return select_first(n, p, min_symbol, max_symbol);
+      return select_first(n, p, cond);
     };
     return map_right_child(node, pos, select);
   }
 
   // Merge results from both branches.
   auto select_ge = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, greater_equal<symbol_id>{min_symbol});
+    return select_first(n, p, greater_equal<symbol_id>{cond.min_value});
   };
   auto select_le = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, less_equal<symbol_id>{max_symbol});
+    return select_first(n, p, less_equal<symbol_id>{cond.max_value});
   };
 
   const auto mapped_lhs_pos = map_left_child(node, pos, select_ge);
@@ -648,8 +645,7 @@ index_type select_first(const wavelet_tree& wt, index_type start,
                         between<symbol_id> cond) noexcept {
   assert(cond.min_value >= 0 && cond.min_value <= cond.max_value &&
          cond.max_value <= wt.max_symbol_id());
-  return select_first_detail::select_first(wt.make_root(), start,
-                                           cond.min_value, cond.max_value);
+  return select_first_detail::select_first(wt.make_root(), start, cond);
 }
 
 } // end namespace brwt
