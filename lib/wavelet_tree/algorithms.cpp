@@ -457,7 +457,7 @@ static index_type select_first_0(const node_proxy& node,
   if (!node.access(start)) {
     return start;
   }
-  const auto nth = 1 + make_lhs_start(node, start);
+  const auto nth = exclusive_rank_0(node, start) + 1;
   return node.select_0(nth);
 }
 
@@ -472,7 +472,7 @@ static index_type select_first_1(const node_proxy& node,
   if (node.access(start)) {
     return start;
   }
-  const auto nth = make_rhs_start(node, start) + 1;
+  const auto nth = exclusive_rank_1(node, start) + 1;
   return node.select_1(nth);
 }
 
