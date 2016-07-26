@@ -113,9 +113,7 @@ public:
   /// \pre <tt>min_label <= max_label</tt>
   ///
   /// \par Time complexity
-  /// If <tt>min_label == max_label</tt>, the time complexity is
-  /// \f$O(\log\sigma)\f$. Otherwise, it is at most
-  /// \f$O(\log{n}\log{\sigma})\f$.
+  /// \f$O(\log\sigma)\f$.
   ///
   /// \remark This operation is also known as \c rel_min_obj_maj.
   ///
