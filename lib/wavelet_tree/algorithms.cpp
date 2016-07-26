@@ -482,6 +482,7 @@ leaf_select_first(const node_proxy& node, const index_type start,
   assert(node.is_leaf());
 
   if (node.is_lhs_symbol(cond.min_value)) {
+    // All symbols are valid.
     return start;
   }
   return select_first_1(node, start);
@@ -493,6 +494,7 @@ static index_type leaf_select_first(const node_proxy& node,
   assert(node.is_leaf());
 
   if (node.is_rhs_symbol(cond.max_value)) {
+    // All symbols are valid.
     return start;
   }
   return select_first_0(node, start);
