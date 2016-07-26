@@ -3,6 +3,7 @@
 #include "../generic_algorithms.h"          // int_binary_search
 #include "bitmask_support.h"                // symbol_id-stuff
 #include <brwt/wavelet_tree/wavelet_tree.h> // wavelet_tree class definition.
+#include <algorithm>                        // min
 
 namespace brwt {
 
@@ -182,7 +183,8 @@ size_type rank(const wavelet_tree& wt, const index_range range,
 
 namespace count_symbols_detail {
 
-// TODO(diego): Optimization. Some overloads of count_symbols generate children
+// TODO(diego): Optimization. Some overloads of count_symbols generate
+// children
 // nodes even when its respective ranges are empty.
 
 static size_type count_symbols(node_proxy node, const index_range range) {
@@ -434,209 +436,225 @@ index_type select(const wavelet_tree& wt, const between<symbol_id> cond,
 namespace select_first_detail {
 
 // index maps
-static index_type make_lhs_pos(const node_proxy& node,
-                               const index_type pos) noexcept {
-  return exclusive_rank_0(node, pos);
+static index_type make_lhs_start(const node_proxy& node,
+                                 const index_type start) noexcept {
+  return exclusive_rank_0(node, start);
 }
 
-static index_type make_rhs_pos(const node_proxy& node,
-                               const index_type pos) noexcept {
-  return exclusive_rank_1(node, pos);
+static index_type make_rhs_start(const node_proxy& node,
+                                 const index_type start) noexcept {
+  return exclusive_rank_1(node, start);
 }
 
-static index_type map_lhs_pos(const node_proxy& node,
-                              const index_type pos) noexcept {
-  const auto nth = make_lhs_pos(node, pos) + 1;
-  assert(nth > 0);
+static index_type select_first_0(const node_proxy& node,
+                                 const index_type start) noexcept {
+  // TODO(Jorge): Return node.select_next_0(pos) when available.
+  assert(start >= 0 && start <= node.size());
+
+  if (start == node.size()) {
+    return index_npos;
+  }
+  if (!node.access(start)) {
+    return start;
+  }
+  const auto nth = 1 + make_lhs_start(node, start);
   return node.select_0(nth);
 }
 
-static index_type map_rhs_pos(const node_proxy& node,
-                              const index_type pos) noexcept {
-  const auto nth = make_rhs_pos(node, pos) + 1;
-  assert(nth > 0);
+static index_type select_first_1(const node_proxy& node,
+                                 const index_type start) noexcept {
+  // TODO(Jorge): Return node.select_next_1(pos) when available.
+  assert(start >= 0 && start <= node.size());
+
+  if (start == node.size()) {
+    return index_npos;
+  }
+  if (node.access(start)) {
+    return start;
+  }
+  const auto nth = make_rhs_start(node, start) + 1;
   return node.select_1(nth);
 }
 
-// node_proxy extensions
-static bool has_left_branch(const node_proxy& node) noexcept {
-  return exclusive_rank_0(node, node.size()) > 0;
-}
-
-static bool has_right_branch(const node_proxy& node) noexcept {
-  return exclusive_rank_1(node, node.size()) > 0;
-}
-
 static index_type
-select_first_leaf(const node_proxy& node, const index_type pos,
+leaf_select_first(const node_proxy& node, const index_type start,
                   const greater_equal<symbol_id> cond) noexcept {
   assert(node.is_leaf());
 
-  const auto min_symbol = cond.min_value;
-  if (node.is_lhs_symbol(min_symbol)) {
-    return pos;
-  } else if (has_right_branch(node)) {
-    return map_rhs_pos(node, pos);
+  if (node.is_lhs_symbol(cond.min_value)) {
+    return start;
   }
-
-  return index_npos;
+  return select_first_1(node, start);
 }
 
-static index_type select_first_leaf(const node_proxy& node,
-                                    const index_type pos,
+static index_type leaf_select_first(const node_proxy& node,
+                                    const index_type start,
                                     const less_equal<symbol_id> cond) noexcept {
   assert(node.is_leaf());
 
-  const auto max_symbol = cond.max_value;
-  if (node.is_rhs_symbol(max_symbol)) {
-    return pos;
-  } else if (has_left_branch(node)) {
-    return map_lhs_pos(node, pos);
+  if (node.is_rhs_symbol(cond.max_value)) {
+    return start;
   }
-
-  return index_npos;
+  return select_first_0(node, start);
 }
 
-static index_type select_first_leaf(const node_proxy& node,
-                                    const index_type pos,
+static index_type leaf_select_first(const node_proxy& node,
+                                    const index_type start,
                                     const between<symbol_id> cond) {
   assert(node.is_leaf());
 
-  if (node.is_lhs_symbol(cond.min_value) &&
-      node.is_rhs_symbol(cond.max_value)) {
-    return pos;
-  }
-
   if (node.is_lhs_symbol(cond.max_value)) {
-    return map_lhs_pos(node, pos);
+    return select_first_0(node, start);
+  }
+  if (node.is_rhs_symbol(cond.min_value)) {
+    return select_first_1(node, start);
   }
 
-  return map_rhs_pos(node, pos);
+  assert(node.is_lhs_symbol(cond.min_value) &&
+         node.is_rhs_symbol(cond.max_value));
+  return start;
 }
 
 // convenience functions
 
-// maps the position of the smallest left child to the current node. Uses the
-// given selection function to determine the smallest child.
-template <class SelectionFunction>
-static index_type map_left_child(const node_proxy& node, const index_type pos,
-                                 SelectionFunction&& fn) noexcept {
-  const auto nth = fn(node.make_lhs(), make_lhs_pos(node, pos)) + 1;
-  return nth == 0 ? index_npos : node.select_0(nth);
+static std::pair<index_type, index_type>
+make_lhs_and_rhs_start(const node_proxy& node,
+                       const index_type start) noexcept {
+  const auto lhs = exclusive_rank_0(node, start);
+  const auto rhs = start - lhs;
+  return {lhs, rhs};
 }
 
-// maps the position of the smallest right child to the current node. Uses the
-// given selection function to determine the smallest child.
-template <class SelectionFunction>
-static index_type map_right_child(const node_proxy& node, index_type pos,
-                                  SelectionFunction&& fn) noexcept {
-  const auto nth = fn(node.make_rhs(), make_rhs_pos(node, pos)) + 1;
-  return nth == 0 ? index_npos : node.select_1(nth);
+static index_type remap_pos_from_lhs(const node_proxy& node,
+                                     const index_type pos) noexcept {
+  if (pos == index_npos) {
+    return index_npos;
+  }
+  return node.select_0(pos + 1);
+}
+
+static index_type remap_pos_from_rhs(const node_proxy& node,
+                                     const index_type pos) noexcept {
+  if (pos == index_npos) {
+    return index_npos;
+  }
+  return node.select_1(pos + 1);
+}
+
+// Computes the minimum between lhs and rhs, considering that lhs or rhs can
+// be equal to index_npos. If lhs == index_npos, returns rhs. Otherwise, if
+// rhs == index_npos, returns lhs. Otherwise, returns min(lhs, rhs).
+static constexpr index_type min_index(const index_type lhs_pos,
+                                      const index_type rhs_pos) noexcept {
+  if (lhs_pos == index_npos) {
+    return rhs_pos;
+  }
+  if (rhs_pos == index_npos) {
+    return lhs_pos;
+  }
+  return std::min(lhs_pos, rhs_pos);
 }
 
 // ==========================
 // select first implementation
 // ==========================
 
-static index_type select_first(node_proxy node, index_type pos,
+static index_type select_first(const node_proxy& node, const index_type start,
                                const greater_equal<symbol_id> cond) noexcept {
-  assert(pos >= 0 && pos <= node.size());
+  assert(start >= 0 && start <= node.size());
+
+  if (start == node.size()) {
+    return index_npos;
+  }
 
   if (node.is_leaf()) {
-    return select_first_leaf(node, pos, cond);
+    return leaf_select_first(node, start, cond);
   }
 
-  auto select = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, cond);
-  };
-
-  if (node.is_lhs_symbol(cond.min_value)) {
-    if (has_left_branch(node)) {
-      const auto mapped_rhs_pos = map_rhs_pos(node, pos);
-      const auto mapped_lhs_pos = map_left_child(node, pos, select);
-
-      if (mapped_rhs_pos != index_npos && mapped_lhs_pos != index_npos) {
-        return std::min(mapped_lhs_pos, mapped_rhs_pos);
-      }
-
-      return mapped_rhs_pos == index_npos ? mapped_lhs_pos : mapped_rhs_pos;
-    }
-
-    return pos;
+  if (node.is_rhs_symbol(cond.min_value)) {
+    const auto rpos =
+        select_first(node.make_rhs(), make_rhs_start(node, start), cond);
+    return remap_pos_from_rhs(node, rpos);
   }
 
-  return map_right_child(node, pos, select);
+  const auto mapped_lhs_pos = [&] {
+    const auto lhs_first =
+        select_first(node.make_lhs(), make_lhs_start(node, start), cond);
+    return remap_pos_from_lhs(node, lhs_first);
+  }();
+  const auto mapped_rhs_pos = select_first_1(node, start);
+
+  return min_index(mapped_lhs_pos, mapped_rhs_pos);
 }
 
-static size_type select_first(node_proxy node, index_type pos,
+static size_type select_first(const node_proxy& node, const index_type start,
                               const less_equal<symbol_id> cond) noexcept {
-  assert(pos >= 0 && pos <= node.size());
+  assert(start >= 0 && start <= node.size());
+
+  if (start == node.size()) {
+    return index_npos;
+  }
 
   if (node.is_leaf()) {
-    return select_first_leaf(node, pos, cond);
+    return leaf_select_first(node, start, cond);
   }
 
-  auto select = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, cond);
-  };
-
-  if (node.is_rhs_symbol(cond.max_value)) {
-    if (has_right_branch(node)) {
-      const auto mapped_lhs_pos = map_lhs_pos(node, pos);
-      const auto mapped_rhs_pos = map_right_child(node, pos, select);
-
-      if (mapped_lhs_pos != index_npos && mapped_rhs_pos != index_npos) {
-        return std::min(mapped_lhs_pos, mapped_rhs_pos);
-      }
-
-      return mapped_rhs_pos == index_npos ? mapped_lhs_pos : mapped_rhs_pos;
-    }
-
-    return pos;
+  if (node.is_lhs_symbol(cond.max_value)) {
+    const auto lhs_first =
+        select_first(node.make_lhs(), make_lhs_start(node, start), cond);
+    return remap_pos_from_lhs(node, lhs_first);
   }
 
-  return map_left_child(node, pos, select);
+  // TODO(jorge): consider optimizing by checking if the right child is empty.
+
+  const auto mapped_lhs_pos = select_first_0(node, start);
+  const auto mapped_rhs_pos = [&] {
+    const auto rhs_first =
+        select_first(node.make_rhs(), make_rhs_start(node, start), cond);
+    return remap_pos_from_rhs(node, rhs_first);
+  }();
+
+  return min_index(mapped_lhs_pos, mapped_rhs_pos);
 }
 
-static index_type select_first(node_proxy node, index_type pos,
+static index_type select_first(const node_proxy& node, const index_type start,
                                const between<symbol_id> cond) noexcept {
-  assert(pos >= 0 && pos <= node.size());
+  assert(start >= 0 && start <= node.size());
+
+  if (start == node.size()) {
+    return index_npos;
+  }
 
   if (node.is_leaf()) {
-    return select_first_leaf(node, pos, cond);
+    return leaf_select_first(node, start, cond);
   }
 
   // Checks whether the interval [min_symbol, max_symbol] is fully covered by
   // either the left branch or the right branch.
   if (node.is_lhs_symbol(cond.max_value)) {
-    auto select = [&](const node_proxy& n, index_type p) {
-      return select_first(n, p, cond);
-    };
-    return map_left_child(node, pos, select);
-  } else if (node.is_rhs_symbol(cond.min_value)) {
-    auto select = [&](const node_proxy& n, index_type p) {
-      return select_first(n, p, cond);
-    };
-    return map_right_child(node, pos, select);
+    const auto lhs_first =
+        select_first(node.make_lhs(), make_lhs_start(node, start), cond);
+    return remap_pos_from_lhs(node, lhs_first);
+  }
+  if (node.is_rhs_symbol(cond.min_value)) {
+    const auto rhs_first =
+        select_first(node.make_rhs(), make_rhs_start(node, start), cond);
+    return remap_pos_from_rhs(node, rhs_first);
   }
 
   // Merge results from both branches.
-  auto select_ge = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, greater_equal<symbol_id>{cond.min_value});
-  };
-  auto select_le = [&](const node_proxy& n, index_type p) {
-    return select_first(n, p, less_equal<symbol_id>{cond.max_value});
-  };
+  const auto children = node.make_lhs_and_rhs();
+  const auto children_start = make_lhs_and_rhs_start(node, start);
 
-  const auto mapped_lhs_pos = map_left_child(node, pos, select_ge);
-  const auto mapped_rhs_pos = map_right_child(node, pos, select_le);
+  const auto lhs_pos =
+      select_first(get_left(children), get_left(children_start),
+                   greater_equal<symbol_id>{cond.min_value});
+  const auto rhs_pos =
+      select_first(get_right(children), get_right(children_start),
+                   less_equal<symbol_id>{cond.max_value});
 
-  if (mapped_lhs_pos != index_npos && mapped_rhs_pos != index_npos) {
-    assert(mapped_lhs_pos >= pos && mapped_rhs_pos >= pos);
-    return std::min(mapped_lhs_pos, mapped_rhs_pos);
-  }
-
-  return mapped_lhs_pos == index_npos ? mapped_lhs_pos : mapped_rhs_pos;
+  return min_index(remap_pos_from_lhs(node, lhs_pos),
+                   remap_pos_from_rhs(node, rhs_pos));
 }
 
 } // end select_first_detail
