@@ -9,5 +9,6 @@ add_unittest("brwt"
   "int_vector_test.cpp"
   "main.cpp"
   "utility_test.cpp"
-  "wavelet_tree_test.cpp"
+  "wavelet_tree/algorithms_test.cpp"
+  "wavelet_tree/wavelet_tree_test.cpp"
 )
