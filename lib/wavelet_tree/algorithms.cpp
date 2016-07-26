@@ -657,7 +657,7 @@ static index_type select_first(const node_proxy& node, const index_type start,
                    remap_pos_from_rhs(node, rhs_pos));
 }
 
-} // end select_first_detail
+} // end namespace select_first_detail
 
 index_type select_first(const wavelet_tree& wt, index_type start,
                         between<symbol_id> cond) noexcept {
