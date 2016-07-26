@@ -444,18 +444,18 @@ static index_type make_rhs_pos(const node_proxy& node,
   return exclusive_rank_1(node, pos);
 }
 
-static index_type map_rhs_pos(const node_proxy& node,
-                              const index_type pos) noexcept {
-  const auto nth = make_rhs_pos(node, pos) + 1;
-  assert(nth > 0);
-  return node.select_1(nth);
-}
-
 static index_type map_lhs_pos(const node_proxy& node,
                               const index_type pos) noexcept {
   const auto nth = make_lhs_pos(node, pos) + 1;
   assert(nth > 0);
   return node.select_0(nth);
+}
+
+static index_type map_rhs_pos(const node_proxy& node,
+                              const index_type pos) noexcept {
+  const auto nth = make_rhs_pos(node, pos) + 1;
+  assert(nth > 0);
+  return node.select_1(nth);
 }
 
 // node_proxy extensions
