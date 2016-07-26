@@ -838,6 +838,33 @@ TEST_CASE("[lower_bound,obj_major]: Full range") {
   CHECK(lower_bound({11_obj, 9_lab}) == nullopt);
 }
 
+TEST_CASE("[lower_bound,obj_major]: Thin range") {
+  auto lower_bound = [br = make_test_binary_relation_2()](const pair_type p) {
+    using brwt::obj_major;
+    return br.lower_bound(p, 5_lab, 6_lab, obj_major);
+  };
+
+  CHECK(lower_bound({0_obj, 5_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({3_obj, 5_lab}) == pair(3_obj, 6_lab));
+  CHECK(lower_bound({3_obj, 6_lab}) == pair(3_obj, 6_lab));
+
+  CHECK(lower_bound({4_obj, 5_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({6_obj, 6_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({7_obj, 5_lab}) == pair(7_obj, 6_lab));
+  CHECK(lower_bound({7_obj, 6_lab}) == pair(7_obj, 6_lab));
+
+  CHECK(lower_bound({8_obj, 5_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({8_obj, 6_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({9_obj, 5_lab}) == pair(9_obj, 6_lab));
+  CHECK(lower_bound({9_obj, 6_lab}) == pair(9_obj, 6_lab));
+
+  CHECK(lower_bound({10_obj, 5_lab}) == nullopt);
+  CHECK(lower_bound({10_obj, 6_lab}) == nullopt);
+
+  CHECK(lower_bound({11_obj, 5_lab}) == nullopt);
+  CHECK(lower_bound({11_obj, 6_lab}) == nullopt);
+}
+
 // ==========================================
 // obj[_exclusive]_rank with fixed_label
 // ==========================================

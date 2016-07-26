@@ -62,10 +62,6 @@ static constexpr object_id prev(const object_id x) noexcept {
   return static_cast<object_id>(to_underlying_type(x) - 1);
 }
 
-static constexpr object_id next(const object_id x) noexcept {
-  return static_cast<object_id>(to_underlying_type(x) + 1);
-}
-
 static constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_underlying_type(alpha) != 0);
   return static_cast<label_id>(to_underlying_type(alpha) - 1);
@@ -372,7 +368,14 @@ auto binary_relation::lower_bound(const pair_type start,
   if (start.object + 1 == object_alphabet_size()) {
     return nullopt;
   }
-  return nth_element(next(start.object), min_label, max_label, 1, obj_major);
+
+  const auto wt_pos = select_first(m_wtree, upper_bound(start.object),
+                                   between_symbols(min_label, max_label));
+  if (wt_pos == index_npos) {
+    return nullopt;
+  }
+  return pair_type{get_associated_object(wt_pos),
+                   as_label(m_wtree.access(wt_pos))};
 }
 
 // ===------------------------------------------===
