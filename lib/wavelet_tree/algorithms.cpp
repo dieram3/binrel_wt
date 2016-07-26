@@ -572,9 +572,9 @@ static index_type select_first(const node_proxy& node, const index_type start,
   }
 
   if (node.is_rhs_symbol(cond.min_value)) {
-    const auto rpos =
+    const auto rhs_first =
         select_first(node.make_rhs(), make_rhs_start(node, start), cond);
-    return remap_pos_from_rhs(node, rpos);
+    return remap_pos_from_rhs(node, rhs_first);
   }
 
   const auto mapped_lhs_pos = [&] {
@@ -642,19 +642,22 @@ static index_type select_first(const node_proxy& node, const index_type start,
     return remap_pos_from_rhs(node, rhs_first);
   }
 
+  assert(node.is_lhs_symbol(cond.min_value) &&
+         node.is_rhs_symbol(cond.max_value));
+
   // Merge results from both branches.
   const auto children = node.make_lhs_and_rhs();
   const auto children_start = make_lhs_and_rhs_start(node, start);
 
-  const auto lhs_pos =
+  const auto lhs_first =
       select_first(get_left(children), get_left(children_start),
                    greater_equal<symbol_id>{cond.min_value});
-  const auto rhs_pos =
+  const auto rhs_first =
       select_first(get_right(children), get_right(children_start),
                    less_equal<symbol_id>{cond.max_value});
 
-  return min_index(remap_pos_from_lhs(node, lhs_pos),
-                   remap_pos_from_rhs(node, rhs_pos));
+  return min_index(remap_pos_from_lhs(node, lhs_first),
+                   remap_pos_from_rhs(node, rhs_first));
 }
 
 } // end namespace select_first_detail
