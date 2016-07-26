@@ -183,8 +183,7 @@ size_type rank(const wavelet_tree& wt, const index_range range,
 
 namespace count_symbols_detail {
 
-// TODO(diego): Optimization. Some overloads of count_symbols generate
-// children
+// TODO(diego): Optimization. Some overloads of count_symbols generate children
 // nodes even when its respective ranges are empty.
 
 static size_type count_symbols(node_proxy node, const index_range range) {

@@ -128,7 +128,7 @@ index_type select(const wavelet_tree& wt, between<symbol_id> cond,
 /// \brief Finds the first element at or after \p start such that its label
 /// value is in the given range.
 ///
-/// \returns The index of the first element that satisfies the given conditions.
+/// \returns The index of the first element that satisfies the given condition.
 /// If no such element exists, returns \c index_npos.
 ///
 /// \par Complexity
