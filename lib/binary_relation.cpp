@@ -148,7 +148,7 @@ auto binary_relation::get_associated_object(const index_type wt_pos) const
   assert(wt_pos >= 0 && wt_pos < m_wtree.size());
 
   const auto bit_pos = m_bitmap.select_0(wt_pos + 1);
-  return static_cast<object_id>(m_bitmap.rank_1(bit_pos));
+  return object_id((bit_pos + 1) - (wt_pos + 1)); // m_bitmap.rank_1(bit_pos)
 }
 
 namespace pairs_constructor_detail {
