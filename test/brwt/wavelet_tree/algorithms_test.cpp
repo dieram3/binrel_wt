@@ -1,8 +1,6 @@
 #include "doctest.h"
 #include <brwt/wavelet_tree.h>
 
-#include <array> // array
-
 using brwt::wavelet_tree;
 using brwt::symbol_id;
 using brwt::int_vector;
@@ -64,7 +62,7 @@ TEST_CASE("[select_first] medium alphabet") {
     return brwt::select_first(wt, start, brwt::between<symbol_id>{min, max});
   };
 
-  // seq= 0226 5363 2132 0453 7000 3321
+  // seq = 0226 5363 2132 0453 7000 3321
 
   CHECK(select_first(/*start=*/0, 0_sym, 1_sym) == 0);
   CHECK(select_first(/*start=*/0, 1_sym, 1_sym) == 9);
