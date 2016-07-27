@@ -177,22 +177,31 @@ bitmap::index_type bitmap::select_0(size_type nth) const {
          brwt::select_0(sequence.get_block(seq_idx), static_cast<int>(nth));
 }
 
+static size_type sb_exclusive_rank(const int_vector& sb_rank,
+                                   const index_type sb_pos) {
+  assert(sb_pos >= 0 && sb_pos < sb_rank.size());
+  if (sb_pos == 0) {
+    return 0;
+  }
+  return static_cast<size_type>(sb_rank[sb_pos - 1]);
+}
+
 bitmap::size_type bitmap::rank_1(const index_type pos) const {
-  assert(pos < length());
+  assert(pos >= 0 && pos < length());
 
-  size_type sum = [&] {
-    const index_type idx = (pos / bits_per_super_block) - 1;
-    return (idx >= 0) ? static_cast<size_type>(super_blocks[idx]) : 0;
-  }();
+  // Address
+  const auto num_super_block = pos / bits_per_super_block;
+  const auto num_block = pos / bits_per_block;
+  const int num_bit = pos % bits_per_block;
 
-  size_type current_pos = pos - (pos % bits_per_super_block);
-  for (; current_pos + bits_per_block <= pos; current_pos += bits_per_block) {
-    sum += pop_count(sequence.get_block(current_pos / bits_per_block));
+  size_type sum = sb_exclusive_rank(super_blocks, num_super_block);
+
+  for (index_type ith = (num_super_block * blocks_per_super_block);
+       ith < num_block; ++ith) {
+    sum += pop_count(sequence.get_block(ith));
   }
 
-  if (current_pos <= pos) {
-    sum += pop_count(sequence.get_chunk(current_pos, (pos - current_pos) + 1));
-  }
+  sum += brwt::rank_1(sequence.get_block(num_block), num_bit);
 
   return sum;
 }
