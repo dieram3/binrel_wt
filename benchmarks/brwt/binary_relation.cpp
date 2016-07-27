@@ -77,7 +77,7 @@ private:
   }
 
 private:
-  std::mt19937 engine{std::random_device{}()};
+  std::mt19937 engine;
   std::uniform_int_distribution<size_t> object_dist;
   std::uniform_int_distribution<size_t> label_dist;
 };
@@ -85,9 +85,7 @@ private:
 
 template <typename T>
 static T clamp(const T& v, const T& lo, const T& hi) {
-  // return v < lo ? lo : hi < v ? hi : v;
-  return static_cast<T>(
-      long(v) < long(lo) ? long(lo) : long(hi) < long(v) ? long(hi) : long(v));
+  return v < lo ? lo : hi < v ? hi : v;
 }
 
 static void bm_rank(benchmark::State& state) {
