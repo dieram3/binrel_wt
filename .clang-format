@@ -5,7 +5,7 @@ ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IncludeCategories:
   - Regex:           '^".+"$'            # Private headers
     Priority:        1
-  - Regex:           '^<binrel_wt/'      # BinRel-WT headers
+  - Regex:           '^<brwt/'           # BRWT headers
     Priority:        2
   - Regex:           '^<.+/.+>$'         # Non standard headers
     Priority:        3
