@@ -9,8 +9,8 @@ if(NOT Benchmark_FOUND)
 endif()
 
 function(add_benchmark BM_NAME)
-  set(TARGET_ID "bm_${BM_NAME}")
-  cpl_add_executable(${TARGET_ID} ${ARGN})
+  set(TARGET_ID "benchmark_${BM_NAME}")
+  cpl_add_executable(${TARGET_ID} "${BM_NAME}.bench.cpp")
   target_link_libraries(${TARGET_ID} binrel_wt Benchmark::benchmark)
 
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -18,4 +18,5 @@ function(add_benchmark BM_NAME)
   endif()
 endfunction()
 
-add_subdirectory("brwt")
+add_benchmark("binary_relation")
+add_benchmark("bit_hacks")

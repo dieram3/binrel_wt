@@ -45,3 +45,5 @@ static void bm_100_pop_counts(benchmark::State& state) {
 }
 
 BENCHMARK(bm_100_pop_counts);
+
+BENCHMARK_MAIN();

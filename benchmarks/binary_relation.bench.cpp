@@ -165,3 +165,5 @@ static void bm_count_distinct_labels(benchmark::State& state) {
   }
 }
 BENCHMARK(bm_count_distinct_labels);
+
+BENCHMARK_MAIN();
