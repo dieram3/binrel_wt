@@ -37,7 +37,7 @@ static index_type gen_index(const bitmap& bm) {
 }
 
 static auto generate_random_indices(const bitmap& bm,
-                                    std::size_t count = 1024) {
+                                    const std::size_t count = 1024) {
   assert(count > 0);
   cyclic_input<index_type> indices;
   indices.generate(count, [&] { return gen_index(bm); });
