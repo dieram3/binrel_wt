@@ -1,3 +1,5 @@
+find_package(Doxygen)
+
 if(DOXYGEN_FOUND)
 	configure_file(Doxyfile.in Doxyfile @ONLY)
 
