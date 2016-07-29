@@ -1,5 +1,5 @@
-#include <benchmark/benchmark_api.h>
 #include <brwt/bit_hacks.h>
+#include <benchmark/benchmark_api.h>
 
 #include <random> // mt19937, uniform_int_distribution
 
