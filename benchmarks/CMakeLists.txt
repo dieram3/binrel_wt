@@ -4,7 +4,7 @@
 find_package(Benchmark)
 
 if(NOT Benchmark_FOUND)
-  message(STATUS "Benchmark library not found. Benchmarks will not be compiled")
+  message(STATUS "Benchmark library not found. Benchmarks will not be built")
   return()
 endif()
 
