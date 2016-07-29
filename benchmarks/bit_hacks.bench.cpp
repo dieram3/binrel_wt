@@ -1,5 +1,5 @@
-#include <benchmark/benchmark_api.h>
 #include <brwt/bit_hacks.h>
+#include <benchmark/benchmark_api.h>
 
 #include <random> // mt19937, uniform_int_distribution
 
@@ -45,3 +45,5 @@ static void bm_100_pop_counts(benchmark::State& state) {
 }
 
 BENCHMARK(bm_100_pop_counts);
+
+BENCHMARK_MAIN();
