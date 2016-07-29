@@ -39,3 +39,4 @@ endfunction()
 
 add_benchmark_test("binary_relation")
 add_benchmark_test("bit_hacks")
+add_benchmark_test("bitmap")
