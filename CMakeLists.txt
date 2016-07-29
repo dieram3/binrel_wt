@@ -20,20 +20,24 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
 include(CPL_functions)
 
-find_package(Doxygen)
-
 # ---------------------------------------
 # Project options
 # ---------------------------------------
 
-option(ENABLE_CLANG_MODULES "Enables support for clang modules" OFF)
-option(COMPILE_BENCHMARKS "Compiles the library benchmarks" ON)
+option(BRWT_INCLUDE_TESTS "Generate build targets for the BRWT unit tests." ON)
+option(BRWT_BUILD_TESTS "Include unit test targets in the default build target." OFF)
+
+option(BRWT_INCLUDE_BENCHMARKS "Generate build targets for the BRWT benchmark tests." OFF)
+
+option(BRWT_INCLUDE_DOCS "Generate build targets for the BRWT documentation." ON)
+
+option(BRWT_ENABLE_MODULES "Enable support for clang modules." OFF)
 
 # ---------------------------------------
-# Handle options
+# Handle compilation options
 # ---------------------------------------
 
-if(ENABLE_CLANG_MODULES)
+if(BRWT_ENABLE_MODULES)
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-fmodules -fcxx-modules)
 endif()
@@ -44,13 +48,18 @@ endif()
 # ---------------------------------------
 
 add_subdirectory("lib")
-add_subdirectory("docs")
 
 # Add the unit tests
-enable_testing()
-add_subdirectory("test")
-include(CTest)
+if(BRWT_INCLUDE_TESTS)
+  enable_testing()
+  add_subdirectory("test")
+  include(CTest)
+endif()
 
-if(COMPILE_BENCHMARKS)
+if(BRWT_INCLUDE_BENCHMARKS)
   add_subdirectory("benchmarks")
+endif()
+
+if(BRWT_INCLUDE_DOCS)
+  add_subdirectory("docs")
 endif()
