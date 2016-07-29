@@ -1,3 +1,12 @@
+if(NOT EXISTS "${CMAKE_SOURCE_DIR}/test/doctest/doctest/doctest.h")
+  message(WARNING
+    "Unit test targets will not be generated because Doctest was not found. "
+    "If you want to build the unit tests, update git submodules first and "
+    "regenerate the project."
+  )
+  return()
+endif()
+
 function(add_unittest TEST_NAME)
   set(TARGET_ID "${TEST_NAME}_test")
   cpl_add_executable(${TARGET_ID} ${ARGN})
