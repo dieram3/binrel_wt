@@ -1,4 +1,4 @@
-cpl_add_library(binrel_wt
+add_brwt_library(binrel_wt
   "binary_relation.cpp"
   "bit_vector.cpp"
   "bitmap.cpp"

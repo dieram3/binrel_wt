@@ -1,7 +1,4 @@
-# To install Benchmark in OS X do:
-# brew install google-benchmark
-
-find_package(Benchmark)
+find_package(Benchmark) # google-benchmark
 
 if(NOT Benchmark_FOUND)
   message(WARNING "Benchmark library not found. "
@@ -27,7 +24,7 @@ add_custom_target(brwt_benchmarks)
 
 function(add_benchmark_test BM_NAME)
   set(TARGET_ID "benchmark_${BM_NAME}")
-  cpl_add_executable(${TARGET_ID} EXCLUDE_FROM_ALL "${BM_NAME}.bench.cpp")
+  add_brwt_executable(${TARGET_ID} EXCLUDE_FROM_ALL "${BM_NAME}.bench.cpp")
   disable_global_constructor_warning(${TARGET_ID})
 
   target_link_libraries(${TARGET_ID} binrel_wt Benchmark::benchmark)

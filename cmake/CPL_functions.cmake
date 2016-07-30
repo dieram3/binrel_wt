@@ -1,4 +1,4 @@
-function(cpl_enable_all_warnings TARGET_ID)
+function(brwt_enable_all_warnings TARGET_ID)
   if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(${TARGET_ID} PRIVATE
       -Weverything
@@ -14,24 +14,24 @@ function(cpl_enable_all_warnings TARGET_ID)
   endif()
 endfunction()
 
-function(cpl_make_cpp14_strict TARGET_ID)
+function(brwt_make_cpp14_strict TARGET_ID)
   set_property(TARGET ${TARGET_ID} PROPERTY CXX_EXTENSIONS       OFF)
   set_property(TARGET ${TARGET_ID} PROPERTY CXX_STANDARD          14)
   set_property(TARGET ${TARGET_ID} PROPERTY CXX_STANDARD_REQUIRED ON)
 endfunction()
 
-# Default configuration for CPL targets.
-function(cpl_configure TARGET_ID)
-  cpl_enable_all_warnings(${TARGET_ID})
-  cpl_make_cpp14_strict(${TARGET_ID})
+# Default configuration for BRWT targets.
+function(brwt_configure TARGET_ID)
+  brwt_enable_all_warnings(${TARGET_ID})
+  brwt_make_cpp14_strict(${TARGET_ID})
 endfunction()
 
-function(cpl_add_library TARGET_ID)
+function(add_brwt_library TARGET_ID)
   add_library(${TARGET_ID} ${ARGN})
-  cpl_configure(${TARGET_ID})
+  brwt_configure(${TARGET_ID})
 endfunction()
 
-function(cpl_add_executable TARGET_ID)
+function(add_brwt_executable TARGET_ID)
   add_executable(${TARGET_ID} ${ARGN})
-  cpl_configure(${TARGET_ID})
+  brwt_configure(${TARGET_ID})
 endfunction()
