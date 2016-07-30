@@ -16,7 +16,7 @@ function(add_unittest TEST_NAME)
   add_test(NAME ${TEST_NAME} COMMAND ${TARGET_ID})
 
   if(NOT BRWT_BUILD_TESTS)
-    set_target_properties(${TARGET_ID} PROPERTIES EXCLUDE_FROM_ALL YES)
+    set_target_properties(${TARGET_ID} PROPERTIES EXCLUDE_FROM_ALL ON)
   endif()
 endfunction()
 
