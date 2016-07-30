@@ -10,3 +10,5 @@ add_brwt_library(brwt
 target_include_directories(brwt PUBLIC
   "${CMAKE_SOURCE_DIR}/include"
 )
+
+install(TARGETS brwt DESTINATION lib)
