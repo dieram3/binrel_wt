@@ -22,6 +22,10 @@ endfunction()
 
 add_custom_target(brwt_benchmarks)
 
+if(BRWT_BUILD_BENCHMARKS)
+  set_target_properties(brwt_benchmarks PROPERTIES EXCLUDE_FROM_ALL OFF)
+endif()
+
 function(add_benchmark_test BM_NAME)
   set(TARGET_ID "benchmark_${BM_NAME}")
   add_brwt_executable(${TARGET_ID} EXCLUDE_FROM_ALL "${BM_NAME}.bench.cpp")

@@ -28,6 +28,7 @@ option(BRWT_INCLUDE_TESTS "Generate build targets for the BRWT unit tests." ON)
 option(BRWT_BUILD_TESTS "Include unit test targets in the default build target." OFF)
 
 option(BRWT_INCLUDE_BENCHMARKS "Generate build targets for the BRWT benchmark tests." OFF)
+option(BRWT_BUILD_BENCHMARKS "Include benchmark targets in the default build target." OFF)
 
 option(BRWT_INCLUDE_DOCS "Generate build targets for the BRWT documentation." ON)
 
