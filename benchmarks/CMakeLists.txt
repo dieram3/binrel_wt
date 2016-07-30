@@ -27,7 +27,7 @@ function(add_benchmark_test BM_NAME)
   add_brwt_executable(${TARGET_ID} EXCLUDE_FROM_ALL "${BM_NAME}.bench.cpp")
   disable_global_constructor_warning(${TARGET_ID})
 
-  target_link_libraries(${TARGET_ID} binrel_wt Benchmark::benchmark)
+  target_link_libraries(${TARGET_ID} brwt Benchmark::benchmark)
   add_dependencies(brwt_benchmarks ${TARGET_ID})
 endfunction()
 
