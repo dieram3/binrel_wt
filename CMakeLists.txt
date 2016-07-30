@@ -14,11 +14,11 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-# For external tools:
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For external tools
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake")
-include(CPL_functions)
+
+include(AddBRWT)
 
 # ---------------------------------------
 # Project options
@@ -50,7 +50,6 @@ endif()
 
 add_subdirectory("lib")
 
-# Add the unit tests
 if(BRWT_INCLUDE_TESTS)
   enable_testing()
   add_subdirectory("test")
