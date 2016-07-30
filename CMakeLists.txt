@@ -40,6 +40,7 @@ option(BRWT_ENABLE_MODULES "Enable support for clang modules." OFF)
 if(BRWT_ENABLE_MODULES)
 if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-fmodules -fcxx-modules)
+  add_compile_options(-Wno-non-modular-include-in-module) # for <cassert>
 endif()
 endif()
 
