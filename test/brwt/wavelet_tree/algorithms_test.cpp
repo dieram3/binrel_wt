@@ -157,3 +157,5 @@ TEST_CASE("[select_first] one node, one symbol") {
   CHECK(select_first(/*start=*/4, 1_sym, 1_sym) == index_npos);
   CHECK(select_first(/*start=*/8, 1_sym, 1_sym) == index_npos);
 }
+
+TEST_SUITE_END();
