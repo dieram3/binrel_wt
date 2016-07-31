@@ -69,6 +69,6 @@ endif()
 # Install include headers
 # ---------------------------------------
 
-install(DIRECTORY include
-        DESTINATION ${CMAKE_INSTALL_PREFIX}
+install(DIRECTORY "include/brwt"
+        DESTINATION "include"
         FILES_MATCHING PATTERN "*.h")
