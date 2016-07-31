@@ -95,21 +95,17 @@ rank_find(const bit_vector& vec, const size_type start, const size_type value,
 template <typename T>
 static int select_1(const T value, const int nth) {
   static_assert(std::is_unsigned<T>::value, "");
-  assert(rank_1(value) >= nth);
+  assert(nth > 0 && nth <= rank_1(value));
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
   };
-  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+  return binary_search(nth - 1, std::numeric_limits<T>::digits - 1, not_enough);
 }
 
 template <typename T>
 static int select_0(const T value, const int nth) {
-  static_assert(std::is_unsigned<T>::value, "");
-  assert(rank_0(value) >= nth);
-  auto not_enough = [value, nth](const int pos) {
-    return rank_0(value, pos) < nth;
-  };
-  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+  static_assert(is_word_type<T>, "");
+  return select_1(~value, nth);
 }
 
 bitmap::index_type bitmap::select_1(size_type nth) const {
