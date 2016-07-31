@@ -32,10 +32,6 @@ static T binary_search(T a, T b, Pred pred) {
   return a;
 }
 
-static constexpr index_type operator"" _idx(unsigned long long pos) {
-  return static_cast<index_type>(pos);
-}
-
 // ==========================================
 // bitmap implementation
 // ==========================================
@@ -120,7 +116,9 @@ bitmap::index_type bitmap::select_1(size_type nth) const {
       return static_cast<size_type>(super_blocks[pos]);
     };
     auto not_enough = [&](const index_type pos) { return ones_sb(pos) < nth; };
-    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
+    const auto sb_begin = (nth - 1) / bits_per_super_block;
+
+    const auto pos = binary_search(sb_begin, super_blocks.size(), not_enough);
     nth -= (pos == 0 ? 0 : ones_sb(pos - 1));
     return pos;
   }();
@@ -155,7 +153,9 @@ bitmap::index_type bitmap::select_0(size_type nth) const {
              static_cast<size_type>(super_blocks[pos]);
     };
     auto not_enough = [&](const index_type pos) { return zeros_sb(pos) < nth; };
-    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
+    const auto sb_begin = (nth - 1) / bits_per_super_block;
+
+    const auto pos = binary_search(sb_begin, super_blocks.size(), not_enough);
     nth -= (pos == 0 ? 0 : zeros_sb(pos - 1));
     return pos;
   }();
