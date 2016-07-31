@@ -7,7 +7,7 @@ project("binrel_wt" CXX)
 
 if (NOT CMAKE_BUILD_TYPE)
   message(STATUS "No build type selected, defaulted to Release")
-  set(CMAKE_BUILD_TYPE "Release")
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type." FORCE)
 endif()
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/lib")
