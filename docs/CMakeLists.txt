@@ -13,6 +13,6 @@ endif(DOXYGEN_FOUND)
 
 install(
   DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/html"
-  DESTINATION "${CMAKE_INSTALL_PREFIX}/docs/brwt"
+  DESTINATION "docs/brwt"
   OPTIONAL
 )
