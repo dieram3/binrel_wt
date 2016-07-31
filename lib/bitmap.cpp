@@ -41,9 +41,13 @@ static constexpr index_type operator"" _idx(unsigned long long pos) {
 // ==========================================
 
 static constexpr size_type bits_per_block = bit_vector::bits_per_block;
-static constexpr size_type blocks_per_super_block = 10;
+static constexpr size_type blocks_per_super_block = 8;
 static constexpr size_type bits_per_super_block =
     blocks_per_super_block * bits_per_block;
+
+static_assert(is_power_of_two(bits_per_block), "");
+static_assert(is_power_of_two(blocks_per_super_block), "");
+static_assert(is_power_of_two(bits_per_super_block), "");
 
 bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
 
