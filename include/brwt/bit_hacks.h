@@ -107,6 +107,18 @@ constexpr int rank_0(const T value, const int pos) noexcept {
   return rank_1(~value, pos);
 }
 
+/// \brief Checks if the input integer is a power of two.
+///
+/// \pre <tt>value > 0</tt>
+///
+template <typename T>
+constexpr bool is_power_of_two(const T value) noexcept {
+  static_assert(std::is_integral<T>::value, "");
+  assert(value > 0);
+
+  return (value & (value - 1)) == 0;
+}
+
 } // end namespace brwt
 
 #endif // BRWT_BIT_HACKS_H

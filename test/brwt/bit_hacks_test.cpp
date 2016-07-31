@@ -176,4 +176,29 @@ TEST_CASE("[rank_1][integer][end_position]") {
   static_assert(noexcept(rank_1(0ull, 0)), "");
 }
 
+TEST_CASE("is_power_of_two") {
+  using brwt::is_power_of_two;
+
+  static_assert(is_power_of_two(1), "");
+  static_assert(is_power_of_two(2), "");
+  static_assert(is_power_of_two(4), "");
+  static_assert(is_power_of_two(8), "");
+  static_assert(is_power_of_two(16), "");
+  static_assert(is_power_of_two(32), "");
+  static_assert(is_power_of_two(64), "");
+  static_assert(is_power_of_two(128), "");
+  static_assert(is_power_of_two(256), "");
+  static_assert(is_power_of_two(512), "");
+
+  static_assert(!is_power_of_two(3), "");
+  static_assert(!is_power_of_two(5), "");
+  static_assert(!is_power_of_two(6), "");
+  static_assert(!is_power_of_two(7), "");
+  static_assert(!is_power_of_two(9), "");
+  static_assert(!is_power_of_two(10), "");
+  static_assert(!is_power_of_two(15), "");
+  static_assert(!is_power_of_two(31), "");
+  static_assert(!is_power_of_two(500), "");
+}
+
 TEST_SUITE_END();
