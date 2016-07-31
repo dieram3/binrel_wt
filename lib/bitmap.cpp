@@ -90,7 +90,7 @@ rank_find(const bit_vector& vec, const size_type start, const size_type value,
 
 template <typename T>
 static int select_1(const T value, const int nth) {
-  static_assert(std::is_unsigned<T>::value, "");
+  static_assert(is_word_type<T>, "");
   assert(nth > 0 && nth <= rank_1(value));
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
