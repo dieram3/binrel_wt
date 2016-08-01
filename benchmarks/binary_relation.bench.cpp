@@ -1,20 +1,19 @@
 #include <brwt/binary_relation.h>
 #include <benchmark/benchmark_api.h>
 
-#include "utility.h"
-#include <cassert> // assert
-#include <cstddef> // size_t
-#include <vector>  // vector
+#include "utility.h" // gen_integer, pow_2
+#include <cassert>   // assert
+#include <cstddef>   // size_t
+#include <vector>    // vector
 
 using brwt::binary_relation;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
-using brwt::obj_major;
-using brwt::lab_major;
 
 using brwt::benchmark::gen_integer;
 using brwt::benchmark::pow_2;
+using benchmark::DoNotOptimize;
 
 template <typename T>
 static constexpr T clamp(const T& v, const T& lo, const T& hi) {
@@ -102,7 +101,8 @@ static void bm_rank(benchmark::State& state) {
   while (state.KeepRunning()) {
     auto const max_object = gen_object(br);
     auto const max_label = gen_label(br);
-    br.rank(max_object, max_label);
+
+    DoNotOptimize(br.rank(max_object, max_label));
   }
 }
 BENCHMARK(bm_rank)->Range(pow_2(1), pow_2(20));
@@ -115,8 +115,9 @@ static void bm_nth_element_lab_maj(benchmark::State& state) {
   while (state.KeepRunning()) {
     auto obj_range = gen_object_range(br);
     auto lab_start = gen_label(br);
-    br.nth_element(obj_range.first, obj_range.second, lab_start, 42,
-                   brwt::lab_major);
+
+    DoNotOptimize(br.nth_element(obj_range.first, obj_range.second, lab_start,
+                                 42, brwt::lab_major));
   }
 }
 BENCHMARK(bm_nth_element_lab_maj)->Range(pow_2(1), pow_2(20));
@@ -129,7 +130,9 @@ static void bm_nth_element_obj_maj(benchmark::State& state) {
   while (state.KeepRunning()) {
     auto obj_start = gen_object(br);
     auto lab_range = gen_label_range(br);
-    br.nth_element(obj_start, lab_range.first, lab_range.second, 42, obj_major);
+
+    DoNotOptimize(br.nth_element(obj_start, lab_range.first, lab_range.second,
+                                 42, brwt::obj_major));
   }
 }
 BENCHMARK(bm_nth_element_obj_maj)->Range(pow_2(1), pow_2(20));
@@ -144,7 +147,8 @@ static void bm_lower_bound(benchmark::State& state) {
     auto start = gen_pair(br);
     start.label = clamp(start.label, lab_range.first, lab_range.second);
 
-    br.lower_bound(start, lab_range.first, lab_range.second, obj_major);
+    DoNotOptimize(br.lower_bound(start, lab_range.first, lab_range.second,
+                                 brwt::obj_major));
   }
 }
 BENCHMARK(bm_lower_bound)->Range(pow_2(1), pow_2(20));
@@ -157,7 +161,8 @@ static void bm_obj_select(benchmark::State& state) {
   while (state.KeepRunning()) {
     auto start = gen_object(br);
     auto label = gen_label(br);
-    br.obj_select(start, label, 42);
+
+    DoNotOptimize(br.obj_select(start, label, 42));
   }
 }
 BENCHMARK(bm_obj_select)->Range(pow_2(1), pow_2(20));
@@ -171,8 +176,8 @@ static void bm_count_distinct_labels(benchmark::State& state) {
     const auto obj_range = gen_object_range(br);
     const auto lab_range = gen_label_range(br);
 
-    br.count_distinct_labels(obj_range.first, obj_range.second, lab_range.first,
-                             lab_range.second);
+    DoNotOptimize(br.count_distinct_labels(obj_range.first, obj_range.second,
+                                           lab_range.first, lab_range.second));
   }
 }
 BENCHMARK(bm_count_distinct_labels)->Range(pow_2(1), pow_2(20));
