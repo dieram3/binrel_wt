@@ -1,26 +1,28 @@
 #include <brwt/bit_vector.h>
 #include <brwt/bitmap.h>
 
-#include <brwt/bit_hacks.h> // pop_count, rank_0, rank_1, used_bits
-#include <brwt/utility.h>   // ceil_div
-
-#include <algorithm> // min
-#include <cassert>   // assert
-#include <utility>   // move, pair
+#include "utils/array_view.h" // array_view
+#include <brwt/bit_hacks.h>   // pop_count, rank_0, rank_1, used_bits
+#include <brwt/utility.h>     // ceil_div
+#include <algorithm>          // min
+#include <cassert>            // assert
+#include <limits>             // numeric_limits
+#include <type_traits>        // enable_if_t
+#include <utility>            // move
 
 namespace brwt {
 
-using value_type = bit_vector::block_type;
+using block_t = bit_vector::block_type;
 
-// TODO(Diego): Rewrite some code. A bit of pessimization was made to fix the
-// errors quickly.
+// ===----------------------------------------------------===
+//                     bit_hacks extensions
+// ===----------------------------------------------------===
 
-// ==========================================
-// helper functions
-// ==========================================
-
+// TODO(Diego): Use int_binary_search.
+//
 template <typename T, typename Pred>
-static T binary_search(T a, T b, Pred pred) {
+static constexpr T binary_search(T a, T b, Pred pred) {
+  assert(a <= b);
   while (a != b) {
     const T mid = a + (b - a) / 2;
     if (pred(mid)) {
@@ -32,169 +34,218 @@ static T binary_search(T a, T b, Pred pred) {
   return a;
 }
 
-static constexpr index_type operator"" _idx(unsigned long long pos) {
-  return static_cast<index_type>(pos);
-}
-
-// ==========================================
-// bitmap implementation
-// ==========================================
-
-static constexpr size_type bits_per_block = bit_vector::bits_per_block;
-static constexpr size_type blocks_per_super_block = 10;
-static constexpr size_type bits_per_super_block =
-    blocks_per_super_block * bits_per_block;
-
-bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
-
-  const auto step = blocks_per_super_block; // measured in blocks.
-  super_blocks = [this] {
-    // num super-blocks
-    const size_type count = ceil_div(sequence.num_blocks(), step);
-    // bits per element
-    const int bpe = used_bits(static_cast<word_type>(sequence.size()));
-    return int_vector(count, bpe);
-  }();
-
-  auto sum_blocks = [&](index_type first, const index_type last) {
-    size_type res = 0;
-    for (; first != last; ++first) {
-      res += pop_count(sequence.get_block(first));
-    }
-    return res;
-  };
-
-  size_type acc_sum = 0;
-  for (size_type i = 0; i < super_blocks.size(); ++i) {
-    const auto first = i * step;
-    const auto last = std::min(first + step, sequence.num_blocks());
-    acc_sum += sum_blocks(first, last);
-    super_blocks[i] = static_cast<word_type>(acc_sum);
-  }
-}
-
-template <typename Rank>
-static std::pair<index_type, size_type>
-rank_find(const bit_vector& vec, const size_type start, const size_type value,
-          const Rank rank) {
-  size_type sum = 0;
-  for (size_type i = start; i < vec.num_blocks(); ++i) {
-    const auto tpm = sum + rank(vec.get_block(i));
-    if (tpm >= value) {
-      return std::make_pair(i, sum);
-    }
-    sum = tpm;
-  }
-  return std::make_pair(vec.num_blocks(), sum);
-}
-
 template <typename T>
-static int select_1(const T value, const int nth) {
-  static_assert(std::is_unsigned<T>::value, "");
-  assert(rank_1(value) >= nth);
+using enable_if_word = std::enable_if_t<is_word_type<T>>;
+
+template <typename T, typename = enable_if_word<T>>
+static constexpr int size_in_bits = std::numeric_limits<T>::digits;
+
+template <bool B, typename T, typename = enable_if_word<T>>
+static constexpr int count(const T value) {
+  return B ? pop_count(value) : pop_count(~value);
+}
+
+template <bool B, typename T, typename = enable_if_word<T>>
+static constexpr int rank(const T value, const int nth) {
+  return B ? rank_1(value, nth) : rank_0(value, nth);
+}
+
+template <typename T, typename = enable_if_word<T>>
+static constexpr int select_1(const T value, const int nth) {
+  assert(nth > 0 && nth <= pop_count(value));
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
   };
-  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+  return binary_search(nth - 1, size_in_bits<T> - 1, not_enough);
 }
 
-template <typename T>
-static int select_0(const T value, const int nth) {
-  static_assert(std::is_unsigned<T>::value, "");
-  assert(rank_0(value) >= nth);
-  auto not_enough = [value, nth](const int pos) {
-    return rank_0(value, pos) < nth;
-  };
-  return binary_search(0, std::numeric_limits<T>::digits - 1, not_enough);
+template <typename T, typename = enable_if_word<T>>
+static constexpr int select_0(const T value, const int nth) {
+  return select_1(~value, nth);
 }
 
-bitmap::index_type bitmap::select_1(size_type nth) const {
-  assert(nth > 0);
-
-  if (nth > num_ones()) {
-    return index_npos; // The answer does not exist.
-  }
-
-  const auto sb_idx = [&] {
-    auto ones_sb = [this](const index_type pos) {
-      return static_cast<size_type>(super_blocks[pos]);
-    };
-    auto not_enough = [&](const index_type pos) { return ones_sb(pos) < nth; };
-    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
-    nth -= (pos == 0 ? 0 : ones_sb(pos - 1));
-    return pos;
-  }();
-  assert(sb_idx < super_blocks.size());
-  assert(nth > 0 && nth <= bits_per_super_block);
-
-  const auto seq_idx = [&] {
-    const auto start = sb_idx * blocks_per_super_block;
-    const auto pair = rank_find(sequence, start, nth, [](const auto value) {
-      return brwt::rank_1(value);
-    });
-    nth -= pair.second; // exclusive_count
-    return pair.first;  // idx where the accumulated pop count was >= nth
-  }();
-  assert(nth > 0 && nth <= std::numeric_limits<word_type>::digits);
-
-  return seq_idx * bits_per_block +
-         brwt::select_1(sequence.get_block(seq_idx), static_cast<int>(nth));
+template <bool B, typename T, typename = enable_if_word<T>>
+static constexpr int select(const T value, const int nth) {
+  return B ? select_1(value, nth) : select_0(value, nth);
 }
 
-bitmap::index_type bitmap::select_0(size_type nth) const {
-  assert(nth > 0);
+// ===----------------------------------------------------===
+//             Bitmap implementation
+// ===----------------------------------------------------===
 
-  if (nth > num_zeros()) {
-    return index_npos; // The answer does not exist.
-  }
+static constexpr size_type bits_per_block = bit_vector::bits_per_block;
+static constexpr size_type blocks_per_super_block = 8;
+static constexpr size_type bits_per_super_block =
+    blocks_per_super_block * bits_per_block;
 
-  const auto sb_idx = [&] {
-    // TODO(Diego): It seems that std::min can be removed safely.
-    auto zeros_sb = [this](const index_type pos) {
-      return std::min((pos + 1) * bits_per_super_block, size()) -
-             static_cast<size_type>(super_blocks[pos]);
-    };
-    auto not_enough = [&](const index_type pos) { return zeros_sb(pos) < nth; };
-    const auto pos = binary_search(0_idx, super_blocks.size(), not_enough);
-    nth -= (pos == 0 ? 0 : zeros_sb(pos - 1));
-    return pos;
-  }();
-  assert(sb_idx < super_blocks.size());
-  assert(nth > 0 && nth <= bits_per_super_block);
+static_assert(is_power_of_two(bits_per_block), "");
+static_assert(is_power_of_two(blocks_per_super_block), "");
+static_assert(is_power_of_two(bits_per_super_block), "");
 
-  const auto seq_idx = [&] {
-    const auto start = sb_idx * blocks_per_super_block;
-    const auto pair = rank_find(sequence, start, nth, [](const auto elem) {
-      return brwt::rank_0(elem);
-    });
-    nth -= pair.second; // exclusive_count
-    return pair.first;  // idx where the accumulated pop count was >= nth
-  }();
-  assert(seq_idx < sequence.num_blocks());
-  assert(nth > 0 && nth <= std::numeric_limits<word_type>::digits);
-
-  return seq_idx * bits_per_block +
-         brwt::select_0(sequence.get_block(seq_idx), static_cast<int>(nth));
+/// Returns the range of blocks belonging to the super block `sb_idx`.
+///
+auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
+  array_view<block_t> v{bit_seq.data(), bit_seq.num_blocks()};
+  return v.subarray(/*pos=*/sb_idx * blocks_per_super_block,
+                    /*count=*/blocks_per_super_block);
 }
 
-bitmap::size_type bitmap::rank_1(const index_type pos) const {
-  assert(pos < length());
+auto bitmap::num_super_blocks() const noexcept -> size_type {
+  return sb_rank_1.size();
+}
 
-  size_type sum = [&] {
-    const index_type idx = (pos / bits_per_super_block) - 1;
-    return (idx >= 0) ? static_cast<size_type>(super_blocks[idx]) : 0;
+/// Sequentially counts the number of set bits in the given range of blocks.
+///
+static constexpr size_type pop_count(const array_view<block_t> blocks) {
+  size_type sum = 0;
+  for (const auto elem : blocks) {
+    sum += pop_count(elem);
+  }
+  return sum;
+}
+
+bitmap::bitmap(bit_vector vec) : bit_seq(std::move(vec)) {
+
+  sb_rank_1 = [this] {
+    const auto count = ceil_div(bit_seq.num_blocks(), blocks_per_super_block);
+    const int bpe = used_bits(static_cast<word_type>(bit_seq.size()));
+    return int_vector(count, bpe);
   }();
 
-  size_type current_pos = pos - (pos % bits_per_super_block);
-  for (; current_pos + bits_per_block <= pos; current_pos += bits_per_block) {
-    sum += pop_count(sequence.get_block(current_pos / bits_per_block));
+  size_type acc_sum = 0;
+  for (size_type i = 0; i < num_super_blocks(); ++i) {
+    // TODO(Diego): Try to use transform_inclusive_scan when available.
+    acc_sum += pop_count(blocks_of_super_block(i));
+    sb_rank_1[i] = static_cast<word_type>(acc_sum);
+  }
+}
+
+template <bool B>
+auto bitmap::num_of() const noexcept -> size_type {
+  return B ? num_ones() : num_zeros();
+}
+
+// Rank lands ----------------------
+
+template <>
+auto bitmap::sb_rank<true>(const index_type sb_idx) const noexcept
+    -> size_type {
+  assert(sb_idx < num_super_blocks());
+
+  return static_cast<size_type>(sb_rank_1[sb_idx]);
+}
+
+template <>
+auto bitmap::sb_rank<false>(const index_type sb_idx) const noexcept
+    -> size_type {
+  assert(sb_idx < num_super_blocks());
+
+  const auto total = std::min((sb_idx + 1) * bits_per_super_block, size());
+  return total - sb_rank<true>(sb_idx);
+}
+
+template <bool B>
+auto bitmap::sb_exclusive_rank(const size_type sb_idx) const noexcept
+    -> size_type {
+  assert(sb_idx <= num_super_blocks());
+  return sb_idx == 0 ? 0 : sb_rank<B>(sb_idx - 1);
+}
+
+auto bitmap::rank_1(const index_type pos) const noexcept -> size_type {
+  assert(pos >= 0 && pos < length());
+
+  // Address
+  const auto sb_idx = pos / bits_per_super_block;
+  const auto block_idx = pos / bits_per_block;
+  const int bit_idx = pos % bits_per_block;
+
+  size_type sum = sb_exclusive_rank<1>(sb_idx);
+
+  for (index_type ith = (sb_idx * blocks_per_super_block); ith < block_idx;
+       ++ith) {
+    sum += pop_count(bit_seq.get_block(ith));
   }
 
-  if (current_pos <= pos) {
-    sum += pop_count(sequence.get_chunk(current_pos, (pos - current_pos) + 1));
-  }
+  sum += brwt::rank_1(bit_seq.get_block(block_idx), bit_idx);
 
   return sum;
+}
+
+auto bitmap::rank_0(const index_type pos) const noexcept -> size_type {
+  return (pos + 1) - rank_1(pos);
+}
+
+// Select lands ----------------------
+
+/// Finds the super block that contains the nth bit equal to B.
+template <bool B>
+auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
+  assert(nth > 0);
+  assert(nth <= num_of<B>());
+  assert(num_super_blocks() > 0);
+
+  auto not_enough = [&](const index_type pos) { return sb_rank<B>(pos) < nth; };
+  const auto sb_begin = (nth - 1) / bits_per_super_block;
+
+  return binary_search(sb_begin, num_super_blocks() - 1, not_enough);
+}
+
+/// Sequentially searches for the nth bit set to B.
+///
+/// \pre The nth bit must exist in the range of blocks.
+///
+/// \returns The position of the found bit, measured in bits. That is, the
+/// position of the bit in the containing block plus `size_in_bits<T>`
+/// multiplied by the number of preceding blocks.
+///
+template <bool B, typename T, typename = enable_if_word<T>>
+static constexpr index_type sequential_select(const array_view<T> blocks,
+                                              const size_type nth) {
+  assert(nth > 0);
+
+  size_type sum = 0;
+  for (index_type i = 0; i < blocks.size(); ++i) {
+    const auto& elem = blocks[i];
+
+    const auto prev_sum = sum;
+    sum += count<B>(elem);
+
+    if (sum >= nth) {
+      assert(nth > prev_sum);
+      return i * size_in_bits<T> +
+             select<B>(elem, static_cast<int>(nth - prev_sum));
+    }
+  }
+  return index_npos;
+}
+
+/// Templated version of select_1 and select_0.
+template <bool B>
+auto bitmap::select(size_type nth) const noexcept -> index_type {
+  assert(nth > 0);
+
+  if (nth > num_of<B>()) {
+    return index_npos; // The answer does not exist.
+  }
+
+  const auto sb_idx = sb_select<B>(nth);
+  assert(sb_idx < num_super_blocks());
+
+  nth -= sb_exclusive_rank<B>(sb_idx);
+  assert(nth > 0 && nth <= bits_per_super_block);
+
+  return sb_idx * bits_per_super_block +
+         sequential_select<B>(blocks_of_super_block(sb_idx), nth);
+}
+
+auto bitmap::select_1(size_type nth) const noexcept -> index_type {
+  assert(nth > 0);
+  return select<1>(nth);
+}
+
+auto bitmap::select_0(size_type nth) const noexcept -> index_type {
+  assert(nth > 0);
+  return select<0>(nth);
 }
 
 } // end namespace brwt

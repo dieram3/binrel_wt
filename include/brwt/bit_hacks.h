@@ -3,14 +3,17 @@
 
 #include <cassert>     // assert
 #include <limits>      // numeric_limits
-#include <type_traits> // is_same, is_unsigned
+#include <type_traits> // is_same, is_unsigned, remove_cv_t
 
 namespace brwt {
 
+// TODO(Diego): Provide a better implementation of this.
+//
 template <typename T>
 constexpr bool is_word_type =
-    std::is_same<T, unsigned>::value || std::is_same<T, unsigned long>::value ||
-    std::is_same<T, unsigned long long>::value;
+    std::is_same<std::remove_cv_t<T>, unsigned>::value ||
+    std::is_same<std::remove_cv_t<T>, unsigned long>::value ||
+    std::is_same<std::remove_cv_t<T>, unsigned long long>::value;
 
 constexpr int pop_count(unsigned x) noexcept {
   return __builtin_popcount(x);
@@ -105,6 +108,18 @@ constexpr int rank_0(const T value, const int pos) noexcept {
   assert(pos >= 0 && pos < std::numeric_limits<T>::digits);
 
   return rank_1(~value, pos);
+}
+
+/// \brief Checks if the input integer is a power of two.
+///
+/// \pre <tt>value > 0</tt>
+///
+template <typename T>
+constexpr bool is_power_of_two(const T value) noexcept {
+  static_assert(std::is_integral<T>::value, "");
+  assert(value > 0);
+
+  return (value & (value - 1)) == 0;
 }
 
 } // end namespace brwt

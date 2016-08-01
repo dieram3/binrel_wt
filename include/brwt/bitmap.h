@@ -14,57 +14,74 @@ public:
   using size_type = brwt::size_type;
 
 public:
-  bitmap() = default;
+  bitmap() noexcept = default;
   explicit bitmap(bit_vector vec);
 
-  bool access(index_type pos) const;
+  bool access(index_type pos) const noexcept;
 
-  size_type rank_0(index_type pos) const;
-  size_type rank_1(index_type pos) const;
+  size_type rank_0(index_type pos) const noexcept;
+  size_type rank_1(index_type pos) const noexcept;
 
-  index_type select_0(size_type nth) const;
-  index_type select_1(size_type nth) const;
+  index_type select_0(size_type nth) const noexcept;
+  index_type select_1(size_type nth) const noexcept;
 
-  size_type length() const;
-  size_type size() const;
+  size_type length() const noexcept; // TODO(Diego): Remove this.
+  size_type size() const noexcept;
 
-  size_type num_ones() const;
-  size_type num_zeros() const;
+  size_type num_ones() const noexcept;
+  size_type num_zeros() const noexcept;
 
 private:
-  bit_vector sequence;
-  int_vector super_blocks;
+  auto blocks_of_super_block(index_type sb_idx) const noexcept;
+  size_type num_super_blocks() const noexcept;
+
+  template <bool B>
+  size_type num_of() const noexcept;
+
+  template <bool B>
+  size_type sb_rank(index_type sb_idx) const noexcept;
+
+  template <bool B>
+  size_type sb_exclusive_rank(index_type sb_idx) const noexcept;
+
+  template <bool B>
+  index_type sb_select(size_type nth) const noexcept;
+
+  template <bool B>
+  index_type select(size_type nth) const noexcept;
+
+  /// Original bit sequence.
+  bit_vector bit_seq;
+
+  /// Number of set bits until the i-th super block (included).
+  int_vector sb_rank_1;
 };
 
 // ==========================================
 // Inline definitions
 // ==========================================
 
-inline bool bitmap::access(const index_type pos) const {
-  return sequence.get(pos);
+inline auto bitmap::access(const index_type pos) const noexcept -> bool {
+  return bit_seq.get(pos);
 }
 
-inline bitmap::size_type bitmap::rank_0(const index_type pos) const {
-  return (pos + 1) - rank_1(pos);
+inline auto bitmap::length() const noexcept -> size_type {
+  return bit_seq.length();
 }
 
-inline bitmap::size_type bitmap::length() const {
-  return sequence.length();
+inline auto bitmap::size() const noexcept -> size_type {
+  return bit_seq.length();
 }
 
-inline bitmap::size_type bitmap::size() const {
-  return sequence.length();
-}
-
-inline bitmap::size_type bitmap::num_ones() const {
+inline auto bitmap::num_ones() const noexcept -> size_type {
   if (size() == 0) {
     return 0;
   }
-  assert(super_blocks.size() > 0);
-  return static_cast<size_type>(super_blocks[super_blocks.size() - 1]);
+  assert(!sb_rank_1.empty());
+  return static_cast<size_type>(sb_rank_1.back());
 }
 
-inline bitmap::size_type bitmap::num_zeros() const {
+inline auto bitmap::num_zeros() const noexcept -> size_type {
   return size() - num_ones();
 }
 

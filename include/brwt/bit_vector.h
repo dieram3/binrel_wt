@@ -38,6 +38,13 @@ public:
   block_type get_block(size_type num_block) const noexcept;
   void set_block(size_type num_block, const block_type value) noexcept;
 
+  /// \brief Returns a pointer to the underlying array of blocks.
+  ///
+  /// The number of blocks can be obtained by calling \c num_blocks(). Note that
+  /// the unused bits from the last block are set to zero.
+  ///
+  const block_type* data() const noexcept;
+
 private:
   size_type m_len{};
   std::vector<block_type> blocks;
@@ -67,6 +74,10 @@ inline auto bit_vector::get_block(const size_type num_block) const noexcept
 inline void bit_vector::set_block(const size_type num_block,
                                   const block_type value) noexcept {
   blocks[static_cast<std::size_t>(num_block)] = value;
+}
+
+inline auto bit_vector::data() const noexcept -> const block_type* {
+  return blocks.data();
 }
 
 } // end namespace brwt
