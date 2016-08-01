@@ -56,7 +56,7 @@ static constexpr int select_1(const T value, const int nth) {
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
   };
-  return binary_search(nth - 1, std::numeric_limits<T>::digits - 1, not_enough);
+  return binary_search(nth - 1, size_in_bits<T> - 1, not_enough);
 }
 
 template <typename T, typename = enable_if_word<T>>
