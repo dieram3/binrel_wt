@@ -15,6 +15,7 @@ using brwt::symbol_id;
 using brwt::benchmark::gen_integer;
 using brwt::benchmark::cyclic_input;
 using brwt::benchmark::pow_2;
+using benchmark::DoNotOptimize;
 
 // ==========================================
 // Random data generation
@@ -99,7 +100,7 @@ static void bm_access(benchmark::State& state) {
 
   while (state.KeepRunning()) {
     const auto idx = indices.next();
-    wt.access(idx);
+    DoNotOptimize(wt.access(idx));
   }
 }
 BENCHMARK(bm_access)->Range(pow_2(1), pow_2(20));
@@ -112,7 +113,7 @@ static void bm_rank(benchmark::State& state) {
   while (state.KeepRunning()) {
     const auto idx = indices.next();
     const auto sym = symbols.next();
-    wt.rank(sym, idx);
+    DoNotOptimize(wt.rank(sym, idx));
   }
 }
 BENCHMARK(bm_rank)->Range(pow_2(1), pow_2(20));
@@ -122,7 +123,7 @@ static void bm_select(benchmark::State& state) {
   auto queries = generate_select_queries(wt, 1024);
   while (state.KeepRunning()) {
     const auto q = queries.next();
-    wt.select(q.first, q.second);
+    DoNotOptimize(wt.select(q.first, q.second));
   }
 }
 BENCHMARK(bm_select)->Range(pow_2(1), pow_2(20));
