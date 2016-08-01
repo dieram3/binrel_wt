@@ -61,19 +61,19 @@ private:
 // Inline definitions
 // ==========================================
 
-inline bool bitmap::access(const index_type pos) const noexcept {
+inline auto bitmap::access(const index_type pos) const noexcept -> bool {
   return sequence.get(pos);
 }
 
-inline bitmap::size_type bitmap::length() const noexcept {
+inline auto bitmap::length() const noexcept -> size_type {
   return sequence.length();
 }
 
-inline bitmap::size_type bitmap::size() const noexcept {
+inline auto bitmap::size() const noexcept -> size_type {
   return sequence.length();
 }
 
-inline bitmap::size_type bitmap::num_ones() const noexcept {
+inline auto bitmap::num_ones() const noexcept -> size_type {
   if (size() == 0) {
     return 0;
   }
@@ -81,7 +81,7 @@ inline bitmap::size_type bitmap::num_ones() const noexcept {
   return static_cast<size_type>(sb_rank_1.back());
 }
 
-inline bitmap::size_type bitmap::num_zeros() const noexcept {
+inline auto bitmap::num_zeros() const noexcept -> size_type {
   return size() - num_ones();
 }
 
