@@ -39,8 +39,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
   const auto alphabet_size = max_symbol_id() + 1;
   std::vector<size_type> next_pos(2 * alphabet_size);
 
-  for (size_type i = 0; i < sequence.size(); ++i) {
-    const auto symbol = sequence[i];
+  for (const auto symbol : sequence) {
     ++next_pos[alphabet_size + symbol];
   }
   {
@@ -83,8 +82,8 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
     assert(num_symbols == 1);
     assert(level_pos == bit_seq.size());
   };
-  for (size_type i = 0; i < sequence.size(); ++i) {
-    push_symbol(sequence[i]);
+  for (const auto symbol : sequence) {
+    push_symbol(symbol);
   }
 
   table = bitmap(std::move(bit_seq)); // The final magic.
