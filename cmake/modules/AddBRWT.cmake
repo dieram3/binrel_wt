@@ -27,7 +27,7 @@ function(brwt_configure TARGET_ID)
 endfunction()
 
 function(add_brwt_library TARGET_ID)
-  add_library(${TARGET_ID} SHARED ${ARGN}) # BRWT library is shared by default.
+  add_library(${TARGET_ID} ${ARGN})
   brwt_configure(${TARGET_ID})
 endfunction()
 
