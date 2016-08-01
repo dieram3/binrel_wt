@@ -173,6 +173,7 @@ auto bitmap::rank_0(const index_type pos) const noexcept -> size_type {
 
 // Select lands ----------------------
 
+/// Finds the super block that contains the nth bit equal to B.
 template <bool B>
 auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
   assert(nth > 0);
@@ -214,6 +215,7 @@ static constexpr index_type sequential_select(const array_view<T> blocks,
   return index_npos;
 }
 
+/// Templated version of select_1 and select_0.
 template <bool B>
 auto bitmap::select(size_type nth) const noexcept -> index_type {
   assert(nth > 0);

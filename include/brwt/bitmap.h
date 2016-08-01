@@ -43,11 +43,9 @@ private:
   template <bool B>
   size_type sb_exclusive_rank(index_type sb_idx) const noexcept;
 
-  /// Finds the super block that contains the nth bit equal to B.
   template <bool B>
   index_type sb_select(size_type nth) const noexcept;
 
-  /// Templated version of select_1 and select_0.
   template <bool B>
   index_type select(size_type nth) const noexcept;
 
