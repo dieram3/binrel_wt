@@ -14,10 +14,10 @@ public:
   using size_type = brwt::size_type;
 
 public:
-  bitmap() = default;
+  bitmap() noexcept = default;
   explicit bitmap(bit_vector vec);
 
-  bool access(index_type pos) const;
+  bool access(index_type pos) const noexcept;
 
   size_type rank_0(index_type pos) const noexcept;
   size_type rank_1(index_type pos) const noexcept;
@@ -25,11 +25,11 @@ public:
   index_type select_0(size_type nth) const noexcept;
   index_type select_1(size_type nth) const noexcept;
 
-  size_type length() const;
-  size_type size() const;
+  size_type length() const noexcept; // TODO(Diego): Remove this.
+  size_type size() const noexcept;
 
-  size_type num_ones() const;
-  size_type num_zeros() const;
+  size_type num_ones() const noexcept;
+  size_type num_zeros() const noexcept;
 
 private:
   /// Returns an array_view to the blocks contained in the super block `sb_idx`.
@@ -61,19 +61,19 @@ private:
 // Inline definitions
 // ==========================================
 
-inline bool bitmap::access(const index_type pos) const {
+inline bool bitmap::access(const index_type pos) const noexcept {
   return sequence.get(pos);
 }
 
-inline bitmap::size_type bitmap::length() const {
+inline bitmap::size_type bitmap::length() const noexcept {
   return sequence.length();
 }
 
-inline bitmap::size_type bitmap::size() const {
+inline bitmap::size_type bitmap::size() const noexcept {
   return sequence.length();
 }
 
-inline bitmap::size_type bitmap::num_ones() const {
+inline bitmap::size_type bitmap::num_ones() const noexcept {
   if (size() == 0) {
     return 0;
   }
@@ -81,7 +81,7 @@ inline bitmap::size_type bitmap::num_ones() const {
   return static_cast<size_type>(super_blocks[super_blocks.size() - 1]);
 }
 
-inline bitmap::size_type bitmap::num_zeros() const {
+inline bitmap::size_type bitmap::num_zeros() const noexcept {
   return size() - num_ones();
 }
 
