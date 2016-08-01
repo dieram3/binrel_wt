@@ -19,11 +19,11 @@ public:
 
   bool access(index_type pos) const;
 
-  size_type rank_0(index_type pos) const;
-  size_type rank_1(index_type pos) const;
+  size_type rank_0(index_type pos) const noexcept;
+  size_type rank_1(index_type pos) const noexcept;
 
-  index_type select_0(size_type nth) const;
-  index_type select_1(size_type nth) const;
+  index_type select_0(size_type nth) const noexcept;
+  index_type select_1(size_type nth) const noexcept;
 
   size_type length() const;
   size_type size() const;
@@ -32,6 +32,27 @@ public:
   size_type num_zeros() const;
 
 private:
+  /// Returns an array_view to the blocks contained in the super block `sb_idx`.
+  auto blocks_of_super_block(index_type sb_idx) const noexcept;
+
+  template <bool B>
+  size_type num_of() const noexcept;
+
+  template <bool B>
+  size_type sb_rank(index_type sb_idx) const noexcept;
+
+  template <bool B>
+  size_type sb_exclusive_rank(index_type sb_idx) const noexcept;
+
+  /// Finds the super block that contains the nth bit equal to B.
+  template <bool B>
+  index_type sb_select(size_type nth) const noexcept;
+
+  /// Templated version of select_1 and select_0.
+  template <bool B>
+  index_type select(size_type nth) const noexcept;
+
+  // member data
   bit_vector sequence;
   int_vector super_blocks;
 };
@@ -42,10 +63,6 @@ private:
 
 inline bool bitmap::access(const index_type pos) const {
   return sequence.get(pos);
-}
-
-inline bitmap::size_type bitmap::rank_0(const index_type pos) const {
-  return (pos + 1) - rank_1(pos);
 }
 
 inline bitmap::size_type bitmap::length() const {
