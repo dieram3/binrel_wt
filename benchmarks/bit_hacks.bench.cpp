@@ -1,49 +1,34 @@
 #include <brwt/bit_hacks.h>
 #include <benchmark/benchmark_api.h>
 
-#include <random> // mt19937, uniform_int_distribution
+#include "utility.h" // get_random_engine
+#include <algorithm> // generate
+#include <array>     // array
+#include <random>    // uniform_int_distribution
+#include <string>    // to_string
 
 using benchmark::DoNotOptimize;
 
-static void bm_100_pop_counts(benchmark::State& state) {
-  using brwt::pop_count;
+static void bm_pop_counts(benchmark::State& state) {
   using int_t = unsigned long long;
-  const auto value = [] {
-    std::random_device rd;
-    std::mt19937 engine{rd()};
-    std::uniform_int_distribution<int_t> gen_int;
-    return gen_int(engine);
-  }();
+  using brwt::pop_count;
 
-  auto ten_pop_count = [value] {
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-    DoNotOptimize(pop_count(value));
-  };
+  std::array<int_t, 8> inputs{};
+  std::generate(begin(inputs), end(inputs), [] {
+    std::uniform_int_distribution<int_t> dist;
+    return dist(brwt::benchmark::get_random_engine());
+  });
 
   while (state.KeepRunning()) {
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
-
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
-    ten_pop_count();
+    for (const auto elem : inputs) {
+      DoNotOptimize(pop_count(elem));
+    }
   }
+
+  state.SetLabel("pop_count(s) per iteration: " +
+                 std::to_string(inputs.size()));
 }
 
-BENCHMARK(bm_100_pop_counts);
+BENCHMARK(bm_pop_counts);
 
 BENCHMARK_MAIN();
