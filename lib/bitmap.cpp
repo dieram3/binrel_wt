@@ -22,6 +22,7 @@ using block_t = bit_vector::block_type;
 //
 template <typename T, typename Pred>
 static constexpr T binary_search(T a, T b, Pred pred) {
+  assert(a <= b);
   while (a != b) {
     const T mid = a + (b - a) / 2;
     if (pred(mid)) {
