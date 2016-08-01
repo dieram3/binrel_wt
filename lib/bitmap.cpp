@@ -155,18 +155,18 @@ auto bitmap::rank_1(const index_type pos) const noexcept -> size_type {
   assert(pos >= 0 && pos < length());
 
   // Address
-  const auto num_super_block = pos / bits_per_super_block;
-  const auto num_block = pos / bits_per_block;
-  const int num_bit = pos % bits_per_block;
+  const auto sb_idx = pos / bits_per_super_block;
+  const auto block_idx = pos / bits_per_block;
+  const int bit_idx = pos % bits_per_block;
 
-  size_type sum = sb_exclusive_rank<1>(num_super_block);
+  size_type sum = sb_exclusive_rank<1>(sb_idx);
 
-  for (index_type ith = (num_super_block * blocks_per_super_block);
-       ith < num_block; ++ith) {
+  for (index_type ith = (sb_idx * blocks_per_super_block); ith < block_idx;
+       ++ith) {
     sum += pop_count(sequence.get_block(ith));
   }
 
-  sum += brwt::rank_1(sequence.get_block(num_block), num_bit);
+  sum += brwt::rank_1(sequence.get_block(block_idx), bit_idx);
 
   return sum;
 }
