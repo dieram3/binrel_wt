@@ -33,6 +33,7 @@ public:
 
 private:
   auto blocks_of_super_block(index_type sb_idx) const noexcept;
+  size_type num_super_blocks() const noexcept;
 
   template <bool B>
   size_type num_of() const noexcept;
@@ -49,9 +50,11 @@ private:
   template <bool B>
   index_type select(size_type nth) const noexcept;
 
-  // member data
+  /// Original bit sequence.
   bit_vector sequence;
-  int_vector super_blocks;
+
+  /// Number of set bits until the i-th super block (included).
+  int_vector sb_rank_1;
 };
 
 // ==========================================
@@ -74,8 +77,8 @@ inline bitmap::size_type bitmap::num_ones() const noexcept {
   if (size() == 0) {
     return 0;
   }
-  assert(super_blocks.size() > 0);
-  return static_cast<size_type>(super_blocks[super_blocks.size() - 1]);
+  assert(!sb_rank_1.empty());
+  return static_cast<size_type>(sb_rank_1.back());
 }
 
 inline bitmap::size_type bitmap::num_zeros() const noexcept {

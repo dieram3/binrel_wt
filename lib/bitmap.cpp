@@ -90,6 +90,10 @@ auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
                     /*count=*/blocks_per_super_block);
 }
 
+auto bitmap::num_super_blocks() const noexcept -> size_type {
+  return sb_rank_1.size();
+}
+
 /// Sequentially counts the number of set bits in the given range of blocks.
 ///
 static constexpr size_type pop_count(const array_view<block_t> blocks) {
@@ -102,17 +106,17 @@ static constexpr size_type pop_count(const array_view<block_t> blocks) {
 
 bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
 
-  super_blocks = [this] {
+  sb_rank_1 = [this] {
     const auto count = ceil_div(sequence.num_blocks(), blocks_per_super_block);
     const int bpe = used_bits(static_cast<word_type>(sequence.size()));
     return int_vector(count, bpe);
   }();
 
   size_type acc_sum = 0;
-  for (size_type i = 0; i < super_blocks.size(); ++i) {
+  for (size_type i = 0; i < num_super_blocks(); ++i) {
     // TODO(Diego): Try to use transform_inclusive_scan when available.
     acc_sum += pop_count(blocks_of_super_block(i));
-    super_blocks[i] = static_cast<word_type>(acc_sum);
+    sb_rank_1[i] = static_cast<word_type>(acc_sum);
   }
 }
 
@@ -126,15 +130,15 @@ auto bitmap::num_of() const noexcept -> size_type {
 template <>
 auto bitmap::sb_rank<true>(const index_type sb_idx) const noexcept
     -> size_type {
-  assert(sb_idx < super_blocks.size());
+  assert(sb_idx < num_super_blocks());
 
-  return static_cast<size_type>(super_blocks[sb_idx]);
+  return static_cast<size_type>(sb_rank_1[sb_idx]);
 }
 
 template <>
 auto bitmap::sb_rank<false>(const index_type sb_idx) const noexcept
     -> size_type {
-  assert(sb_idx < super_blocks.size());
+  assert(sb_idx < num_super_blocks());
 
   const auto total = std::min((sb_idx + 1) * bits_per_super_block, size());
   return total - sb_rank<true>(sb_idx);
@@ -143,7 +147,7 @@ auto bitmap::sb_rank<false>(const index_type sb_idx) const noexcept
 template <bool B>
 auto bitmap::sb_exclusive_rank(const size_type sb_idx) const noexcept
     -> size_type {
-  assert(sb_idx <= super_blocks.size());
+  assert(sb_idx <= num_super_blocks());
   return sb_idx == 0 ? 0 : sb_rank<B>(sb_idx - 1);
 }
 
@@ -178,12 +182,12 @@ template <bool B>
 auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
   assert(nth > 0);
   assert(nth <= num_of<B>());
-  assert(!super_blocks.empty());
+  assert(num_super_blocks() > 0);
 
   auto not_enough = [&](const index_type pos) { return sb_rank<B>(pos) < nth; };
   const auto sb_begin = (nth - 1) / bits_per_super_block;
 
-  return binary_search(sb_begin, super_blocks.size() - 1, not_enough);
+  return binary_search(sb_begin, num_super_blocks() - 1, not_enough);
 }
 
 /// Sequentially searches for the nth bit set to B.
@@ -225,7 +229,7 @@ auto bitmap::select(size_type nth) const noexcept -> index_type {
   }
 
   const auto sb_idx = sb_select<B>(nth);
-  assert(sb_idx < super_blocks.size());
+  assert(sb_idx < num_super_blocks());
 
   nth -= sb_exclusive_rank<B>(sb_idx);
   assert(nth > 0 && nth <= bits_per_super_block);
