@@ -32,7 +32,6 @@ public:
   size_type num_zeros() const noexcept;
 
 private:
-  /// Returns an array_view to the blocks contained in the super block `sb_idx`.
   auto blocks_of_super_block(index_type sb_idx) const noexcept;
 
   template <bool B>

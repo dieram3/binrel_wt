@@ -82,38 +82,38 @@ static_assert(is_power_of_two(bits_per_block), "");
 static_assert(is_power_of_two(blocks_per_super_block), "");
 static_assert(is_power_of_two(bits_per_super_block), "");
 
-bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
-
-  const auto step = blocks_per_super_block; // measured in blocks.
-  super_blocks = [this] {
-    // num super-blocks
-    const size_type count = ceil_div(sequence.num_blocks(), step);
-    // bits per element
-    const int bpe = used_bits(static_cast<word_type>(sequence.size()));
-    return int_vector(count, bpe);
-  }();
-
-  auto sum_blocks = [&](index_type first, const index_type last) {
-    size_type res = 0;
-    for (; first != last; ++first) {
-      res += pop_count(sequence.get_block(first));
-    }
-    return res;
-  };
-
-  size_type acc_sum = 0;
-  for (size_type i = 0; i < super_blocks.size(); ++i) {
-    const auto first = i * step;
-    const auto last = std::min(first + step, sequence.num_blocks());
-    acc_sum += sum_blocks(first, last);
-    super_blocks[i] = static_cast<word_type>(acc_sum);
-  }
-}
-
+/// Returns the range of blocks belonging to the super block `sb_idx`.
+///
 auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
   array_view<block_t> v{sequence.data(), sequence.num_blocks()};
   return v.subarray(/*pos=*/sb_idx * blocks_per_super_block,
                     /*count=*/blocks_per_super_block);
+}
+
+/// Sequentially counts the number of set bits in the given range of blocks.
+///
+static constexpr size_type pop_count(const array_view<block_t> blocks) {
+  size_type sum = 0;
+  for (const auto elem : blocks) {
+    sum += pop_count(elem);
+  }
+  return sum;
+}
+
+bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
+
+  super_blocks = [this] {
+    const auto count = ceil_div(sequence.num_blocks(), blocks_per_super_block);
+    const int bpe = used_bits(static_cast<word_type>(sequence.size()));
+    return int_vector(count, bpe);
+  }();
+
+  size_type acc_sum = 0;
+  for (size_type i = 0; i < super_blocks.size(); ++i) {
+    // TODO(Diego): Try to use transform_inclusive_scan when available.
+    acc_sum += pop_count(blocks_of_super_block(i));
+    super_blocks[i] = static_cast<word_type>(acc_sum);
+  }
 }
 
 template <bool B>
