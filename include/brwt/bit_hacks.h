@@ -3,14 +3,17 @@
 
 #include <cassert>     // assert
 #include <limits>      // numeric_limits
-#include <type_traits> // is_same, is_unsigned
+#include <type_traits> // is_same, is_unsigned, remove_cv_t
 
 namespace brwt {
 
+// TODO(Diego): Provide a better implementation of this.
+//
 template <typename T>
 constexpr bool is_word_type =
-    std::is_same<T, unsigned>::value || std::is_same<T, unsigned long>::value ||
-    std::is_same<T, unsigned long long>::value;
+    std::is_same<std::remove_cv_t<T>, unsigned>::value ||
+    std::is_same<std::remove_cv_t<T>, unsigned long>::value ||
+    std::is_same<std::remove_cv_t<T>, unsigned long long>::value;
 
 constexpr int pop_count(unsigned x) noexcept {
   return __builtin_popcount(x);
