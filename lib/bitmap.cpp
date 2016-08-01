@@ -14,9 +14,6 @@ namespace brwt {
 
 using block_t = bit_vector::block_type;
 
-// TODO(Diego): Rewrite some code. A bit of pessimization was made to fix the
-// errors quickly.
-
 // ===----------------------------------------------------===
 //                     bit_hacks extensions
 // ===----------------------------------------------------===
