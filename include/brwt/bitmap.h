@@ -51,7 +51,7 @@ private:
   index_type select(size_type nth) const noexcept;
 
   /// Original bit sequence.
-  bit_vector sequence;
+  bit_vector bit_seq;
 
   /// Number of set bits until the i-th super block (included).
   int_vector sb_rank_1;
@@ -62,15 +62,15 @@ private:
 // ==========================================
 
 inline auto bitmap::access(const index_type pos) const noexcept -> bool {
-  return sequence.get(pos);
+  return bit_seq.get(pos);
 }
 
 inline auto bitmap::length() const noexcept -> size_type {
-  return sequence.length();
+  return bit_seq.length();
 }
 
 inline auto bitmap::size() const noexcept -> size_type {
-  return sequence.length();
+  return bit_seq.length();
 }
 
 inline auto bitmap::num_ones() const noexcept -> size_type {

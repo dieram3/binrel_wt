@@ -85,7 +85,7 @@ static_assert(is_power_of_two(bits_per_super_block), "");
 /// Returns the range of blocks belonging to the super block `sb_idx`.
 ///
 auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
-  array_view<block_t> v{sequence.data(), sequence.num_blocks()};
+  array_view<block_t> v{bit_seq.data(), bit_seq.num_blocks()};
   return v.subarray(/*pos=*/sb_idx * blocks_per_super_block,
                     /*count=*/blocks_per_super_block);
 }
@@ -104,11 +104,11 @@ static constexpr size_type pop_count(const array_view<block_t> blocks) {
   return sum;
 }
 
-bitmap::bitmap(bit_vector vec) : sequence(std::move(vec)) {
+bitmap::bitmap(bit_vector vec) : bit_seq(std::move(vec)) {
 
   sb_rank_1 = [this] {
-    const auto count = ceil_div(sequence.num_blocks(), blocks_per_super_block);
-    const int bpe = used_bits(static_cast<word_type>(sequence.size()));
+    const auto count = ceil_div(bit_seq.num_blocks(), blocks_per_super_block);
+    const int bpe = used_bits(static_cast<word_type>(bit_seq.size()));
     return int_vector(count, bpe);
   }();
 
@@ -163,10 +163,10 @@ auto bitmap::rank_1(const index_type pos) const noexcept -> size_type {
 
   for (index_type ith = (sb_idx * blocks_per_super_block); ith < block_idx;
        ++ith) {
-    sum += pop_count(sequence.get_block(ith));
+    sum += pop_count(bit_seq.get_block(ith));
   }
 
-  sum += brwt::rank_1(sequence.get_block(block_idx), bit_idx);
+  sum += brwt::rank_1(bit_seq.get_block(block_idx), bit_idx);
 
   return sum;
 }
