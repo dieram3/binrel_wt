@@ -18,8 +18,6 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For external tools
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
-include(AddBRWT)
-
 # ---------------------------------------
 # Project options
 # ---------------------------------------
@@ -34,6 +32,8 @@ option(BRWT_INCLUDE_DOCS "Generate build targets for the BRWT documentation." ON
 
 option(BRWT_ENABLE_MODULES "Enable support for clang modules." OFF)
 
+option(BRWT_ENABLE_LTO "Enable link time optimization." OFF)
+
 # ---------------------------------------
 # Handle compilation options
 # ---------------------------------------
@@ -44,6 +44,8 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wno-non-modular-include-in-module) # for <cassert>
 endif()
 endif()
+
+include(AddBRWT)
 
 # ---------------------------------------
 # Add subdirectories
