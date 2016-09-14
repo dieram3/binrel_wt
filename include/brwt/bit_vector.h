@@ -36,7 +36,7 @@ public:
   void set_chunk(size_type pos, size_type count, block_type value) noexcept;
 
   block_type get_block(size_type num_block) const noexcept;
-  void set_block(size_type num_block, const block_type value) noexcept;
+  void set_block(size_type num_block, block_type value) noexcept;
 
   /// \brief Returns a pointer to the underlying array of blocks.
   ///

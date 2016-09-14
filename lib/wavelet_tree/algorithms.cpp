@@ -209,7 +209,8 @@ static size_type count_symbols(node_proxy node, const index_range range) {
            count_symbols(get_right(children), rhs_range);
   }
 
-  return (empty(lhs_range) ? 0 : 1) + (empty(rhs_range) ? 0 : 1);
+  return size_type{empty(lhs_range) ? 0 : 1} +
+         size_type{empty(rhs_range) ? 0 : 1};
 }
 
 static size_type count_symbols(node_proxy node, index_range range,

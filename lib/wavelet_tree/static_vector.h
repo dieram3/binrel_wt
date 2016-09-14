@@ -16,6 +16,10 @@ public:
   using const_reference = const T&;
 
 public:
+  static_vector() : m_size{0} {
+    // m_data is uninitialized.
+  }
+
   ~static_vector() {
     // If T is trivially destructible the compiler should optimize this away.
     while (!empty()) {
@@ -35,7 +39,7 @@ public:
     (data()[--m_size]).~T();
   }
 
-  const_reference operator[](const size_type pos) const noexcept {
+  const_reference operator[](size_type pos) const noexcept {
     assert(pos < m_size);
     return data()[pos];
   }
@@ -58,7 +62,7 @@ private:
       typename std::aligned_storage<sizeof(T), alignof(T)>::type;
 
   aligned_storage_t m_data[N];
-  size_type m_size = 0;
+  size_type m_size;
 };
 
 } // end namespace brwt

@@ -210,7 +210,7 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   // Finally, erase unused elements (because removing of duplicates) and
   // construct the wavelet tree.
   seq.erase(seq_end, seq.end());
-  return wavelet_tree(std::move(seq));
+  return wavelet_tree(seq);
 }
 
 static bitmap make_bitmap(const vector<size_type>& objects_frequency,

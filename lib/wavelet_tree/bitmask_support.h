@@ -18,7 +18,9 @@ constexpr auto extract_value(const symbol_id symbol) noexcept {
 template <typename Integer>
 constexpr auto operator<<(const symbol_id symbol, const Integer d) noexcept {
   assert(d >= 0);
-  return static_cast<symbol_id>(extract_value(symbol) << d);
+  const auto res = extract_value(symbol) << d;
+  // TODO(Diego): Use brace initialization when possible.
+  return symbol_id(res);
 }
 
 template <typename Integer>
