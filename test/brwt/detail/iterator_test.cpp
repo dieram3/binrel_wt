@@ -147,6 +147,7 @@ void test_iterator_properties() {
 
   I mut_it{}; // mutable iterator
   const I it{};
+  const I it2{};
   const D d{};
 
   // element access
@@ -166,15 +167,15 @@ void test_iterator_properties() {
   static_assert(same<decltype(it + d), I>, "");
   static_assert(same<decltype(d + it), I>, "");
   static_assert(same<decltype(it - d), I>, "");
-  static_assert(same<decltype(it - it), D>, "");
+  static_assert(same<decltype(it - it2), D>, "");
 
   // relational operators
-  static_assert(same<decltype(it == it), bool>, "");
-  static_assert(same<decltype(it != it), bool>, "");
-  static_assert(same<decltype(it < it), bool>, "");
-  static_assert(same<decltype(it > it), bool>, "");
-  static_assert(same<decltype(it <= it), bool>, "");
-  static_assert(same<decltype(it >= it), bool>, "");
+  static_assert(same<decltype(it == it2), bool>, "");
+  static_assert(same<decltype(it != it2), bool>, "");
+  static_assert(same<decltype(it < it2), bool>, "");
+  static_assert(same<decltype(it > it2), bool>, "");
+  static_assert(same<decltype(it <= it2), bool>, "");
+  static_assert(same<decltype(it >= it2), bool>, "");
 
   // Check swappable property.
   using std::swap;
@@ -378,7 +379,8 @@ TEST_CASE_FIXTURE(iterator_fixture, "operator +=") {
   CHECK((i += 0) == i2);
   (i += 1) = i0;
   CHECK(i == i0);
-  i = i0, i += 3;
+  i = i0;
+  i += 3;
   CHECK(i == i3);
 }
 
@@ -391,7 +393,8 @@ TEST_CASE_FIXTURE(iterator_fixture, "operator -=") {
   CHECK((i -= 0) == i1);
   (i -= 1) = i3;
   CHECK(i == i3);
-  i = i3, i -= 3;
+  i = i3;
+  i -= 3;
   CHECK(i == i0);
 }
 

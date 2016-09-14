@@ -383,7 +383,7 @@ TEST_CASE("node_proxy: equality operator") {
   const auto x2 = x1.make_rhs();
 
   SUBCASE("Copied wavelet tree") {
-    const auto copy = wt;
+    const auto copy = wt; // NOLINT: This copy is intentional.
     const auto y0 = copy.make_root();
     const auto y1 = y0.make_lhs();
     const auto y2 = y1.make_rhs();
