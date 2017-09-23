@@ -1,21 +1,21 @@
 ---
-Checks: "-*,
-cert-*,
-clang-diagnostic-*,
+Checks: "-*,\
+cert-*,\
+clang-diagnostic-*,\
 clang-analyzer-*,\
--clang-analyzer-alpha*,
+-clang-analyzer-alpha*,\
 cppcoreguidelines-*,\
 -cppcoreguidelines-pro-bounds-constant-array-index,\
 -cppcoreguidelines-pro-type-vararg,\
--cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
 google-*,\
 -google-runtime-int,\
--google-runtime-references,
+-google-runtime-references,\
 llvm-*,\
--llvm-include-order,
-misc-*,
-modernize-*,
-performance-*,
+-llvm-include-order,\
+misc-*,\
+modernize-*,\
+performance-*,\
 readability-*"
 
 # Note: cppcoreguidelines-pro-bounds-array-to-pointer-decay is disabled because
@@ -26,6 +26,8 @@ HeaderFilterRegex: '.*'
 AnalyzeTemporaryDtors: true
 
 CheckOptions:
+  - key: cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions
+    value: '1'
   - key:             llvm-namespace-comment.ShortNamespaceLines
     value:           '20'
   - key:             readability-braces-around-statements.ShortStatementLines
