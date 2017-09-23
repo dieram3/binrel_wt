@@ -14,9 +14,9 @@ function(brwt_enable_all_warnings TARGET_ID)
   endif()
 endfunction()
 
-function(brwt_make_cpp14_strict TARGET_ID)
+function(brwt_make_strict_modern_cpp TARGET_ID)
   set_property(TARGET ${TARGET_ID} PROPERTY CXX_EXTENSIONS       OFF)
-  set_property(TARGET ${TARGET_ID} PROPERTY CXX_STANDARD          14)
+  set_property(TARGET ${TARGET_ID} PROPERTY CXX_STANDARD          17)
   set_property(TARGET ${TARGET_ID} PROPERTY CXX_STANDARD_REQUIRED ON)
 endfunction()
 
@@ -41,7 +41,7 @@ endfunction()
 
 function(brwt_configure TARGET_ID)
   brwt_enable_all_warnings(${TARGET_ID})
-  brwt_make_cpp14_strict(${TARGET_ID})
+  brwt_make_strict_modern_cpp(${TARGET_ID})
 
   if (BRWT_ENABLE_LTO)
     brwt_target_enable_lto(${TARGET_ID})
