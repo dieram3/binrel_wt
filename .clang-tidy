@@ -1,6 +1,8 @@
 ---
 Checks: "-*,\
+bugprone-*,\
 cert-*,\
+-cert-dcl21-cpp,\
 clang-diagnostic-*,\
 clang-analyzer-*,\
 -clang-analyzer-alpha*,\
@@ -9,10 +11,14 @@ cppcoreguidelines-*,\
 -cppcoreguidelines-pro-type-vararg,\
 -cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
 google-*,\
+-google-readability-namespace-comments,\
 -google-runtime-int,\
 -google-runtime-references,\
+hicpp-*,\
+-hicpp-special-member-functions,\
 llvm-*,\
 -llvm-include-order,\
+-llvm-namespace-comment,\
 misc-*,\
 modernize-*,\
 performance-*,\
@@ -20,6 +26,10 @@ readability-*"
 
 # Note: cppcoreguidelines-pro-bounds-array-to-pointer-decay is disabled because
 # using 'assert' triggers this warning.
+# llvm-namespace-comment and google-readability-namespace-comments don't support
+# C++17 foo::bar comments yet.
+# hicpp-special-member-functions checks are already handled by
+# cppcoreguidelines-special-member-functions
 
 HeaderFilterRegex: '.*'
 
