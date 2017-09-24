@@ -5,14 +5,13 @@
 #include <type_traits> // is_reference
 #include <utility>     // move
 
-namespace brwt {
-namespace detail {
+namespace brwt::detail {
 
 /// \brief Class used to treat a smart reference (or proxy) as a pointer.
 ///
 template <typename SmartRef>
 class pointed_reference {
-  static_assert(!std::is_reference<SmartRef>::value,
+  static_assert(!std::is_reference_v<SmartRef>,
                 "This class is intended for smart references only");
 
 public:
@@ -53,7 +52,6 @@ struct reference_traits<T&> {
   }
 };
 
-} // end namespace detail
-} // end namespace brwt
+} // namespace brwt::detail
 
 #endif // BRWT_DETAIL_UTILITY_H

@@ -48,7 +48,7 @@ auto int_vector::non_const(const_iterator pos) noexcept -> iterator {
 }
 
 int_vector::int_vector(const size_type count, const int bpe)
-    : bit_seq{}, num_elems{count}, bits_per_element{bpe} {
+    : num_elems{count}, bits_per_element{bpe} {
   assert(count >= 0);
   assert(bpe >= 0);
 

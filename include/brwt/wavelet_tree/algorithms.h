@@ -138,6 +138,6 @@ index_type select(const wavelet_tree& wt, between<symbol_id> cond,
 ///
 index_type select_first(const wavelet_tree& wt, index_type start,
                         between<symbol_id> cond) noexcept;
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_WAVELET_TREE_ALGORITHMS_H

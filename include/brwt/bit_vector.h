@@ -80,6 +80,6 @@ inline auto bit_vector::data() const noexcept -> const block_type* {
   return blocks.data();
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_BIT_VECTOR_H

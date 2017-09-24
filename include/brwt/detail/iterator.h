@@ -7,8 +7,7 @@
 #include <memory>                // addressof
 #include <type_traits>           // remove_const_t
 
-namespace brwt {
-namespace detail {
+namespace brwt::detail {
 
 /// \brief This class provide \e random-access iterators to containers that have
 /// overloaded the subscript operator (\c operator[]).
@@ -157,7 +156,6 @@ private:
   difference_type m_pos{};
 };
 
-} // end namespace detail
-} // end namespace brwt
+} // namespace brwt::detail
 
 #endif // BRWT_DETAIL_ITERATOR_H

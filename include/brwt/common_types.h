@@ -54,6 +54,6 @@ struct between {
   T max_value;
 };
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_COMMON_TYPES_H

@@ -45,11 +45,6 @@ static constexpr int count(const T value) {
   return B ? pop_count(value) : pop_count(~value);
 }
 
-template <bool B, typename T, typename = enable_if_word<T>>
-static constexpr int rank(const T value, const int nth) {
-  return B ? rank_1(value, nth) : rank_0(value, nth);
-}
-
 template <typename T, typename = enable_if_word<T>>
 static constexpr int select_1(const T value, const int nth) {
   assert(nth > 0 && nth <= pop_count(value));
@@ -73,14 +68,14 @@ static constexpr int select(const T value, const int nth) {
 //             Bitmap implementation
 // ===----------------------------------------------------===
 
-static constexpr size_type bits_per_block = bit_vector::bits_per_block;
-static constexpr size_type blocks_per_super_block = 8;
-static constexpr size_type bits_per_super_block =
+constexpr size_type bits_per_block = bit_vector::bits_per_block;
+constexpr size_type blocks_per_super_block = 8;
+constexpr size_type bits_per_super_block =
     blocks_per_super_block * bits_per_block;
 
-static_assert(is_power_of_two(bits_per_block), "");
-static_assert(is_power_of_two(blocks_per_super_block), "");
-static_assert(is_power_of_two(bits_per_super_block), "");
+static_assert(is_power_of_two(bits_per_block));
+static_assert(is_power_of_two(blocks_per_super_block));
+static_assert(is_power_of_two(bits_per_super_block));
 
 /// Returns the range of blocks belonging to the super block `sb_idx`.
 ///

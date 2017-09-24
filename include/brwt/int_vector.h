@@ -25,6 +25,7 @@ public:
 
   public:
     reference(const reference&) = default;
+    ~reference() = default;
 
     reference& operator=(const value_type value) noexcept {
       vector.set_value(elem_pos, value);
@@ -34,7 +35,7 @@ public:
       vector.set_value(elem_pos, other);
       return *this;
     }
-    operator value_type() const noexcept {
+    operator value_type() const noexcept { // NOLINT
       return vector.get_value(elem_pos);
     }
 
@@ -346,6 +347,6 @@ inline void swap(int_vector::value_type& lhs, int_vector::reference rhs) {
   rhs = tmp;
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_INT_VECTOR_H

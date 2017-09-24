@@ -85,6 +85,6 @@ inline auto bitmap::num_zeros() const noexcept -> size_type {
   return size() - num_ones();
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_BITMAP_H

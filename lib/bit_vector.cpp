@@ -31,8 +31,6 @@ static constexpr block_type make_mask(const size_type count) noexcept {
 // bit_vector implementation
 // ==========================================
 
-constexpr size_type bit_vector::bits_per_block;
-
 bit_vector::bit_vector(const size_type count) : m_len{count} {
   using sz = decltype(blocks)::size_type;
   assert(count >= 0);

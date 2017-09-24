@@ -28,13 +28,13 @@ static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
 // ==========================================
 
 wavelet_tree::wavelet_tree(const int_vector& sequence)
-    : table{}, seq_len{sequence.size()}, bits_per_symbol{sequence.get_bpe()} {
+    : seq_len{sequence.size()}, bits_per_symbol{sequence.get_bpe()} {
   assert(bits_per_symbol >= 1);
   using std::size_t;
   using value_type = int_vector::value_type;
 
-  // TODO(diegoramirez): Improves the constructor implementation. Consider
-  // represent the tree with a Wavelet matrix.
+  // TODO(diegoramirez): Improve the constructor implementation. Consider
+  // representing the tree with a Wavelet matrix.
 
   const auto alphabet_size = max_symbol_id() + 1;
   std::vector<size_type> next_pos(2 * alphabet_size);

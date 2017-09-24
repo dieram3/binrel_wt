@@ -55,6 +55,6 @@ inline auto empty(const index_range& range) {
   return range.empty();
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_INDEX_RANGE_H

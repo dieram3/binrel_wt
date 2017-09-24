@@ -239,6 +239,6 @@ inline auto wavelet_tree::make_root() const noexcept -> node_proxy {
   return node_proxy(*this);
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_WAVELET_TREE_WAVELET_TREE_H

@@ -20,6 +20,12 @@ public:
     // m_data is uninitialized.
   }
 
+  // These functions are deleted for now.
+  static_vector(const static_vector&) = delete;
+  static_vector(static_vector&&) = delete;
+  static_vector& operator=(const static_vector&) = delete;
+  static_vector& operator=(static_vector&&) = delete;
+
   ~static_vector() {
     // If T is trivially destructible the compiler should optimize this away.
     while (!empty()) {

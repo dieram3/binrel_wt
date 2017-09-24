@@ -263,6 +263,6 @@ constexpr bool operator!=(const binary_relation::pair_type& lhs,
   return !(lhs == rhs);
 }
 
-} // end namespace brwt
+} // namespace brwt
 
 #endif // BRWT_BINARY_RELATION_H
