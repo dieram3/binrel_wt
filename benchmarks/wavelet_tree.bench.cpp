@@ -7,15 +7,15 @@
 #include <type_traits>      // underlying_type_t, make_unsigned_t
 #include <utility>          // pair, make_pair
 
-using brwt::wavelet_tree;
 using brwt::index_type;
 using brwt::size_type;
 using brwt::symbol_id;
+using brwt::wavelet_tree;
 
-using brwt::benchmark::gen_integer;
-using brwt::benchmark::cyclic_input;
-using brwt::benchmark::pow_2;
 using benchmark::DoNotOptimize;
+using brwt::benchmark::cyclic_input;
+using brwt::benchmark::gen_integer;
+using brwt::benchmark::pow_2;
 
 // ==========================================
 // Random data generation

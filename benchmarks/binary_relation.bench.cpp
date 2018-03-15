@@ -11,9 +11,9 @@ using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
 
+using benchmark::DoNotOptimize;
 using brwt::benchmark::gen_integer;
 using brwt::benchmark::pow_2;
-using benchmark::DoNotOptimize;
 
 template <typename T>
 static constexpr T clamp(const T& v, const T& lo, const T& hi) {

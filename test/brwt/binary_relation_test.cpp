@@ -15,8 +15,8 @@
 // make_test_binary_relation_2 instead.
 
 using brwt::binary_relation;
-using brwt::nullopt;
 using brwt::index_type;
+using brwt::nullopt;
 using brwt::size_type;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
@@ -1047,8 +1047,7 @@ TEST_CASE("[obj_rank,label_range]: Full range") {
 
 TEST_CASE("[obj_select,fixed_label]") {
   auto select_list = [br = make_test_binary_relation_2()](
-      const object_id start, const label_id label) {
-
+                         const object_id start, const label_id label) {
     auto select = [&](const size_type nth) {
       return br.obj_select(start, label, nth);
     };

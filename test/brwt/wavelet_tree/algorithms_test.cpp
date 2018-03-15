@@ -1,11 +1,11 @@
 #include "doctest.h"
 #include <brwt/wavelet_tree.h>
 
-using brwt::wavelet_tree;
-using brwt::symbol_id;
-using brwt::int_vector;
-using brwt::index_type;
 using brwt::index_npos;
+using brwt::index_type;
+using brwt::int_vector;
+using brwt::symbol_id;
+using brwt::wavelet_tree;
 
 static constexpr symbol_id operator"" _sym(const unsigned long long value) {
   return static_cast<symbol_id>(value);

@@ -66,7 +66,7 @@ public:
     ++m_pos;
     return *this;
   }
-  random_access_iterator operator++(int)noexcept {
+  random_access_iterator operator++(int) noexcept {
     auto old = *this;
     ++(*this);
     return old;
@@ -75,7 +75,7 @@ public:
     --m_pos;
     return *this;
   }
-  random_access_iterator operator--(int)noexcept {
+  random_access_iterator operator--(int) noexcept {
     auto old = *this;
     --(*this);
     return old;

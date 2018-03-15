@@ -22,14 +22,14 @@ using word_type = std::uint_fast64_t;
 
 // generic types
 
-using types::size_type;
 using types::index_type;
+using types::size_type;
 using types::word_type;
 
 constexpr index_type index_npos = -1;
 
-using std::experimental::optional;
 using std::experimental::nullopt;
+using std::experimental::optional;
 
 // wavelet tree types
 

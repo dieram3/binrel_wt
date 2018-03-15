@@ -7,12 +7,12 @@
 #include <utility>   // move
 
 using brwt::bitmap;
-using brwt::size_type;
 using brwt::index_type;
+using brwt::size_type;
 
-using brwt::benchmark::pow_2;
-using brwt::benchmark::gen_integer;
 using brwt::benchmark::cyclic_input;
+using brwt::benchmark::gen_integer;
+using brwt::benchmark::pow_2;
 
 using benchmark::DoNotOptimize;
 

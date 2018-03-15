@@ -10,12 +10,12 @@
 #include <utility>           // make_pair
 #include <vector>            // vector
 
-using brwt::wavelet_tree;
 using brwt::int_vector;
-using brwt::symbol_id;
 using brwt::size_type;
-using std::size_t;
+using brwt::symbol_id;
+using brwt::wavelet_tree;
 using std::ptrdiff_t;
+using std::size_t;
 
 static constexpr symbol_id operator"" _sym(const unsigned long long value) {
   return static_cast<symbol_id>(value);
@@ -467,7 +467,7 @@ static auto make_wavelet_tree_with_3_bpe() {
 
 TEST_CASE("[wavelet_tree][select][between]") {
   auto select = [wt = make_wavelet_tree_with_3_bpe()](
-      const char min, const char max, const size_type nth) {
+                    const char min, const char max, const size_type nth) {
     const auto cond = brwt::between<symbol_id>{map_upper(min), map_upper(max)};
     return brwt::select(wt, cond, nth); // seq = EHDHA CEEGB CBGCF
   };

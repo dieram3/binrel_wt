@@ -5,8 +5,8 @@
 
 #include <string> // string
 
-using brwt::bitmap;
 using brwt::bit_vector;
+using brwt::bitmap;
 
 using size_type = bitmap::size_type;
 using index_type = bitmap::index_type;
@@ -15,8 +15,10 @@ TEST_SUITE("bitmap");
 
 TEST_CASE("bitmap::access()") {
   const std::vector<bit_vector> tests = {
-      bit_vector{"10000101111"}, bit_vector{"10100110101111"},
-      bit_vector{"11010111010111"}, bit_vector{"1101111111"},
+      bit_vector{"10000101111"},
+      bit_vector{"10100110101111"},
+      bit_vector{"11010111010111"},
+      bit_vector{"1101111111"},
   };
 
   for (const auto& test : tests) {
