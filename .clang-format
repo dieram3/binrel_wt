@@ -13,4 +13,5 @@ IncludeCategories:
     Priority:        4
   - Regex:           '.*'                # Others (like unistd.h)
     Priority:        5
+IndentPPDirectives: AfterHash
 PointerAlignment: Left
