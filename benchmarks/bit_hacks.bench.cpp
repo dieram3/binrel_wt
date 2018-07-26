@@ -1,5 +1,5 @@
 #include <brwt/bit_hacks.h>
-#include <benchmark/benchmark_api.h>
+#include <benchmark/benchmark.h>
 
 #include "utility.h" // get_random_engine
 #include <algorithm> // generate

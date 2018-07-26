@@ -1,5 +1,5 @@
 #include <brwt/bitmap.h>
-#include <benchmark/benchmark_api.h>
+#include <benchmark/benchmark.h>
 
 #include "utility.h" // gen_integer
 #include <cassert>   // assert
@@ -49,7 +49,7 @@ static auto generate_random_indices(const bitmap& bm,
 // ==========================================
 
 static void bm_access(benchmark::State& state) {
-  const auto bm = gen_bitmap(state.range_x());
+  const auto bm = gen_bitmap(state.range(0));
   auto indices = generate_random_indices(bm);
 
   while (state.KeepRunning()) {
@@ -60,7 +60,7 @@ static void bm_access(benchmark::State& state) {
 BENCHMARK(bm_access)->Range(pow_2(12), pow_2(20));
 
 static void bm_rank_1(benchmark::State& state) {
-  const auto bm = gen_bitmap(state.range_x());
+  const auto bm = gen_bitmap(state.range(0));
   auto indices = generate_random_indices(bm, 1024);
 
   while (state.KeepRunning()) {
@@ -71,7 +71,7 @@ static void bm_rank_1(benchmark::State& state) {
 BENCHMARK(bm_rank_1)->Range(pow_2(12), pow_2(20));
 
 static void bm_select_1(benchmark::State& state) {
-  const auto bm = gen_bitmap(state.range_x());
+  const auto bm = gen_bitmap(state.range(0));
   auto input = cyclic_input<size_type>();
   input.generate(1024,
                  [&] { return gen_integer<size_type>(1, bm.num_ones()); });
@@ -86,7 +86,7 @@ static void bm_select_1(benchmark::State& state) {
 BENCHMARK(bm_select_1)->Range(pow_2(12), pow_2(20));
 
 static void bm_select_0(benchmark::State& state) {
-  const auto bm = gen_bitmap(state.range_x());
+  const auto bm = gen_bitmap(state.range(0));
   auto input = cyclic_input<size_type>();
   input.generate(1024,
                  [&] { return gen_integer<size_type>(1, bm.num_zeros()); });

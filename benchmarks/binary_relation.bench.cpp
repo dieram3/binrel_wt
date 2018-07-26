@@ -1,5 +1,5 @@
 #include <brwt/binary_relation.h>
-#include <benchmark/benchmark_api.h>
+#include <benchmark/benchmark.h>
 
 #include "utility.h" // gen_integer, pow_2
 #include <cassert>   // assert
@@ -96,7 +96,7 @@ gen_label_range(const binary_relation& br) {
 static void bm_rank(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     auto const max_object = gen_object(br);
@@ -110,7 +110,7 @@ BENCHMARK(bm_rank)->Range(pow_2(1), pow_2(20));
 static void bm_nth_element_lab_maj(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     auto obj_range = gen_object_range(br);
@@ -125,7 +125,7 @@ BENCHMARK(bm_nth_element_lab_maj)->Range(pow_2(1), pow_2(20));
 static void bm_nth_element_obj_maj(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     auto obj_start = gen_object(br);
@@ -140,7 +140,7 @@ BENCHMARK(bm_nth_element_obj_maj)->Range(pow_2(1), pow_2(20));
 static void bm_lower_bound(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     const auto lab_range = gen_label_range(br);
@@ -156,7 +156,7 @@ BENCHMARK(bm_lower_bound)->Range(pow_2(1), pow_2(20));
 static void bm_obj_select(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     auto start = gen_object(br);
@@ -170,7 +170,7 @@ BENCHMARK(bm_obj_select)->Range(pow_2(1), pow_2(20));
 static void bm_count_distinct_labels(benchmark::State& state) {
   const auto br = gen_binary_relation(/*max_size=*/1'000'000,
                                       /*max_object=*/object_id(100'000),
-                                      /*max_label=*/label_id(state.range_x()));
+                                      /*max_label=*/label_id(state.range(0)));
 
   while (state.KeepRunning()) {
     const auto obj_range = gen_object_range(br);

@@ -1,5 +1,5 @@
 #include <brwt/wavelet_tree.h>
-#include <benchmark/benchmark_api.h>
+#include <benchmark/benchmark.h>
 
 #include "utility.h"        // gen_integer
 #include <brwt/bit_hacks.h> // used_bits
@@ -95,7 +95,7 @@ static auto generate_select_queries(const wavelet_tree& wt,
 // ==========================================
 
 static void bm_access(benchmark::State& state) {
-  const auto wt = gen_wavelet_tree(pow_2(16), state.range_x());
+  const auto wt = gen_wavelet_tree(pow_2(16), state.range(0));
   auto indices = generate_random_indices(wt, 1024);
 
   while (state.KeepRunning()) {
@@ -106,7 +106,7 @@ static void bm_access(benchmark::State& state) {
 BENCHMARK(bm_access)->Range(pow_2(1), pow_2(20));
 
 static void bm_rank(benchmark::State& state) {
-  const auto wt = gen_wavelet_tree(pow_2(16), state.range_x());
+  const auto wt = gen_wavelet_tree(pow_2(16), state.range(0));
   auto indices = generate_random_indices(wt, 1024);
   auto symbols = generate_random_symbols(wt, 1019);
 
@@ -119,7 +119,7 @@ static void bm_rank(benchmark::State& state) {
 BENCHMARK(bm_rank)->Range(pow_2(1), pow_2(20));
 
 static void bm_select(benchmark::State& state) {
-  const auto wt = gen_wavelet_tree(pow_2(16), state.range_x());
+  const auto wt = gen_wavelet_tree(pow_2(16), state.range(0));
   auto queries = generate_select_queries(wt, 1024);
   while (state.KeepRunning()) {
     const auto q = queries.next();
