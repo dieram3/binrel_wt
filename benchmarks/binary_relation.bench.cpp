@@ -1,10 +1,9 @@
-#include <brwt/binary_relation.h>
+#include "brwt/binary_relation.h"
+#include "utility.h"
 #include <benchmark/benchmark.h>
-
-#include "utility.h" // gen_integer, pow_2
-#include <cassert>   // assert
-#include <cstddef>   // size_t
-#include <vector>    // vector
+#include <cassert>
+#include <cstddef>
+#include <vector>
 
 using brwt::binary_relation;
 using object_id = binary_relation::object_id;

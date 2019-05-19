@@ -1,12 +1,12 @@
 #ifndef BINREL_WT_BENCHMARKS_UTILITY_H // NOLINT
 #define BINREL_WT_BENCHMARKS_UTILITY_H
 
-#include <algorithm>   // generate
-#include <cassert>     // assert
-#include <cstddef>     // size_t
-#include <random>      // mt19937_64, random_device, uniform_int_distribution
-#include <type_traits> // is_integral
-#include <vector>      // vector
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <random>
+#include <type_traits>
+#include <vector>
 
 namespace brwt {
 namespace benchmark {

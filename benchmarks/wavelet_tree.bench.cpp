@@ -1,11 +1,10 @@
-#include <brwt/wavelet_tree.h>
+#include "brwt/wavelet_tree.h"
+#include "utility.h"
+#include "brwt/bit_hacks.h"
 #include <benchmark/benchmark.h>
-
-#include "utility.h"        // gen_integer
-#include <brwt/bit_hacks.h> // used_bits
-#include <cassert>          // assert
-#include <type_traits>      // underlying_type_t, make_unsigned_t
-#include <utility>          // pair, make_pair
+#include <cassert>
+#include <type_traits>
+#include <utility>
 
 using brwt::index_type;
 using brwt::size_type;

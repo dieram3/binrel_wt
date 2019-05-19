@@ -1,10 +1,9 @@
-#include <brwt/bitmap.h>
+#include "brwt/bitmap.h"
+#include "utility.h"
 #include <benchmark/benchmark.h>
-
-#include "utility.h" // gen_integer
-#include <cassert>   // assert
-#include <random>    // bernoulli_distribution
-#include <utility>   // move
+#include <cassert>
+#include <random>
+#include <utility>
 
 using brwt::bitmap;
 using brwt::index_type;

@@ -1,11 +1,10 @@
-#include <brwt/bit_hacks.h>
+#include "brwt/bit_hacks.h"
+#include "utility.h"
 #include <benchmark/benchmark.h>
-
-#include "utility.h" // get_random_engine
-#include <algorithm> // generate
-#include <array>     // array
-#include <random>    // uniform_int_distribution
-#include <string>    // to_string
+#include <algorithm>
+#include <array>
+#include <random>
+#include <string>
 
 using benchmark::DoNotOptimize;
 
