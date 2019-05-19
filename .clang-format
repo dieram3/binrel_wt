@@ -3,15 +3,18 @@ AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IncludeCategories:
+  - Regex:           '^"doctest.h"$'     # Doctest
+    Priority:        -1
+  - Regex:           '^"brwt/'           # BRWT headers
+    Priority:        2
   - Regex:           '^".+"$'            # Private headers
     Priority:        1
-  - Regex:           '^<brwt/'           # BRWT headers
-    Priority:        2
-  - Regex:           '^<.+/.+>$'         # Non standard headers
+  - Regex:           '^<.+/.+>$'         # Non-standard headers
     Priority:        3
   - Regex:           '^<[_[:alnum:]]+>$' # Standard headers
     Priority:        4
   - Regex:           '.*'                # Others (like unistd.h)
     Priority:        5
+IncludeIsMainRegex: '(_test)?$'
 IndentPPDirectives: AfterHash
 PointerAlignment: Left
