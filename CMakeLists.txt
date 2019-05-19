@@ -45,6 +45,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif()
 endif()
 
+include(HandleOptions)
 include(AddBRWT)
 
 # ---------------------------------------

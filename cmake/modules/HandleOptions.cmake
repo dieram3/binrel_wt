@@ -1,0 +1,5 @@
+if (UNIX AND CMAKE_GENERATOR STREQUAL "Ninja")
+  if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    add_compile_options("-fdiagnostics-color")
+  endif()
+endif()
