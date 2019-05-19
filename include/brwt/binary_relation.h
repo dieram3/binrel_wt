@@ -32,8 +32,8 @@ class binary_relation {
 public:
   // member types
   using size_type = types::size_type;
-  enum object_id : types::size_type {};
-  enum label_id : types::size_type {};
+  enum class object_id : types::size_type {};
+  enum class label_id : types::size_type {};
 
   struct pair_type {
     // TODO(Diego): Consider renaming pair_type.

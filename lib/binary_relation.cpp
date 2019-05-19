@@ -48,6 +48,14 @@ static constexpr auto to_underlying_type(const T value) noexcept {
 // binary_relation implementation
 // ==========================================
 
+static constexpr auto to_integer(const object_id x) noexcept {
+  return to_underlying_type(x);
+}
+
+static constexpr auto to_integer(const label_id x) noexcept {
+  return to_underlying_type(x);
+}
+
 static constexpr auto as_symbol(const label_id label) noexcept {
   return static_cast<symbol_id>(label);
 }
@@ -57,13 +65,13 @@ static constexpr auto as_label(const symbol_id symbol) noexcept {
 }
 
 static constexpr object_id prev(const object_id x) noexcept {
-  assert(to_underlying_type(x) != 0);
-  return static_cast<object_id>(to_underlying_type(x) - 1);
+  assert(to_integer(x) != 0);
+  return static_cast<object_id>(to_integer(x) - 1);
 }
 
 static constexpr label_id prev(const label_id alpha) noexcept {
-  assert(to_underlying_type(alpha) != 0);
-  return static_cast<label_id>(to_underlying_type(alpha) - 1);
+  assert(to_integer(alpha) != 0);
+  return static_cast<label_id>(to_integer(alpha) - 1);
 }
 
 static constexpr auto between_symbols(const label_id min,
@@ -104,11 +112,12 @@ binary_relation::unmap(const index_type wt_pos) const noexcept -> object_id {
 ///
 auto binary_relation::lower_bound(const object_id x) const noexcept
     -> index_type {
-  if (x == 0) {
+  if (x == object_id{0}) {
     return 0;
   }
-  const auto flag_pos = m_bitmap.select_1(x);
-  return (flag_pos + 1) - x; // m_bitmap.rank_0(flag_pos)
+  const auto nth = to_integer(x);
+  const auto flag_pos = m_bitmap.select_1(nth);
+  return (flag_pos + 1) - nth; // m_bitmap.rank_0(flag_pos)
 }
 
 /// Returns the position of the first element in the wavelet tree such that its
@@ -120,8 +129,9 @@ auto binary_relation::lower_bound(const object_id x) const noexcept
 ///
 auto binary_relation::upper_bound(const object_id x) const noexcept
     -> index_type {
-  const auto flag_pos = m_bitmap.select_1(x + 1);
-  return (flag_pos + 1) - (x + 1); // m_bitmap.rank_0(flag_pos);
+  const auto nth = to_integer(x) + 1;
+  const auto flag_pos = m_bitmap.select_1(nth);
+  return (flag_pos + 1) - nth; // m_bitmap.rank_0(flag_pos);
 }
 
 /// Returns the range of elements in the wavelet tree with (object == x)
@@ -158,7 +168,10 @@ static auto count_objects_frequency(const vector<pair_type>& pairs,
   // TODO(Diego): Consider to replace the histogram with a compressed vector.
   const auto num_objects = static_cast<size_t>(max_object) + 1;
   std::vector<size_type> frequency(num_objects);
-  for_each(pairs, [&](const pair_type& p) { ++frequency[p.object]; });
+  for_each(pairs, [&frequency](const pair_type& p) {
+    const auto obj_index = static_cast<size_t>(p.object);
+    ++frequency[obj_index];
+  });
   return frequency;
 }
 
@@ -178,8 +191,9 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   // inline counting sort to do this.
   inplace_exclusive_scan(objects_frequency, size_type{0});
   for_each(pairs, [&](const pair_type& p) {
-    const auto next_pos = objects_frequency[p.object]++;
-    seq[next_pos] = p.label;
+    const auto obj_index = static_cast<size_t>(p.object);
+    const auto next_pos = objects_frequency[obj_index]++;
+    seq[next_pos] = static_cast<int_vector::value_type>(p.label);
   });
 
   assert(objects_frequency.back() == seq.size());
@@ -256,7 +270,7 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
   // TODO(Diego): Assert for m_wtree.sigma() when available.
   assert(m_wtree.size() == num_unique_pairs);
   assert(m_bitmap.num_zeros() == num_unique_pairs);
-  assert(m_bitmap.num_ones() == max_object + 1);
+  assert(m_bitmap.num_ones() == to_integer(max_object) + 1);
 }
 
 auto binary_relation::rank(object_id max_object, label_id max_label) const
@@ -267,7 +281,7 @@ auto binary_relation::rank(object_id max_object, label_id max_label) const
 
 auto binary_relation::rank(object_id min_object, object_id max_object,
                            label_id max_label) const noexcept -> size_type {
-  if (min_object == 0) {
+  if (min_object == object_id{0}) {
     return rank(max_object, max_label);
   }
   return rank(max_object, max_label) - rank(prev(min_object), max_label);
@@ -275,7 +289,7 @@ auto binary_relation::rank(object_id min_object, object_id max_object,
 
 auto binary_relation::rank(object_id max_object, label_id min_label,
                            label_id max_label) const noexcept -> size_type {
-  if (min_label == 0) {
+  if (min_label == label_id{0}) {
     return rank(max_object, max_label);
   }
   const auto cond =
@@ -290,7 +304,7 @@ auto binary_relation::nth_element(const object_id x, const object_id y,
   assert(x <= y);
   assert(nth > 0);
 
-  if (alpha > 0) {
+  if (alpha > label_id{0}) {
     nth += rank(x, y, prev(alpha));
   }
 
@@ -356,7 +370,7 @@ auto binary_relation::lower_bound(const pair_type start,
                  between_symbols(start.label, max_label)) > 0) {
     return nth_element(start.object, start.object, start.label, 1, lab_major);
   }
-  if (start.object + 1 == object_alphabet_size()) {
+  if (to_integer(start.object) + 1 == object_alphabet_size()) {
     return std::nullopt;
   }
 
