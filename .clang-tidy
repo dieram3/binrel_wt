@@ -2,27 +2,27 @@
 Checks: "-*,\
 bugprone-*,\
 cert-*,\
--cert-dcl21-cpp,\
 clang-diagnostic-*,\
 clang-analyzer-*,\
--clang-analyzer-alpha*,\
 cppcoreguidelines-*,\
--cppcoreguidelines-pro-bounds-constant-array-index,\
--cppcoreguidelines-pro-type-vararg,\
--cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
 google-*,\
--google-readability-namespace-comments,\
--google-runtime-int,\
--google-runtime-references,\
 hicpp-*,\
--hicpp-special-member-functions,\
 llvm-*,\
--llvm-include-order,\
--llvm-namespace-comment,\
 misc-*,\
 modernize-*,\
 performance-*,\
-readability-*"
+readability-*,\
+-cert-dcl21-cpp,\
+-clang-analyzer-alpha*,\
+-cppcoreguidelines-pro-bounds-constant-array-index,\
+-cppcoreguidelines-pro-type-vararg,\
+-cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
+-google-readability-namespace-comments,\
+-google-runtime-int,\
+-google-runtime-references,\
+-hicpp-special-member-functions,\
+-llvm-include-order,\
+-llvm-namespace-comment"
 
 # Note: cppcoreguidelines-pro-bounds-array-to-pointer-decay is disabled because
 # using 'assert' triggers this warning.
