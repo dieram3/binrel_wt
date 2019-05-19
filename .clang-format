@@ -15,6 +15,6 @@ IncludeCategories:
     Priority:        4
   - Regex:           '.*'                # Others (like unistd.h)
     Priority:        5
-IncludeIsMainRegex: '(_test|\.bench)?$'
+IncludeIsMainRegex: '(_test|_bench)?$'
 IndentPPDirectives: AfterHash
 PointerAlignment: Left
