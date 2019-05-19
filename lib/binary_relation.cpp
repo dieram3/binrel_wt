@@ -72,12 +72,12 @@ static constexpr auto between_symbols(const label_id min,
   return between<symbol_id>{as_symbol(min), as_symbol(max)};
 }
 
-static constexpr optional<pair_type>
-optional_pair(const optional<object_id>& obj, const label_id label) {
+static constexpr std::optional<pair_type>
+optional_pair(const std::optional<object_id>& obj, const label_id label) {
   if (obj) {
     return pair_type{*obj, label};
   }
-  return nullopt;
+  return std::nullopt;
 }
 
 [[deprecated("when there is no pair with object_id=x, this function does not "
@@ -286,7 +286,7 @@ auto binary_relation::rank(object_id max_object, label_id min_label,
 auto binary_relation::nth_element(const object_id x, const object_id y,
                                   const label_id alpha, size_type nth,
                                   label_major_order_t /*unused*/) const noexcept
-    -> optional<pair_type> {
+    -> std::optional<pair_type> {
   assert(x <= y);
   assert(nth > 0);
 
@@ -296,7 +296,7 @@ auto binary_relation::nth_element(const object_id x, const object_id y,
 
   const auto range = make_mapped_range(x, y);
   if (range.size() < nth) {
-    return nullopt;
+    return std::nullopt;
   }
 
   symbol_id symbol{};
@@ -308,7 +308,7 @@ auto binary_relation::nth_element(const object_id x, const object_id y,
 auto binary_relation::nth_element(const object_id x, const label_id alpha,
                                   const label_id beta, const size_type nth,
                                   object_major_order_t /*unused*/) const
-    noexcept -> optional<pair_type> {
+    noexcept -> std::optional<pair_type> {
 
   const auto first = lower_bound(x);
   const auto cond = between<symbol_id>{as_symbol(alpha), as_symbol(beta)};
@@ -317,7 +317,7 @@ auto binary_relation::nth_element(const object_id x, const label_id alpha,
     return brwt::select(m_wtree, cond, abs_nth);
   }();
   if (wt_pos == index_npos) {
-    return nullopt;
+    return std::nullopt;
   }
 
   const auto fixed_object = get_associated_object(wt_pos);
@@ -338,7 +338,7 @@ auto binary_relation::lower_bound(const pair_type start,
                                   const label_id min_label,
                                   const label_id max_label,
                                   object_major_order_t /*unused*/) const
-    noexcept -> optional<pair_type> {
+    noexcept -> std::optional<pair_type> {
   assert(start.label >= min_label && start.label <= max_label);
   assert(min_label <= max_label);
 
@@ -357,13 +357,13 @@ auto binary_relation::lower_bound(const pair_type start,
     return nth_element(start.object, start.object, start.label, 1, lab_major);
   }
   if (start.object + 1 == object_alphabet_size()) {
-    return nullopt;
+    return std::nullopt;
   }
 
   const auto wt_pos = select_first(m_wtree, upper_bound(start.object),
                                    between_symbols(min_label, max_label));
   if (wt_pos == index_npos) {
-    return nullopt;
+    return std::nullopt;
   }
   return pair_type{get_associated_object(wt_pos),
                    as_label(m_wtree.access(wt_pos))};
@@ -406,14 +406,14 @@ auto binary_relation::obj_rank(const object_id x, const label_id min_label,
 auto binary_relation::obj_select(const object_id object_start,
                                  const label_id fixed_label,
                                  const size_type nth) const noexcept
-    -> optional<object_id> {
+    -> std::optional<object_id> {
   assert(nth > 0);
 
   const auto abs_nth = nth + obj_exclusive_rank(object_start, fixed_label);
   const auto wt_pos = m_wtree.select(as_symbol(fixed_label), abs_nth);
 
   if (wt_pos == index_npos) {
-    return nullopt;
+    return std::nullopt;
   }
   return get_associated_object(wt_pos);
 }

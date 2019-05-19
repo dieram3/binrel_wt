@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
+#include <optional>
 #include <ostream>
 #include <random>
 #include <stdexcept>
@@ -15,8 +16,8 @@
 
 using brwt::binary_relation;
 using brwt::index_type;
-using brwt::nullopt;
 using brwt::size_type;
+using std::nullopt;
 using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
@@ -132,7 +133,7 @@ static std::ostream& operator<<(std::ostream& os, const pair_type p) {
 }
 
 template <typename T>
-static std::ostream& operator<<(std::ostream& os, const optional<T>& opt) {
+static std::ostream& operator<<(std::ostream& os, const std::optional<T>& opt) {
   if (opt) {
     return os << *opt;
   }

@@ -4,6 +4,7 @@
 #include "brwt/bitmap.h"
 #include "brwt/common_types.h"
 #include "brwt/wavelet_tree.h"
+#include <optional>
 #include <vector>
 
 namespace brwt {
@@ -86,9 +87,10 @@ public:
   ///
   /// \remark In the literature this operation is known as \e rel_sel_obj_maj
   ///
-  optional<pair_type> nth_element(object_id x, label_id alpha, label_id beta,
-                                  size_type nth,
-                                  object_major_order_t order) const noexcept;
+  std::optional<pair_type> nth_element(object_id x, label_id alpha,
+                                       label_id beta, size_type nth,
+                                       object_major_order_t order) const
+      noexcept;
 
   /// \brief Finds the nth pair in the range
   /// 'access(alpha, max_label, x, y)' when it is ordered by label value, then
@@ -96,9 +98,10 @@ public:
   ///
   /// \remark In the literature this operation is known as \e rel_sel_lab_maj
   ///
-  optional<pair_type> nth_element(object_id x, object_id y, label_id alpha,
-                                  size_type nth,
-                                  label_major_order_t order) const noexcept;
+  std::optional<pair_type> nth_element(object_id x, object_id y, label_id alpha,
+                                       size_type nth,
+                                       label_major_order_t order) const
+      noexcept;
 
   /// \brief Finds the first pair not less than \p start, such that its label
   /// value is in the given range.
@@ -117,9 +120,10 @@ public:
   ///
   /// \remark This operation is also known as \c rel_min_obj_maj.
   ///
-  optional<pair_type> lower_bound(pair_type start, label_id min_label,
-                                  label_id max_label,
-                                  object_major_order_t order) const noexcept;
+  std::optional<pair_type> lower_bound(pair_type start, label_id min_label,
+                                       label_id max_label,
+                                       object_major_order_t order) const
+      noexcept;
   /// @}
 
   /// \name Object view
@@ -164,8 +168,9 @@ public:
   ///
   /// \remark This operation is also known as \c obj_sel1.
   ///
-  optional<object_id> obj_select(object_id object_start, label_id fixed_label,
-                                 size_type nth) const noexcept;
+  std::optional<object_id> obj_select(object_id object_start,
+                                      label_id fixed_label, size_type nth) const
+      noexcept;
   /// @}
 
   /// \name Label view
