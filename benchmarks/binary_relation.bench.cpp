@@ -27,12 +27,16 @@ static constexpr T clamp(const T& v, const T& lo, const T& hi) {
 
 static object_id gen_object(const object_id min, const object_id max) {
   assert(min <= max);
-  return static_cast<object_id>(gen_integer<brwt::size_type>(min, max));
+  // FIXME: Should use `to_integer` function instead of static_cast (same for
+  // gen_label).
+  return object_id{gen_integer(static_cast<brwt::size_type>(min),
+                               static_cast<brwt::size_type>(max))};
 }
 
 static label_id gen_label(const label_id min, const label_id max) {
   assert(min <= max);
-  return static_cast<label_id>(gen_integer<brwt::size_type>(min, max));
+  return label_id{gen_integer(static_cast<brwt::size_type>(min),
+                              static_cast<brwt::size_type>(max))};
 }
 
 static binary_relation gen_binary_relation(const std::size_t max_size,
