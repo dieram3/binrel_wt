@@ -1,9 +1,9 @@
 #ifndef BINREL_WT_LIB_WAVELET_TREE_BITMASK_SUPPORT_H // NOLINT
 #define BINREL_WT_LIB_WAVELET_TREE_BITMASK_SUPPORT_H
 
-#include <brwt/common_types.h> // symbol_id
-#include <cassert>             // assert
-#include <type_traits>         // underlying_type_t
+#include "brwt/common_types.h"
+#include <cassert>
+#include <type_traits>
 
 namespace brwt {
 

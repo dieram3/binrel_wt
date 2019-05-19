@@ -1,15 +1,14 @@
-#include <brwt/binary_relation.h>
-
-#include <brwt/bit_hacks.h>   // used_bits
-#include <brwt/index_range.h> // index_range
-#include <algorithm>          // max, for_each, sort, unique
-#include <cassert>            // assert
-#include <cstddef>            // size_t
-#include <iterator>           // begin, end
-#include <tuple>              // tie
-#include <type_traits>        // is_enum, underlying_type_t
-#include <utility>            // pair, make_pair, move
-#include <vector>             // vector
+#include "brwt/binary_relation.h"
+#include "brwt/bit_hacks.h"
+#include "brwt/index_range.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 namespace brwt {
 

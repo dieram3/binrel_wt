@@ -1,12 +1,12 @@
 #ifndef BRWT_INT_VECTOR_H
 #define BRWT_INT_VECTOR_H
 
-#include <brwt/bit_vector.h>      // bit_vector
-#include <brwt/detail/iterator.h> // random_access_iterator
-#include <algorithm>              // equal
-#include <cassert>                // assert
-#include <cstddef>                // ptrdiff_t
-#include <initializer_list>       // initializer_list
+#include "brwt/bit_vector.h"
+#include "brwt/detail/iterator.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <initializer_list>
 
 namespace brwt {
 

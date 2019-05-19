@@ -1,9 +1,9 @@
 #ifndef BRWT_WAVELET_TREE_ALGORITHMS_H
 #define BRWT_WAVELET_TREE_ALGORITHMS_H
 
-#include <brwt/common_types.h> // symbol_id, size_type, index_type
-#include <brwt/index_range.h>  // index_range
-#include <utility>             // pair
+#include "brwt/common_types.h"
+#include "brwt/index_range.h"
+#include <utility>
 
 namespace brwt {
 

@@ -1,7 +1,6 @@
 #include "doctest.h"
-#include <brwt/bit_hacks.h>
-
-#include <cstdint> // uint32_t, uint64_t
+#include "brwt/bit_hacks.h"
+#include <cstdint>
 
 /// TODO(Diego): Test the count_leading_zeros overloads.
 /// TODO(Diego): Test the count_trailing_zeros overloads.

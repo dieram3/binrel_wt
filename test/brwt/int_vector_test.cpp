@@ -1,12 +1,10 @@
 #include "doctest.h"
-#include <brwt/int_vector.h>
-
-#include <algorithm>   // all_of, sort, reverse, equal, find
-#include <iterator>    // distance
-#include <limits>      // numeric_limits
-#include <stdexcept>   // domain_error
-#include <type_traits> // is_signed, is_unsigned, ...
-#include <type_traits> // is_same
+#include "brwt/int_vector.h"
+#include <algorithm>
+#include <iterator>
+#include <limits>
+#include <stdexcept>
+#include <type_traits>
 
 // TODO(Diego): Consider adding more static asserts.
 

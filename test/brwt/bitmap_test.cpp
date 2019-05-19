@@ -1,9 +1,7 @@
 #include "doctest.h"
-
-#include <brwt/bit_vector.h>
-#include <brwt/bitmap.h>
-
-#include <string> // string
+#include "brwt/bitmap.h"
+#include "brwt/bit_vector.h"
+#include <string>
 
 using brwt::bit_vector;
 using brwt::bitmap;

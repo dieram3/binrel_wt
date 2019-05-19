@@ -1,11 +1,11 @@
 #ifndef BRWT_BIT_VECTOR_H
 #define BRWT_BIT_VECTOR_H
 
-#include <cstddef> // ptrdiff_t
-#include <cstdint> // uint_fast64_t
-#include <limits>  // numeric_limits
-#include <string>  // string
-#include <vector>  // vector
+#include <cstddef>
+#include <cstdint>
+#include <limits>
+#include <string>
+#include <vector>
 
 namespace brwt {
 

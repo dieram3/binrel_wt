@@ -1,10 +1,10 @@
 #ifndef BRWT_BITMAP_H
 #define BRWT_BITMAP_H
 
-#include <brwt/bit_vector.h>   // bit_vector
-#include <brwt/common_types.h> // index_type, size_type
-#include <brwt/int_vector.h>   // int_vector
-#include <cassert>             // assert
+#include "brwt/bit_vector.h"
+#include "brwt/common_types.h"
+#include "brwt/int_vector.h"
+#include <cassert>
 
 namespace brwt {
 

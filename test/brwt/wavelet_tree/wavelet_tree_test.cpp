@@ -1,14 +1,13 @@
 #include "doctest.h"
-#include <brwt/wavelet_tree.h>
-
-#include <brwt/int_vector.h> // int_vector
-#include <array>             // array
-#include <cstddef>           // size_t, ptrdiff_t
-#include <ostream>           // ostream
-#include <string>            // string
-#include <type_traits>       // is_nothrow_default_constructible, ...
-#include <utility>           // make_pair
-#include <vector>            // vector
+#include "brwt/wavelet_tree.h"
+#include "brwt/int_vector.h"
+#include <array>
+#include <cstddef>
+#include <ostream>
+#include <string>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 using brwt::int_vector;
 using brwt::size_type;

@@ -1,9 +1,8 @@
-#include <brwt/wavelet_tree/algorithms.h>
-
-#include "../generic_algorithms.h"          // int_binary_search
-#include "bitmask_support.h"                // symbol_id-stuff
-#include <brwt/wavelet_tree/wavelet_tree.h> // wavelet_tree class definition.
-#include <algorithm>                        // min
+#include "brwt/wavelet_tree/algorithms.h"
+#include "../generic_algorithms.h"
+#include "bitmask_support.h"
+#include "brwt/wavelet_tree/wavelet_tree.h"
+#include <algorithm>
 
 namespace brwt {
 

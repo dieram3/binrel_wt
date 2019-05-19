@@ -1,9 +1,9 @@
 #ifndef BINREL_WT_LIB_UTILS_ARRAY_VIEW_H // NOLINT
 #define BINREL_WT_LIB_UTILS_ARRAY_VIEW_H
 
-#include <algorithm> // min
-#include <cassert>   // assert
-#include <cstddef>   // ptrdiff_t
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
 
 namespace brwt {
 

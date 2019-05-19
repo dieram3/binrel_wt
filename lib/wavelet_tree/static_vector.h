@@ -1,10 +1,10 @@
 #ifndef BINREL_WT_SRC_STATIC_VECTOR_H // NOLINT
 #define BINREL_WT_SRC_STATIC_VECTOR_H
 
-#include <cassert>     // assert
-#include <cstddef>     // size_t
-#include <type_traits> // aligned_storage
-#include <utility>     // forward
+#include <cassert>
+#include <cstddef>
+#include <type_traits>
+#include <utility>
 
 namespace brwt {
 

@@ -1,15 +1,14 @@
 #include "doctest.h"
-#include <brwt/binary_relation.h>
-
-#include <algorithm>        // shuffle, for_each
-#include <cassert>          // assert
-#include <initializer_list> // initializer_list
-#include <ostream>          // ostream
-#include <random>           // default_random_engine
-#include <stdexcept>        // logic_error
-#include <type_traits>      // underlying_type_t, is_enum, decay_t
-#include <utility>          // pair, move
-#include <vector>           // vector
+#include "brwt/binary_relation.h"
+#include <algorithm>
+#include <cassert>
+#include <initializer_list>
+#include <ostream>
+#include <random>
+#include <stdexcept>
+#include <type_traits>
+#include <utility>
+#include <vector>
 
 // TODO(Diego): Remove the use of make_test_binary_relation. Use
 // make_test_binary_relation_2 instead.

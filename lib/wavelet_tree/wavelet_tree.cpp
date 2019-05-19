@@ -1,12 +1,11 @@
-#include <brwt/wavelet_tree.h>
-
-#include "bitmask_support.h" // symbol_id-stuff
-#include "static_vector.h"   // static_vector
-#include <cassert>           // assert
-#include <cstddef>           // size_t
-#include <limits>            // numeric_limits
-#include <utility>           // move, exchange
-#include <vector>            // vector
+#include "brwt/wavelet_tree.h"
+#include "bitmask_support.h"
+#include "static_vector.h"
+#include <cassert>
+#include <cstddef>
+#include <limits>
+#include <utility>
+#include <vector>
 
 using brwt::wavelet_tree;
 using node_proxy = wavelet_tree::node_proxy;

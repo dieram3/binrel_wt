@@ -1,11 +1,10 @@
-#include <brwt/int_vector.h> // int_vector
-
-#include <brwt/bit_hacks.h> // lsb_mask, used_bits
-#include <algorithm>        // for_each, max_element, copy
-#include <cassert>          // assert
-#include <iterator>         // begin, end
-#include <limits>           // numeric_limits
-#include <stdexcept>        // domain_error
+#include "brwt/int_vector.h"
+#include "brwt/bit_hacks.h"
+#include <algorithm>
+#include <cassert>
+#include <iterator>
+#include <limits>
+#include <stdexcept>
 
 namespace brwt {
 

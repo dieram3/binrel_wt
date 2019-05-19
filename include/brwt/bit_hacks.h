@@ -1,9 +1,9 @@
 #ifndef BRWT_BIT_HACKS_H
 #define BRWT_BIT_HACKS_H
 
-#include <cassert>     // assert
-#include <limits>      // numeric_limits
-#include <type_traits> // is_same, is_unsigned, remove_cv_t
+#include <cassert>
+#include <limits>
+#include <type_traits>
 
 namespace brwt {
 

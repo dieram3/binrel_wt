@@ -1,8 +1,8 @@
 #ifndef BRWT_UTILITY_H
 #define BRWT_UTILITY_H
 
-#include <cassert>     // assert
-#include <type_traits> // is_integral
+#include <cassert>
+#include <type_traits>
 
 namespace brwt {
 

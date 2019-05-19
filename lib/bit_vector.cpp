@@ -1,9 +1,8 @@
-#include <brwt/bit_vector.h>
-
-#include <brwt/bit_hacks.h> // lsb_mask
-#include <brwt/utility.h>   // ceil_div
-#include <algorithm>        // min
-#include <cassert>          // assert
+#include "brwt/bit_vector.h"
+#include "brwt/bit_hacks.h"
+#include "brwt/utility.h"
+#include <algorithm>
+#include <cassert>
 
 using brwt::bit_vector;
 using size_type = bit_vector::size_type;

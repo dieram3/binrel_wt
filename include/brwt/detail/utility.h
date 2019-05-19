@@ -1,9 +1,9 @@
 #ifndef BRWT_DETAIL_UTILITY_H
 #define BRWT_DETAIL_UTILITY_H
 
-#include <memory>      // addressof
-#include <type_traits> // is_reference
-#include <utility>     // move
+#include <memory>
+#include <type_traits>
+#include <utility>
 
 namespace brwt::detail {
 

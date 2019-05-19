@@ -1,8 +1,8 @@
 #ifndef BRWT_INDEX_RANGE_H
 #define BRWT_INDEX_RANGE_H
 
-#include <brwt/common_types.h> // index_type, size_type
-#include <cassert>             // assert
+#include "brwt/common_types.h"
+#include <cassert>
 
 namespace brwt {
 

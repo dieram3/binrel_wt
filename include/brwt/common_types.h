@@ -1,9 +1,9 @@
 #ifndef BRWT_COMMON_TYPES_H
 #define BRWT_COMMON_TYPES_H
 
-#include <experimental/optional> // optional
-#include <cstddef>               // ptrdiff_t
-#include <cstdint>               // uint_fast64_t
+#include <experimental/optional>
+#include <cstddef>
+#include <cstdint>
 
 namespace brwt {
 namespace types {

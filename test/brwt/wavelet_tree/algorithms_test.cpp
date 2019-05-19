@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include <brwt/wavelet_tree.h>
+#include "brwt/wavelet_tree.h"
 
 using brwt::index_npos;
 using brwt::index_type;

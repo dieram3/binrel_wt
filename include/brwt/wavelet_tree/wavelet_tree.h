@@ -1,11 +1,11 @@
 #ifndef BRWT_WAVELET_TREE_WAVELET_TREE_H
 #define BRWT_WAVELET_TREE_WAVELET_TREE_H
 
-#include <brwt/bitmap.h>       // bitmap
-#include <brwt/common_types.h> // symbol_id, size_type, index_type
-#include <brwt/int_vector.h>   // int_vector
-#include <cstddef>             // ptrdiff_t
-#include <utility>             // pair
+#include "brwt/bitmap.h"
+#include "brwt/common_types.h"
+#include "brwt/int_vector.h"
+#include <cstddef>
+#include <utility>
 
 namespace brwt {
 

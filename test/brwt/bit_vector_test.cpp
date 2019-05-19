@@ -1,9 +1,8 @@
 #include "doctest.h"
-#include <brwt/bit_vector.h>
-
-#include <algorithm> // min
-#include <ostream>   // ostream
-#include <string>    // string
+#include "brwt/bit_vector.h"
+#include <algorithm>
+#include <ostream>
+#include <string>
 
 // TODO(Diego): Test size() instead of length(). Remove length(). Test
 // num_blocks(). Test data().

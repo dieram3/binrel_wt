@@ -1,5 +1,5 @@
 #include "doctest.h"
-#include <brwt/utility.h>
+#include "brwt/utility.h"
 
 using brwt::ceil_div;
 

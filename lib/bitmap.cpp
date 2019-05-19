@@ -1,14 +1,13 @@
-#include <brwt/bit_vector.h>
-#include <brwt/bitmap.h>
-
-#include "utils/array_view.h" // array_view
-#include <brwt/bit_hacks.h>   // pop_count, rank_0, rank_1, used_bits
-#include <brwt/utility.h>     // ceil_div
-#include <algorithm>          // min
-#include <cassert>            // assert
-#include <limits>             // numeric_limits
-#include <type_traits>        // enable_if_t
-#include <utility>            // move
+#include "brwt/bitmap.h"
+#include "utils/array_view.h"
+#include "brwt/bit_hacks.h"
+#include "brwt/bit_vector.h"
+#include "brwt/utility.h"
+#include <algorithm>
+#include <cassert>
+#include <limits>
+#include <type_traits>
+#include <utility>
 
 namespace brwt {
 

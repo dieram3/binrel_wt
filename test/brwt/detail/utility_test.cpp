@@ -1,12 +1,11 @@
 #include "doctest.h"
-#include <brwt/detail/utility.h>
-
-#include <brwt/detail/iterator.h> // random_access_iterator
-#include <algorithm>              // max
-#include <cassert>                // assert
-#include <cstddef>                // size_t, ptrdiff_t
-#include <iterator>               // distance, begin, end
-#include <type_traits>            // conditional_t
+#include "brwt/detail/utility.h"
+#include "brwt/detail/iterator.h"
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <iterator>
+#include <type_traits>
 
 // TODO(Diego): Review reference_traits in more detail when possible.
 

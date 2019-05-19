@@ -1,10 +1,10 @@
 #ifndef BRWT_BINARY_RELATION_H
 #define BRWT_BINARY_RELATION_H
 
-#include <brwt/bitmap.h>       // bitmap
-#include <brwt/common_types.h> // size_type, word_type, optional
-#include <brwt/wavelet_tree.h> // wavelet_tree
-#include <vector>              // vector
+#include "brwt/bitmap.h"
+#include "brwt/common_types.h"
+#include "brwt/wavelet_tree.h"
+#include <vector>
 
 namespace brwt {
 
