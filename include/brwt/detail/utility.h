@@ -28,7 +28,7 @@ public:
     return std::addressof(m_ref);
   }
 
-public:
+private:
   SmartRef m_ref;
 };
 
