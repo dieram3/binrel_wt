@@ -1,4 +1,6 @@
 BasedOnStyle: LLVM
+---
+Language: Cpp
 AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
@@ -18,3 +20,6 @@ IncludeCategories:
 IncludeIsMainRegex: '(_test|_bench)?$'
 IndentPPDirectives: AfterHash
 PointerAlignment: Left
+---
+Language: Json
+IndentWidth: 4
