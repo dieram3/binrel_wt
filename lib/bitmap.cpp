@@ -1,11 +1,12 @@
 #include "brwt/bitmap.h"
-#include "utils/array_view.h"
 #include "brwt/bit_hacks.h"
 #include "brwt/bit_vector.h"
 #include "brwt/utility.h"
 #include <algorithm>
 #include <cassert>
+#include <iterator>
 #include <limits>
+#include <span>
 #include <type_traits>
 #include <utility>
 
@@ -79,9 +80,9 @@ static_assert(is_power_of_two(bits_per_super_block));
 /// Returns the range of blocks belonging to the super block `sb_idx`.
 ///
 auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
-  array_view<block_t> v{bit_seq.data(), bit_seq.num_blocks()};
-  return v.subarray(/*pos=*/sb_idx * blocks_per_super_block,
-                    /*count=*/blocks_per_super_block);
+  const auto blocks = bit_seq.get_blocks();
+  return blocks.subspan(sb_idx * blocks_per_super_block,
+                        blocks_per_super_block);
 }
 
 auto bitmap::num_super_blocks() const noexcept -> size_type {
@@ -90,7 +91,7 @@ auto bitmap::num_super_blocks() const noexcept -> size_type {
 
 /// Sequentially counts the number of set bits in the given range of blocks.
 ///
-static constexpr size_type pop_count(const array_view<block_t> blocks) {
+static constexpr size_type pop_count(const std::span<const block_t> blocks) {
   size_type sum = 0;
   for (const auto elem : blocks) {
     sum += pop_count(elem);
@@ -151,7 +152,7 @@ auto bitmap::rank_1(const index_type pos) const noexcept -> size_type {
   // Address
   const auto sb_idx = pos / bits_per_super_block;
   const auto block_idx = pos / bits_per_block;
-  const int bit_idx = pos % bits_per_block;
+  const auto bit_idx = static_cast<int>(pos % bits_per_block);
 
   size_type sum = sb_exclusive_rank<1>(sb_idx);
 
@@ -193,12 +194,12 @@ auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
 /// multiplied by the number of preceding blocks.
 ///
 template <bool B, typename T, typename = enable_if_word<T>>
-static constexpr index_type sequential_select(const array_view<T> blocks,
+static constexpr index_type sequential_select(const std::span<const T> blocks,
                                               const size_type nth) {
   assert(nth > 0);
 
   size_type sum = 0;
-  for (index_type i = 0; i < blocks.size(); ++i) {
+  for (index_type i = 0; i < std::ssize(blocks); ++i) {
     const auto& elem = blocks[i];
 
     const auto prev_sum = sum;
