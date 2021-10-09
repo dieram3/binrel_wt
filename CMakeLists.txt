@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.9.3)
+cmake_minimum_required(VERSION 3.21.3)
 project("binrel_wt" CXX)
 
 # ---------------------------------------
