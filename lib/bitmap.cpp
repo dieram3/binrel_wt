@@ -3,6 +3,7 @@
 #include "brwt/bit_vector.h"
 #include "brwt/utility.h"
 #include <algorithm>
+#include <bit>
 #include <cassert>
 #include <iterator>
 #include <limits>
@@ -40,15 +41,15 @@ static constexpr int size_in_bits = std::numeric_limits<T>::digits;
 template <bool B, large_unsigned_integer T>
 static constexpr int count(const T value) {
   if constexpr (B) {
-    return pop_count(value);
+    return std::popcount(value);
   } else {
-    return pop_count(~value);
+    return std::popcount(~value);
   }
 }
 
 template <large_unsigned_integer T>
 static constexpr int select_1(const T value, const int nth) {
-  assert(nth > 0 && nth <= pop_count(value));
+  assert(nth > 0 && nth <= std::popcount(value));
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
   };
@@ -99,7 +100,7 @@ auto bitmap::num_super_blocks() const noexcept -> size_type {
 static constexpr size_type pop_count(const std::span<const block_t> blocks) {
   size_type sum = 0;
   for (const auto elem : blocks) {
-    sum += pop_count(elem);
+    sum += std::popcount(elem);
   }
   return sum;
 }
@@ -115,7 +116,7 @@ bitmap::bitmap(bit_vector vec) : bit_seq(std::move(vec)) {
   size_type acc_sum = 0;
   for (size_type i = 0; i < num_super_blocks(); ++i) {
     // TODO(Diego): Try to use transform_inclusive_scan when available.
-    acc_sum += pop_count(blocks_of_super_block(i));
+    acc_sum += brwt::pop_count(blocks_of_super_block(i));
     sb_rank_1[i] = static_cast<word_type>(acc_sum);
   }
 }
@@ -163,7 +164,7 @@ auto bitmap::rank_1(const index_type pos) const noexcept -> size_type {
 
   for (index_type ith = (sb_idx * blocks_per_super_block); ith < block_idx;
        ++ith) {
-    sum += pop_count(bit_seq.get_block(ith));
+    sum += std::popcount(bit_seq.get_block(ith));
   }
 
   sum += brwt::rank_1(bit_seq.get_block(block_idx), bit_idx);

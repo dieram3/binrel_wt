@@ -2,8 +2,6 @@
 #include "brwt/bit_hacks.h"
 #include <cstdint>
 
-/// TODO(Diego): Test the count_leading_zeros overloads.
-/// TODO(Diego): Test the count_trailing_zeros overloads.
 /// TODO(Diego): Test used_bits
 
 using uint = unsigned int;
@@ -13,38 +11,6 @@ using std::uint32_t;
 using std::uint64_t;
 
 TEST_SUITE("bit_hacks");
-
-TEST_CASE("pop_count") {
-  using brwt::pop_count;
-
-  SUBCASE("unsigned overload") {
-    CHECK(pop_count(0x1111u) == 4);
-    CHECK(pop_count(0x1212u) == 4);
-    CHECK(pop_count(0x1F2Fu) == 10);
-    CHECK(pop_count(0xFFFFu) == 16);
-  }
-  SUBCASE("unsigned long overload") {
-    CHECK(pop_count(0x1111'1111ul) == 8);
-    CHECK(pop_count(0x1214'2814ul) == 8);
-    CHECK(pop_count(0x12F2'439Eul) == 15);
-    CHECK(pop_count(0xFFFF'FFFFul) == 32);
-  }
-  SUBCASE("unsigned long long overload") {
-    CHECK(pop_count(0x1111'1111'1111'1111ull) == 16);
-    CHECK(pop_count(0x1248'1428'1144'2488ull) == 16);
-    CHECK(pop_count(0x14C0'2491'A9B3'2390ull) == 23);
-    CHECK(pop_count(0xFFFF'FFFF'FFFF'FFFFull) == 64);
-  }
-
-  // check constexpr
-  static_assert(pop_count(0x1111u) == 4, "");
-  static_assert(pop_count(0x12F2'439Eul) == 15, "");
-  static_assert(pop_count(0x14C0'2491'A9B3'2390ull) == 23, "");
-  // check noexcept
-  static_assert(noexcept(pop_count(uint{})), "");
-  static_assert(noexcept(pop_count(ulong{})), "");
-  static_assert(noexcept(pop_count(ullong{})), "");
-}
 
 TEST_CASE("lsb_mask") {
   using brwt::lsb_mask;

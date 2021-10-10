@@ -2,48 +2,12 @@
 #define BRWT_BIT_HACKS_H
 
 #include "brwt/concepts.h"
+#include <bit>
 #include <cassert>
 #include <limits>
 #include <type_traits>
 
 namespace brwt {
-
-constexpr int pop_count(unsigned x) noexcept {
-  // TODO(Diego): Consider using constexpr-if when clang-format gets it right.
-  return __builtin_popcount(x);
-}
-constexpr int pop_count(unsigned long x) noexcept {
-  return __builtin_popcountl(x);
-}
-constexpr int pop_count(unsigned long long x) noexcept {
-  return __builtin_popcountll(x);
-}
-
-constexpr int count_leading_zeros(unsigned x) noexcept {
-  assert(x != 0);
-  return __builtin_clz(x);
-}
-constexpr int count_leading_zeros(unsigned long x) noexcept {
-  assert(x != 0);
-  return __builtin_clzl(x);
-}
-constexpr int count_leading_zeros(unsigned long long x) noexcept {
-  assert(x != 0);
-  return __builtin_clzll(x);
-}
-
-constexpr int count_trailing_zeros(unsigned x) noexcept {
-  assert(x != 0);
-  return __builtin_ctz(x);
-}
-constexpr int count_trailing_zeros(unsigned long x) noexcept {
-  assert(x != 0);
-  return __builtin_ctzl(x);
-}
-constexpr int count_trailing_zeros(unsigned long long x) noexcept {
-  assert(x != 0);
-  return __builtin_ctzll(x);
-}
 
 /// \brief Creates a mask with the 'count' least significant bits set.
 ///
@@ -69,12 +33,12 @@ constexpr T lsb_mask(const int count) noexcept {
 template <large_unsigned_integer T>
 constexpr int used_bits(const T x) {
   assert(x != 0);
-  return std::numeric_limits<T>::digits - count_leading_zeros(x);
+  return std::numeric_limits<T>::digits - std::countl_zero(x);
 }
 
 template <large_unsigned_integer T>
 constexpr int rank_1(const T value) noexcept {
-  return pop_count(value);
+  return std::popcount(value);
 }
 
 template <large_unsigned_integer T>
