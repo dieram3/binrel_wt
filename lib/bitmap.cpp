@@ -34,18 +34,19 @@ static constexpr T binary_search(T a, T b, Pred pred) {
   return a;
 }
 
-template <typename T>
-using enable_if_word = std::enable_if_t<is_word_type<T>>;
-
-template <typename T, typename = enable_if_word<T>>
+template <large_unsigned_integer T>
 static constexpr int size_in_bits = std::numeric_limits<T>::digits;
 
-template <bool B, typename T, typename = enable_if_word<T>>
+template <bool B, large_unsigned_integer T>
 static constexpr int count(const T value) {
-  return B ? pop_count(value) : pop_count(~value);
+  if constexpr (B) {
+    return pop_count(value);
+  } else {
+    return pop_count(~value);
+  }
 }
 
-template <typename T, typename = enable_if_word<T>>
+template <large_unsigned_integer T>
 static constexpr int select_1(const T value, const int nth) {
   assert(nth > 0 && nth <= pop_count(value));
   auto not_enough = [value, nth](const int pos) {
@@ -54,14 +55,18 @@ static constexpr int select_1(const T value, const int nth) {
   return binary_search(nth - 1, size_in_bits<T> - 1, not_enough);
 }
 
-template <typename T, typename = enable_if_word<T>>
+template <large_unsigned_integer T>
 static constexpr int select_0(const T value, const int nth) {
   return select_1(~value, nth);
 }
 
-template <bool B, typename T, typename = enable_if_word<T>>
+template <bool B, large_unsigned_integer T>
 static constexpr int select(const T value, const int nth) {
-  return B ? select_1(value, nth) : select_0(value, nth);
+  if constexpr (B) {
+    return select_1(value, nth);
+  } else {
+    return select_0(value, nth);
+  }
 }
 
 // ===----------------------------------------------------===
@@ -193,7 +198,7 @@ auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
 /// position of the bit in the containing block plus `size_in_bits<T>`
 /// multiplied by the number of preceding blocks.
 ///
-template <bool B, typename T, typename = enable_if_word<T>>
+template <bool B, large_unsigned_integer T>
 static constexpr index_type sequential_select(const std::span<const T> blocks,
                                               const size_type nth) {
   assert(nth > 0);
