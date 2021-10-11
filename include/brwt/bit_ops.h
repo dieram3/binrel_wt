@@ -26,13 +26,11 @@ constexpr T lsb_mask(const int count) noexcept {
 
 /// \brief Returns the number of used bits in x.
 ///
-/// Effectively returns 1 plus the position of the most significant bit.
-///
-/// \pre <tt>x != 0</tt>
+/// Effectively, returns 1 plus the position of the most significant bit, or
+/// zero if `x` is zero.
 ///
 template <large_unsigned_integer T>
-constexpr int used_bits(const T x) {
-  assert(x != 0);
+constexpr int used_bits(const T x) noexcept {
   return std::numeric_limits<T>::digits - std::countl_zero(x);
 }
 
