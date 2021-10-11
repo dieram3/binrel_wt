@@ -1,5 +1,5 @@
-#ifndef BRWT_BIT_HACKS_H
-#define BRWT_BIT_HACKS_H
+#ifndef BRWT_BIT_OPS_H
+#define BRWT_BIT_OPS_H
 
 #include "brwt/concepts.h"
 #include <bit>
@@ -75,4 +75,4 @@ constexpr bool is_power_of_two(const T value) {
 
 } // namespace brwt
 
-#endif // BRWT_BIT_HACKS_H
+#endif // BRWT_BIT_OPS_H

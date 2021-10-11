@@ -1,5 +1,5 @@
 #include "brwt/bit_vector.h"
-#include "brwt/bit_hacks.h"
+#include "brwt/bit_ops.h"
 #include "brwt/utility.h"
 #include <algorithm>
 #include <cassert>

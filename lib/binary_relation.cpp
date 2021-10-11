@@ -1,5 +1,5 @@
 #include "brwt/binary_relation.h"
-#include "brwt/bit_hacks.h"
+#include "brwt/bit_ops.h"
 #include "brwt/index_range.h"
 #include <algorithm>
 #include <cassert>

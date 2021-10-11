@@ -1,6 +1,6 @@
 #include "brwt/wavelet_tree.h"
 #include "utility.h"
-#include "brwt/bit_hacks.h"
+#include "brwt/bit_ops.h"
 #include <benchmark/benchmark.h>
 #include <cassert>
 #include <type_traits>

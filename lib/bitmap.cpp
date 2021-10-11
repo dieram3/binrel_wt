@@ -1,5 +1,5 @@
 #include "brwt/bitmap.h"
-#include "brwt/bit_hacks.h"
+#include "brwt/bit_ops.h"
 #include "brwt/bit_vector.h"
 #include "brwt/utility.h"
 #include <algorithm>
@@ -16,7 +16,7 @@ namespace brwt {
 using block_t = bit_vector::block_type;
 
 // ===----------------------------------------------------===
-//                     bit_hacks extensions
+//                     bit_ops extensions
 // ===----------------------------------------------------===
 
 // TODO(Diego): Use int_binary_search.
