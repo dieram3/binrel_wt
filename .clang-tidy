@@ -5,6 +5,7 @@ Checks: >
   cert-*,
   clang-analyzer-*,
   clang-diagnostic-*,
+  concurrency-*,
   cppcoreguidelines-*,
   google-*,
   hicpp-*,
