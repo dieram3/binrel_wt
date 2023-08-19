@@ -15,6 +15,7 @@ Checks: >
   performance-*,
   readability-*,
   -cert-dcl21-cpp,
+  -cppcoreguidelines-avoid-magic-numbers,
   -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
   -cppcoreguidelines-pro-bounds-constant-array-index,
   -cppcoreguidelines-pro-type-vararg,
@@ -28,8 +29,8 @@ Checks: >
 # using 'assert' triggers this warning.
 # llvm-namespace-comment and google-readability-namespace-comments don't support
 # C++17 foo::bar comments yet.
-# hicpp-special-member-functions checks are already handled by
-# cppcoreguidelines-special-member-functions
+# hicpp-special-member-functions: redirects to cppcoreguidelines-special-member-functions
+# cppcoreguidelines-avoid-magic-numbers: redirects to readability-magic-numbers
 
 HeaderFilterRegex: '.*'
 CheckOptions:
