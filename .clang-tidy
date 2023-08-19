@@ -1,28 +1,29 @@
 ---
-Checks: "-*,\
-bugprone-*,\
-cert-*,\
-clang-diagnostic-*,\
-clang-analyzer-*,\
-cppcoreguidelines-*,\
-google-*,\
-hicpp-*,\
-llvm-*,\
-misc-*,\
-modernize-*,\
-performance-*,\
-readability-*,\
--cert-dcl21-cpp,\
--clang-analyzer-alpha*,\
--cppcoreguidelines-pro-bounds-constant-array-index,\
--cppcoreguidelines-pro-type-vararg,\
--cppcoreguidelines-pro-bounds-array-to-pointer-decay,\
--google-readability-namespace-comments,\
--google-runtime-int,\
--google-runtime-references,\
--hicpp-special-member-functions,\
--llvm-include-order,\
--llvm-namespace-comment"
+Checks: >
+  -*,
+  bugprone-*,
+  cert-*,
+  clang-analyzer-*,
+  clang-diagnostic-*,
+  cppcoreguidelines-*,
+  google-*,
+  hicpp-*,
+  llvm-*,
+  misc-*,
+  modernize-*,
+  performance-*,
+  readability-*,
+  -cert-dcl21-cpp,
+  -clang-analyzer-alpha*,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -cppcoreguidelines-pro-bounds-constant-array-index,
+  -cppcoreguidelines-pro-type-vararg,
+  -google-readability-namespace-comments,
+  -google-runtime-int,
+  -google-runtime-references,
+  -hicpp-special-member-functions,
+  -llvm-include-order,
+  -llvm-namespace-comment,
 
 # Note: cppcoreguidelines-pro-bounds-array-to-pointer-decay is disabled because
 # using 'assert' triggers this warning.
