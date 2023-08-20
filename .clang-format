@@ -22,4 +22,4 @@ IndentPPDirectives: AfterHash
 PointerAlignment: Left
 ---
 Language: Json
-IndentWidth: 4
+IndentWidth: 2
