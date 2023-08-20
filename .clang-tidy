@@ -41,6 +41,7 @@ CheckOptions:
   cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions: true
   llvm-namespace-comment.ShortNamespaceLines: 20
   readability-braces-around-statements.ShortStatementLines: 2
+  readability-identifier-length.IgnoredParameterNames: '^[abcxyzn]$'
   readability-identifier-naming.ClassCase: lower_case
   readability-identifier-naming.EnumCase: lower_case
   readability-identifier-naming.FunctionCase: lower_case
