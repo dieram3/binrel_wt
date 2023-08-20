@@ -87,8 +87,10 @@ static_assert(is_power_of_two(bits_per_super_block));
 ///
 auto bitmap::blocks_of_super_block(const size_type sb_idx) const noexcept {
   const auto blocks = bit_seq.get_blocks();
-  return blocks.subspan(sb_idx * blocks_per_super_block,
-                        blocks_per_super_block);
+  const auto offset = sb_idx * blocks_per_super_block;
+  const auto count =
+      std::min<size_type>(blocks_per_super_block, std::ssize(blocks) - offset);
+  return blocks.subspan(offset, count);
 }
 
 auto bitmap::num_super_blocks() const noexcept -> size_type {
