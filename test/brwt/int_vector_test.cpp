@@ -24,15 +24,15 @@ static auto std_vec(std::initializer_list<value_t> ilist) {
 
 // From here on, 'bpe' stands for 'bits per element'
 
-static_assert(std::is_unsigned<int_vector::value_type>::value, "");
-static_assert(std::is_signed<int_vector::size_type>::value, "");
+static_assert(std::is_unsigned<int_vector::value_type>::value);
+static_assert(std::is_signed<int_vector::size_type>::value);
 
-static_assert(std::is_nothrow_default_constructible<int_vector>::value, "");
-static_assert(std::is_copy_constructible<int_vector>::value, "");
-static_assert(std::is_copy_assignable<int_vector>::value, "");
-static_assert(std::is_nothrow_move_constructible<int_vector>::value, "");
-static_assert(std::is_nothrow_move_assignable<int_vector>::value, "");
-static_assert(std::is_nothrow_destructible<int_vector>::value, "");
+static_assert(std::is_nothrow_default_constructible<int_vector>::value);
+static_assert(std::is_copy_constructible<int_vector>::value);
+static_assert(std::is_copy_assignable<int_vector>::value);
+static_assert(std::is_nothrow_move_constructible<int_vector>::value);
+static_assert(std::is_nothrow_move_assignable<int_vector>::value);
+static_assert(std::is_nothrow_destructible<int_vector>::value);
 
 TEST_SUITE("int_vector");
 
@@ -120,7 +120,7 @@ TEST_CASE("int_vector::set_value") {
     CHECK(vec[45] == 1023);
     CHECK(vec[46] == 460);
 
-    static_assert(noexcept(vec[0] = 140), "");
+    static_assert(noexcept(vec[0] = 140));
   }
   SUBCASE("There are invalid values") {
     int_vector vec(/*count=*/50, /*bpe=*/9);
@@ -157,13 +157,13 @@ TEST_CASE("int_vector::front") {
     CHECK(seq[0] == 42);
     CHECK(std_vec(seq) == std_vec({42, 20, 30, 40}));
 
-    static_assert(same<decltype(seq.front()), int_vector::reference>, "");
+    static_assert(same<decltype(seq.front()), int_vector::reference>);
   }
   {
     const int_vector seq = {10, 20, 30, 40};
     CHECK(seq.front() == 10);
 
-    static_assert(same<decltype(seq.front()), int_vector::const_reference>, "");
+    static_assert(same<decltype(seq.front()), int_vector::const_reference>);
   }
 }
 
@@ -178,13 +178,13 @@ TEST_CASE("int_vector::back") {
     CHECK(seq[3] == 13);
     CHECK(std_vec(seq) == std_vec({10, 20, 30, 13}));
 
-    static_assert(same<decltype(seq.back()), int_vector::reference>, "");
+    static_assert(same<decltype(seq.back()), int_vector::reference>);
   }
   {
     const int_vector seq = {10, 20, 30, 40};
     CHECK(seq.back() == 40);
 
-    static_assert(same<decltype(seq.front()), int_vector::const_reference>, "");
+    static_assert(same<decltype(seq.front()), int_vector::const_reference>);
   }
 }
 

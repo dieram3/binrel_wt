@@ -8,7 +8,7 @@
 // num_blocks(). Test data().
 
 using brwt::bit_vector;
-static_assert(bit_vector::bits_per_block >= 64, "");
+static_assert(bit_vector::bits_per_block >= 64);
 
 namespace brwt {
 static std::ostream& operator<<(std::ostream& os, const bit_vector& v) {
@@ -36,7 +36,7 @@ TEST_SUITE("bit_vector");
 TEST_CASE("bit_vector::bit_vector()") {
   CHECK(bit_vector() == bit_vector(0));
 
-  static_assert(noexcept(bit_vector()), "");
+  static_assert(noexcept(bit_vector()));
 }
 
 TEST_CASE("bit_vector::bit_vector(size_type)") {
@@ -101,7 +101,7 @@ TEST_CASE("bit_vector::length()") {
   CHECK(bit_vector(32).length() == 32);
   CHECK(bit_vector(197).length() == 197);
 
-  static_assert(noexcept(bit_vector().length()), "");
+  static_assert(noexcept(bit_vector().length()));
 }
 
 TEST_CASE("bit_vector::allocated_bytes()") {
@@ -111,7 +111,7 @@ TEST_CASE("bit_vector::allocated_bytes()") {
   CHECK(bit_vector(65).allocated_bytes() >= 16);
   CHECK(bit_vector(700).allocated_bytes() >= 88);
 
-  static_assert(noexcept(bit_vector().allocated_bytes()), "");
+  static_assert(noexcept(bit_vector().allocated_bytes()));
 }
 
 TEST_CASE("bit_vector::get(size_type)") {
@@ -124,7 +124,7 @@ TEST_CASE("bit_vector::get(size_type)") {
   CHECK(!v.get(55));
   CHECK(v.get(56));
 
-  static_assert(noexcept(bit_vector().get(0)), "");
+  static_assert(noexcept(bit_vector().get(0)));
 }
 
 TEST_CASE("bit_vector::set(size_type, bool)") {
@@ -145,7 +145,7 @@ TEST_CASE("bit_vector::set(size_type, bool)") {
   CHECK(!v.get(198));
   CHECK(v.get(199));
 
-  static_assert(noexcept(bit_vector().set(0, false)), "");
+  static_assert(noexcept(bit_vector().set(0, false)));
 }
 
 TEST_CASE("bit_vector::get_chunk") {
@@ -159,7 +159,7 @@ TEST_CASE("bit_vector::get_chunk") {
   CHECK(v.get_chunk(8, 16) == 0x2811);
   CHECK(v.get_chunk(24, 36) == 0xFFF'1EEE'14);
 
-  static_assert(noexcept(bit_vector().get_chunk(0, 10)), "");
+  static_assert(noexcept(bit_vector().get_chunk(0, 10)));
 }
 
 TEST_CASE("bit_vector::set_chunk") {
@@ -185,7 +185,7 @@ TEST_CASE("bit_vector::set_chunk") {
   CHECK(v.get_chunk(128, 64) == 0x0022'1412'4244'1263);
   CHECK(v.get_chunk(160, 40) == 0x00'0022'1412);
 
-  static_assert(noexcept(bit_vector().set_chunk(0, 8, 0xFF)), "");
+  static_assert(noexcept(bit_vector().set_chunk(0, 8, 0xFF)));
 }
 
 TEST_CASE("bit_vector::get_block") {
@@ -204,7 +204,7 @@ TEST_CASE("bit_vector::get_block") {
   CHECK(cv.get_block(1) == 1);
   CHECK(cv.get_block(2) == 4);
 
-  static_assert(noexcept(bit_vector().get_block(0)), "");
+  static_assert(noexcept(bit_vector().get_block(0)));
 }
 
 TEST_CASE("bit_vector::set_block") {
@@ -228,7 +228,7 @@ TEST_CASE("bit_vector::set_block") {
   CHECK(v.get_block(2) == 0x3492'4238);
   CHECK(v.get_block(3) == 0);
 
-  static_assert(noexcept(bit_vector().set_block(0, 0xFFFF)), "");
+  static_assert(noexcept(bit_vector().set_block(0, 0xFFFF)));
 }
 
 TEST_SUITE_END();

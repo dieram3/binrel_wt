@@ -102,22 +102,22 @@ TEST_SUITE("wavelet_tree");
 
 template <typename T>
 static void test_wavelet_tree_default_member_functions() {
-  static_assert(std::is_nothrow_default_constructible<T>::value, "");
-  static_assert(std::is_copy_constructible<T>::value, "");
-  static_assert(std::is_nothrow_move_constructible<T>::value, "");
-  static_assert(std::is_copy_assignable<T>::value, "");
-  static_assert(std::is_nothrow_move_assignable<T>::value, "");
-  static_assert(std::is_nothrow_destructible<T>::value, "");
+  static_assert(std::is_nothrow_default_constructible<T>::value);
+  static_assert(std::is_copy_constructible<T>::value);
+  static_assert(std::is_nothrow_move_constructible<T>::value);
+  static_assert(std::is_copy_assignable<T>::value);
+  static_assert(std::is_nothrow_move_assignable<T>::value);
+  static_assert(std::is_nothrow_destructible<T>::value);
 }
 
 template <typename T>
 static void test_node_proxy_default_member_functions() {
-  static_assert(!std::is_default_constructible<T>::value, "");
-  static_assert(std::is_trivially_copy_constructible<T>::value, "");
-  static_assert(std::is_trivially_move_constructible<T>::value, "");
-  static_assert(std::is_trivially_copy_assignable<T>::value, "");
-  static_assert(std::is_trivially_move_assignable<T>::value, "");
-  static_assert(std::is_trivially_destructible<T>::value, "");
+  static_assert(!std::is_default_constructible<T>::value);
+  static_assert(std::is_trivially_copy_constructible<T>::value);
+  static_assert(std::is_trivially_move_constructible<T>::value);
+  static_assert(std::is_trivially_copy_assignable<T>::value);
+  static_assert(std::is_trivially_move_assignable<T>::value);
+  static_assert(std::is_trivially_destructible<T>::value);
 }
 
 TEST_CASE("Default constructor") {

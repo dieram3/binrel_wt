@@ -103,44 +103,43 @@ static void test_iterators_types_and_conversions() {
   using iterator = typename Container::iterator;
   using const_iterator = typename Container::const_iterator;
 
-  static_assert(!same<iterator, const_iterator>, "");
+  static_assert(!same<iterator, const_iterator>);
 
-  static_assert(!constructible<iterator, const_iterator>, "");
-  static_assert(constructible<const_iterator, iterator>, "");
-  static_assert(!assignable<iterator, const_iterator>, "");
-  static_assert(assignable<const_iterator, iterator>, "");
+  static_assert(!constructible<iterator, const_iterator>);
+  static_assert(constructible<const_iterator, iterator>);
+  static_assert(!assignable<iterator, const_iterator>);
+  static_assert(assignable<const_iterator, iterator>);
 
-  static_assert(convertible<iterator, const_iterator>, "");
-  static_assert(!convertible<const_iterator, iterator>, "");
+  static_assert(convertible<iterator, const_iterator>);
+  static_assert(!convertible<const_iterator, iterator>);
 
   {
     Container c{};
-    static_assert(same<decltype(c.begin()), iterator>, "");
-    static_assert(same<decltype(c.cbegin()), const_iterator>, "");
-    static_assert(same<decltype(c.end()), iterator>, "");
-    static_assert(same<decltype(c.cend()), const_iterator>, "");
+    static_assert(same<decltype(c.begin()), iterator>);
+    static_assert(same<decltype(c.cbegin()), const_iterator>);
+    static_assert(same<decltype(c.end()), iterator>);
+    static_assert(same<decltype(c.cend()), const_iterator>);
   }
   {
     const Container c{};
-    static_assert(same<decltype(c.begin()), const_iterator>, "");
-    static_assert(same<decltype(c.cbegin()), const_iterator>, "");
-    static_assert(same<decltype(c.end()), const_iterator>, "");
-    static_assert(same<decltype(c.cend()), const_iterator>, "");
+    static_assert(same<decltype(c.begin()), const_iterator>);
+    static_assert(same<decltype(c.cbegin()), const_iterator>);
+    static_assert(same<decltype(c.end()), const_iterator>);
+    static_assert(same<decltype(c.cend()), const_iterator>);
   }
 }
 
 template <typename I>
 void test_iterator_properties() {
-  static_assert(std::is_nothrow_default_constructible<I>::value, "");
-  static_assert(std::is_trivially_copy_constructible<I>::value, "");
-  static_assert(std::is_trivially_move_constructible<I>::value, "");
-  static_assert(std::is_trivially_copy_assignable<I>::value, "");
-  static_assert(std::is_trivially_move_assignable<I>::value, "");
-  static_assert(std::is_trivially_destructible<I>::value, "");
+  static_assert(std::is_nothrow_default_constructible<I>::value);
+  static_assert(std::is_trivially_copy_constructible<I>::value);
+  static_assert(std::is_trivially_move_constructible<I>::value);
+  static_assert(std::is_trivially_copy_assignable<I>::value);
+  static_assert(std::is_trivially_move_assignable<I>::value);
+  static_assert(std::is_trivially_destructible<I>::value);
 
   static_assert(same<typename std::iterator_traits<I>::iterator_category,
-                     std::random_access_iterator_tag>,
-                "");
+                     std::random_access_iterator_tag>);
 
   using D = typename I::difference_type;
 
@@ -150,35 +149,35 @@ void test_iterator_properties() {
   const D d{};
 
   // element access
-  static_assert(same<decltype(*it), typename I::reference>, "");
-  static_assert(same<decltype(it[d]), typename I::reference>, "");
-  static_assert(same<decltype(it.operator->()), typename I::pointer>, "");
+  static_assert(same<decltype(*it), typename I::reference>);
+  static_assert(same<decltype(it[d]), typename I::reference>);
+  static_assert(same<decltype(it.operator->()), typename I::pointer>);
 
   // modifiers
-  static_assert(same<decltype(++mut_it), I&>, "");
-  static_assert(same<decltype(mut_it++), I>, "");
-  static_assert(same<decltype(--mut_it), I&>, "");
-  static_assert(same<decltype(mut_it--), I>, "");
-  static_assert(same<decltype(mut_it += d), I&>, "");
-  static_assert(same<decltype(mut_it -= d), I&>, "");
+  static_assert(same<decltype(++mut_it), I&>);
+  static_assert(same<decltype(mut_it++), I>);
+  static_assert(same<decltype(--mut_it), I&>);
+  static_assert(same<decltype(mut_it--), I>);
+  static_assert(same<decltype(mut_it += d), I&>);
+  static_assert(same<decltype(mut_it -= d), I&>);
 
   // arithmetic operators
-  static_assert(same<decltype(it + d), I>, "");
-  static_assert(same<decltype(d + it), I>, "");
-  static_assert(same<decltype(it - d), I>, "");
-  static_assert(same<decltype(it - it2), D>, "");
+  static_assert(same<decltype(it + d), I>);
+  static_assert(same<decltype(d + it), I>);
+  static_assert(same<decltype(it - d), I>);
+  static_assert(same<decltype(it - it2), D>);
 
   // relational operators
-  static_assert(same<decltype(it == it2), bool>, "");
-  static_assert(same<decltype(it != it2), bool>, "");
-  static_assert(same<decltype(it < it2), bool>, "");
-  static_assert(same<decltype(it > it2), bool>, "");
-  static_assert(same<decltype(it <= it2), bool>, "");
-  static_assert(same<decltype(it >= it2), bool>, "");
+  static_assert(same<decltype(it == it2), bool>);
+  static_assert(same<decltype(it != it2), bool>);
+  static_assert(same<decltype(it < it2), bool>);
+  static_assert(same<decltype(it > it2), bool>);
+  static_assert(same<decltype(it <= it2), bool>);
+  static_assert(same<decltype(it >= it2), bool>);
 
   // Check swappable property.
   using std::swap;
-  static_assert(noexcept(swap(mut_it, mut_it)), "");
+  static_assert(noexcept(swap(mut_it, mut_it)));
 }
 
 // ===------------------------------------------------------===

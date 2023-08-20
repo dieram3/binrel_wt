@@ -116,7 +116,7 @@ static auto make_test_binary_relation_2() {
 namespace brwt {
 template <typename T>
 static constexpr auto to_underlying_type(const T value) {
-  static_assert(std::is_enum<T>::value, "");
+  static_assert(std::is_enum<T>::value);
   return static_cast<std::underlying_type_t<T>>(value);
 }
 

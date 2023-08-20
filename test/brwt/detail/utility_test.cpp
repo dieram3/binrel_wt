@@ -151,8 +151,8 @@ TEST_CASE("static checks") {
   using pointer = typename reference_traits<reference>::pointer;
   using const_pointer = typename reference_traits<const_reference>::pointer;
 
-  static_assert(same<pointer, pointed_reference<reference>>, "");
-  static_assert(same<const_pointer, const point*>, "");
+  static_assert(same<pointer, pointed_reference<reference>>);
+  static_assert(same<const_pointer, const point*>);
 }
 
 TEST_CASE("const_iterator test") {
