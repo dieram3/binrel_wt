@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 3.21.3)
-project("binrel_wt" CXX)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_STANDARD_REQUIRED ON)
@@ -19,7 +18,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For external tools
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
 
 # ---------------------------------------
-# Project options
+# Project
 # ---------------------------------------
 
 option(BRWT_INCLUDE_TESTS "Generate build targets for the BRWT unit tests." ON)
@@ -33,6 +32,17 @@ option(BRWT_INCLUDE_DOCS "Generate build targets for the BRWT documentation." ON
 option(BRWT_ENABLE_MODULES "Enable support for clang modules." OFF)
 
 option(BRWT_ENABLE_LTO "Enable link time optimization." OFF)
+
+# Autoselect vcpkg features based on selected options. If Vcpkg is not in use,
+# VCPKG_MANIFEST_FEATURES is just ignored.
+if(BRWT_INCLUDE_TESTS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "tests")
+endif()
+if(BRWT_INCLUDE_BENCHMARKS)
+  list(APPEND VCPKG_MANIFEST_FEATURES "benchmarks")
+endif()
+
+project("binrel_wt" CXX)
 
 # ---------------------------------------
 # Handle compilation options
