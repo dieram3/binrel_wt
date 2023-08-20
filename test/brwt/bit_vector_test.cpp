@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/bit_vector.h"
+#include <doctest/doctest.h>
 #include <algorithm>
 #include <ostream>
 #include <string>
@@ -31,7 +31,9 @@ static bool operator==(const bit_vector& lhs, const bit_vector& rhs) noexcept {
 }
 } // end namespace brwt
 
-TEST_SUITE("bit_vector");
+// FIXME: In the current doctest version, TEST_SUITE is meant to open a scope.
+// Either do that, or remove TEST_SUITE.
+// TEST_SUITE("bit_vector");
 
 TEST_CASE("bit_vector::bit_vector()") {
   CHECK(bit_vector() == bit_vector(0));

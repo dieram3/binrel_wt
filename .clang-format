@@ -5,8 +5,6 @@ AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 IncludeCategories:
-  - Regex:           '^"doctest.h"$'     # Doctest
-    Priority:        -1
   - Regex:           '^"brwt/'           # BRWT headers
     Priority:        2
   - Regex:           '^".+"$'            # Private headers

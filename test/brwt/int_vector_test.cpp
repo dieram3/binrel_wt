@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/int_vector.h"
+#include <doctest/doctest.h>
 #include <algorithm>
 #include <iterator>
 #include <limits>
@@ -34,7 +34,7 @@ static_assert(std::is_nothrow_move_constructible_v<int_vector>);
 static_assert(std::is_nothrow_move_assignable_v<int_vector>);
 static_assert(std::is_nothrow_destructible_v<int_vector>);
 
-TEST_SUITE("int_vector");
+// TEST_SUITE("int_vector");
 
 TEST_CASE("int_vector::int_vector()") {
   const int_vector v{};

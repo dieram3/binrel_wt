@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/detail/iterator.h"
+#include <doctest/doctest.h>
 #include <algorithm>
 #include <cstddef>
 #include <iterator>
@@ -184,7 +184,7 @@ void test_iterator_properties() {
 //                  Test cases
 // ===------------------------------------------------------===
 
-TEST_SUITE("detail::random_access_iterator");
+// TEST_SUITE("detail::random_access_iterator");
 
 TEST_CASE("iterator: Static tests") {
   using container = dyn_array<int>;

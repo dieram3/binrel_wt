@@ -1,9 +1,9 @@
-#include "doctest.h"
 #include "brwt/utility.h"
+#include <doctest/doctest.h>
 
 using brwt::ceil_div;
 
-TEST_SUITE("utility");
+// TEST_SUITE("utility");
 
 TEST_CASE("ceil_div") {
   SUBCASE("When remainder is 0") {

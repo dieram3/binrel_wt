@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/binary_relation.h"
+#include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
@@ -186,7 +186,7 @@ TEST_CASE("as_objects test") {
   }
 }
 
-TEST_SUITE("binary_relation");
+// TEST_SUITE("binary_relation");
 
 TEST_CASE("Vector of pairs constructor") {
   using vec_t = std::vector<pair_type>;

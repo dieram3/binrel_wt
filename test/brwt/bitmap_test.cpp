@@ -1,6 +1,6 @@
-#include "doctest.h"
 #include "brwt/bitmap.h"
 #include "brwt/bit_vector.h"
+#include <doctest/doctest.h>
 #include <string>
 
 using brwt::bit_vector;
@@ -9,7 +9,7 @@ using brwt::bitmap;
 using size_type = bitmap::size_type;
 using index_type = bitmap::index_type;
 
-TEST_SUITE("bitmap");
+// TEST_SUITE("bitmap");
 
 TEST_CASE("bitmap::access()") {
   const std::vector<bit_vector> tests = {

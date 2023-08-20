@@ -1,6 +1,6 @@
-#include "doctest.h"
 #include "brwt/wavelet_tree.h"
 #include "brwt/int_vector.h"
+#include <doctest/doctest.h>
 #include <array>
 #include <cstddef>
 #include <ostream>
@@ -98,7 +98,7 @@ static std::ostream& operator<<(std::ostream& os,
 }
 } // end namespace std
 
-TEST_SUITE("wavelet_tree");
+// TEST_SUITE("wavelet_tree");
 
 template <typename T>
 static void test_wavelet_tree_default_member_functions() {

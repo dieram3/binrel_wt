@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/bit_ops.h"
+#include <doctest/doctest.h>
 #include <cstdint>
 
 /// TODO(Diego): Test used_bits
@@ -10,7 +10,7 @@ using ullong = unsigned long long;
 using std::uint32_t;
 using std::uint64_t;
 
-TEST_SUITE("bit_ops");
+// TEST_SUITE("bit_ops");
 
 TEST_CASE("lsb_mask") {
   using brwt::lsb_mask;

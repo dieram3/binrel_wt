@@ -1,5 +1,5 @@
-#include "doctest.h"
 #include "brwt/wavelet_tree.h"
+#include <doctest/doctest.h>
 
 using brwt::index_npos;
 using brwt::index_type;
@@ -11,7 +11,7 @@ static constexpr symbol_id operator"" _sym(const unsigned long long value) {
   return static_cast<symbol_id>(value);
 }
 
-TEST_SUITE("wavelet_tree/algorithms");
+// TEST_SUITE("wavelet_tree/algorithms");
 
 TEST_CASE("[select_first] small alphabet") {
   int_vector vec = {0, 2, 2, 1, 2, 3, 1, 3, 2, 1, 3, 0,
