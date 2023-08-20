@@ -1,0 +1,21 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vcpkg-tool/main/docs/vcpkg.schema.json",
+  "default-features": [
+    "tests"
+  ],
+  "features": {
+    "tests": {
+      "description": "Build tests.",
+      "dependencies": [
+        "doctest"
+      ]
+    },
+    "benchmarks": {
+      "description": "Build benchmarks.",
+      "dependencies": [
+        "benchmark"
+      ]
+    }
+  },
+  "builtin-baseline": "9edb1b8e590cc086563301d735cae4b6e732d2d2"
+}
