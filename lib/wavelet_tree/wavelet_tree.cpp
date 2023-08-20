@@ -100,13 +100,13 @@ auto wavelet_tree::access(index_type pos) const noexcept -> symbol_id {
       pos = node.rank_0(pos) - 1; // 1 rank
       node = node.make_lhs();     // 2 ranks
     } else {
-      res |= 1u;
+      res |= 1U;
       pos = node.rank_1(pos) - 1; // 1 rank
       node = node.make_rhs();     // 2 ranks
     }
     res <<= 1;
   }
-  res |= (node.access(pos)) ? 1u : 0u;
+  res |= (node.access(pos)) ? 1U : 0U;
   return res;
 }
 

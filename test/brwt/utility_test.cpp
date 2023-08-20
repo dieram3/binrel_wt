@@ -23,11 +23,11 @@ TEST_CASE("ceil_div") {
 
   // check constexpr
   static_assert(ceil_div(5, 2) == 3);
-  static_assert(ceil_div(10ul, 3ul) == 4ul);
+  static_assert(ceil_div(10UL, 3UL) == 4UL);
 
   // check noexcept
   static_assert(noexcept(ceil_div(1, 1)));
-  static_assert(noexcept(ceil_div(1ul, 1ul)));
+  static_assert(noexcept(ceil_div(1UL, 1UL)));
 }
 
 TEST_SUITE_END();

@@ -101,9 +101,9 @@ TEST_CASE("[rank_0][integer][end_position]") {
   //     0100'0001'0010'0011 <-    (16..31: 11, total: 22)
   //     0001'0101'0001'0100 begin ( 0..15: 11, total: 11)
 
-  static_assert(noexcept(rank_0(0u, 0)));
-  static_assert(noexcept(rank_0(0ul, 0)));
-  static_assert(noexcept(rank_0(0ull, 0)));
+  static_assert(noexcept(rank_0(0U, 0)));
+  static_assert(noexcept(rank_0(0UL, 0)));
+  static_assert(noexcept(rank_0(0ULL, 0)));
 }
 
 TEST_CASE("[rank_1][integer][end_position]") {
@@ -136,9 +136,9 @@ TEST_CASE("[rank_1][integer][end_position]") {
   //     0100'0001'0010'0011 <-    (16..31: 5, total: 12)
   //     0101'1001'1000'0011 begin ( 0..15: 7, total: 7)
 
-  static_assert(noexcept(rank_1(0u, 0)));
-  static_assert(noexcept(rank_1(0ul, 0)));
-  static_assert(noexcept(rank_1(0ull, 0)));
+  static_assert(noexcept(rank_1(0U, 0)));
+  static_assert(noexcept(rank_1(0UL, 0)));
+  static_assert(noexcept(rank_1(0ULL, 0)));
 }
 
 TEST_CASE("is_power_of_two") {
