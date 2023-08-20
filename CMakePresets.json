@@ -16,7 +16,8 @@
         "dev": true,
         "deprecated": true,
         "uninitialized": true
-      }
+      },
+      "toolchainFile": "${sourceDir}/cmake/toolchains/default.cmake"
     },
     {
       "name": "debug",
