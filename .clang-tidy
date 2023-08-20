@@ -24,6 +24,8 @@ Checks: >
   -hicpp-special-member-functions,
   -llvm-include-order,
   -llvm-namespace-comment,
+  -modernize-use-nodiscard,
+  -modernize-use-trailing-return-type,
 
 # Note: cppcoreguidelines-pro-bounds-array-to-pointer-decay is disabled because
 # using 'assert' triggers this warning.
@@ -31,6 +33,8 @@ Checks: >
 # C++17 foo::bar comments yet.
 # hicpp-special-member-functions: redirects to cppcoreguidelines-special-member-functions
 # cppcoreguidelines-avoid-magic-numbers: redirects to readability-magic-numbers
+# modernize-use-nodiscard: too noisy
+# modernize-use-trailing-return-type: not for now
 
 HeaderFilterRegex: '.*'
 CheckOptions:
