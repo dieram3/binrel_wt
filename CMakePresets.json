@@ -1,38 +1,38 @@
 {
-    "version": 3,
-    "cmakeMinimumRequired": {
-        "major": 3,
-        "minor": 21,
-        "patch": 0
+  "version": 3,
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
+  "configurePresets": [
+    {
+      "name": "base_config",
+      "hidden": true,
+      "description": "Base config used to capture common configurations.",
+      "generator": "Ninja",
+      "binaryDir": "build/${presetName}",
+      "warnings": {
+        "dev": true,
+        "deprecated": true,
+        "uninitialized": true
+      }
     },
-    "configurePresets": [
-        {
-            "name": "base_config",
-            "hidden": true,
-            "description": "Base config used to capture common configurations.",
-            "generator": "Ninja",
-            "binaryDir": "build/${presetName}",
-            "warnings": {
-                "dev": true,
-                "deprecated": true,
-                "uninitialized": true
-            }
-        },
-        {
-            "name": "debug",
-            "inherits": "base_config",
-            "displayName": "Debug build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug"
-            }
-        },
-        {
-            "name": "release",
-            "inherits": "base_config",
-            "displayName": "Release build",
-            "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
-            }
-        }
-    ]
+    {
+      "name": "debug",
+      "inherits": "base_config",
+      "displayName": "Debug build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
+    },
+    {
+      "name": "release",
+      "inherits": "base_config",
+      "displayName": "Release build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release"
+      }
+    }
+  ]
 }
