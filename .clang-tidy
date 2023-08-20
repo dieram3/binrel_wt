@@ -47,4 +47,3 @@ CheckOptions:
   readability-identifier-naming.TemplateParameterCase: CamelCase
   readability-identifier-naming.UnionCase: lower_case
   readability-identifier-naming.VariableCase: lower_case
-...
