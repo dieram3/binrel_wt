@@ -138,7 +138,7 @@ auto positive_array::operator[](size_type pos) -> reference {
 // ===------------------------------------------------------===
 
 template <typename T, typename U>
-constexpr bool same = std::is_same<T, U>::value;
+constexpr bool same = std::is_same_v<T, U>;
 
 TEST_SUITE("detail::reference_traits");
 

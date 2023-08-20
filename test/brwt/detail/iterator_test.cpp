@@ -86,16 +86,16 @@ private:
 
 namespace {
 template <typename T, typename U>
-constexpr bool same = std::is_same<T, U>::value;
+constexpr bool same = std::is_same_v<T, U>;
 
 template <typename T, typename... Args>
-constexpr bool constructible = std::is_constructible<T, Args...>::value;
+constexpr bool constructible = std::is_constructible_v<T, Args...>;
 
 template <typename T, typename U>
-constexpr bool assignable = std::is_assignable<T, U>::value;
+constexpr bool assignable = std::is_assignable_v<T, U>;
 
 template <typename From, typename To>
-constexpr bool convertible = std::is_convertible<From, To>::value;
+constexpr bool convertible = std::is_convertible_v<From, To>;
 } // end namespace
 
 template <typename Container>
@@ -131,12 +131,12 @@ static void test_iterators_types_and_conversions() {
 
 template <typename I>
 void test_iterator_properties() {
-  static_assert(std::is_nothrow_default_constructible<I>::value);
-  static_assert(std::is_trivially_copy_constructible<I>::value);
-  static_assert(std::is_trivially_move_constructible<I>::value);
-  static_assert(std::is_trivially_copy_assignable<I>::value);
-  static_assert(std::is_trivially_move_assignable<I>::value);
-  static_assert(std::is_trivially_destructible<I>::value);
+  static_assert(std::is_nothrow_default_constructible_v<I>);
+  static_assert(std::is_trivially_copy_constructible_v<I>);
+  static_assert(std::is_trivially_move_constructible_v<I>);
+  static_assert(std::is_trivially_copy_assignable_v<I>);
+  static_assert(std::is_trivially_move_assignable_v<I>);
+  static_assert(std::is_trivially_destructible_v<I>);
 
   static_assert(same<typename std::iterator_traits<I>::iterator_category,
                      std::random_access_iterator_tag>);

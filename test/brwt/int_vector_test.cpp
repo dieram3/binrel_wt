@@ -12,7 +12,7 @@ using brwt::int_vector;
 using value_t = int_vector::value_type;
 
 template <typename T, typename U>
-constexpr bool same = std::is_same<T, U>::value;
+constexpr bool same = std::is_same_v<T, U>;
 
 static auto std_vec(const int_vector& seq) {
   return std::vector<value_t>(seq.begin(), seq.end());
@@ -24,15 +24,15 @@ static auto std_vec(std::initializer_list<value_t> ilist) {
 
 // From here on, 'bpe' stands for 'bits per element'
 
-static_assert(std::is_unsigned<int_vector::value_type>::value);
-static_assert(std::is_signed<int_vector::size_type>::value);
+static_assert(std::is_unsigned_v<int_vector::value_type>);
+static_assert(std::is_signed_v<int_vector::size_type>);
 
-static_assert(std::is_nothrow_default_constructible<int_vector>::value);
-static_assert(std::is_copy_constructible<int_vector>::value);
-static_assert(std::is_copy_assignable<int_vector>::value);
-static_assert(std::is_nothrow_move_constructible<int_vector>::value);
-static_assert(std::is_nothrow_move_assignable<int_vector>::value);
-static_assert(std::is_nothrow_destructible<int_vector>::value);
+static_assert(std::is_nothrow_default_constructible_v<int_vector>);
+static_assert(std::is_copy_constructible_v<int_vector>);
+static_assert(std::is_copy_assignable_v<int_vector>);
+static_assert(std::is_nothrow_move_constructible_v<int_vector>);
+static_assert(std::is_nothrow_move_assignable_v<int_vector>);
+static_assert(std::is_nothrow_destructible_v<int_vector>);
 
 TEST_SUITE("int_vector");
 

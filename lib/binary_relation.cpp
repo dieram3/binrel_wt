@@ -40,7 +40,7 @@ static UnaryFunction for_each(InputRange&& range, UnaryFunction f) {
 
 template <typename T>
 static constexpr auto to_underlying_type(const T value) noexcept {
-  static_assert(std::is_enum<T>::value);
+  static_assert(std::is_enum_v<T>);
   return static_cast<std::underlying_type_t<T>>(value);
 }
 

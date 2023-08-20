@@ -23,7 +23,7 @@ inline auto& get_random_engine() {
 
 template <typename T>
 T gen_integer(const T min, const T max) {
-  static_assert(std::is_integral<T>::value);
+  static_assert(std::is_integral_v<T>);
   assert(min <= max);
 
   std::uniform_int_distribution<T> dist{min, max};
