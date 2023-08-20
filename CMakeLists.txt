@@ -4,11 +4,6 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (NOT CMAKE_BUILD_TYPE)
-  message(STATUS "No build type selected, defaulted to Release")
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Choose the build type." FORCE)
-endif()
-
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON) # For external tools
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake/modules")
