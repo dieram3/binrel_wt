@@ -124,8 +124,8 @@ auto wavelet_tree::rank(const symbol_id symbol, index_type pos) const noexcept
   return node.is_lhs_symbol(symbol) ? node.rank_0(pos) : node.rank_1(pos);
 }
 
-auto wavelet_tree::select(const symbol_id symbol, const size_type nth) const
-    noexcept -> index_type {
+auto wavelet_tree::select(const symbol_id symbol,
+                          const size_type nth) const noexcept -> index_type {
   assert(symbol <= max_symbol_id());
   assert(nth > 0);
   // Time complexity: Exactly 2 bitmap ranks and 1 bitmap select for level.

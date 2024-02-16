@@ -87,10 +87,9 @@ public:
   ///
   /// \remark In the literature this operation is known as \e rel_sel_obj_maj
   ///
-  std::optional<pair_type> nth_element(object_id x, label_id alpha,
-                                       label_id beta, size_type nth,
-                                       object_major_order_t order) const
-      noexcept;
+  std::optional<pair_type>
+  nth_element(object_id x, label_id alpha, label_id beta, size_type nth,
+              object_major_order_t order) const noexcept;
 
   /// \brief Finds the nth pair in the range
   /// 'access(alpha, max_label, x, y)' when it is ordered by label value, then
@@ -98,10 +97,9 @@ public:
   ///
   /// \remark In the literature this operation is known as \e rel_sel_lab_maj
   ///
-  std::optional<pair_type> nth_element(object_id x, object_id y, label_id alpha,
-                                       size_type nth,
-                                       label_major_order_t order) const
-      noexcept;
+  std::optional<pair_type>
+  nth_element(object_id x, object_id y, label_id alpha, size_type nth,
+              label_major_order_t order) const noexcept;
 
   /// \brief Finds the first pair not less than \p start, such that its label
   /// value is in the given range.
@@ -120,10 +118,9 @@ public:
   ///
   /// \remark This operation is also known as \c rel_min_obj_maj.
   ///
-  std::optional<pair_type> lower_bound(pair_type start, label_id min_label,
-                                       label_id max_label,
-                                       object_major_order_t order) const
-      noexcept;
+  std::optional<pair_type>
+  lower_bound(pair_type start, label_id min_label, label_id max_label,
+              object_major_order_t order) const noexcept;
   /// @}
 
   /// \name Object view
@@ -139,16 +136,16 @@ public:
   /// \brief Returns the number of objects less than \p x that  are associated
   /// with the given label.
   ///
-  size_type obj_exclusive_rank(object_id x, label_id fixed_label) const
-      noexcept;
+  size_type obj_exclusive_rank(object_id x,
+                               label_id fixed_label) const noexcept;
 
   /// \brief Returns the number of objects less than or equal to \p x that are
   /// associated with a label in the given range.
   ///
   /// \remark This operation is also known as <tt>obj_rnk</tt>.
   ///
-  size_type obj_rank(object_id x, label_id min_label, label_id max_label) const
-      noexcept;
+  size_type obj_rank(object_id x, label_id min_label,
+                     label_id max_label) const noexcept;
 
   /// \brief Returns the number of objects less than \p x that are associated
   /// with a label in the given range.
@@ -169,8 +166,8 @@ public:
   /// \remark This operation is also known as \c obj_sel1.
   ///
   std::optional<object_id> obj_select(object_id object_start,
-                                      label_id fixed_label, size_type nth) const
-      noexcept;
+                                      label_id fixed_label,
+                                      size_type nth) const noexcept;
   /// @}
 
   /// \name Label view
