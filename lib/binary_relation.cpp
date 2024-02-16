@@ -5,6 +5,7 @@
 #include <cassert>
 #include <cstddef>
 #include <iterator>
+#include <numeric>
 #include <tuple>
 #include <type_traits>
 #include <utility>
@@ -22,16 +23,6 @@ using pair_type = binary_relation::pair_type;
 // ==========================================
 // Generic helpers
 // ==========================================
-
-// TODO(Diego): Consider to put exclusive_scan in a private header. It is also
-// used in the wavelet tree implementation.
-template <typename InputIt, typename OutputIt, typename T>
-static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
-                           T init) {
-  for (; first != last; ++first) {
-    *d_first++ = std::exchange(init, init + (*first));
-  }
-}
 
 template <typename InputRange, typename UnaryFunction>
 static UnaryFunction for_each(InputRange&& range, UnaryFunction f) {
@@ -177,7 +168,8 @@ static auto count_objects_frequency(const vector<pair_type>& pairs,
 
 template <typename ForwardRange, typename T>
 static void inplace_exclusive_scan(ForwardRange& range, const T init) {
-  exclusive_scan(std::begin(range), std::end(range), std::begin(range), init);
+  std::exclusive_scan(std::begin(range), std::end(range), std::begin(range),
+                      init);
 }
 
 static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,

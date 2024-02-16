@@ -4,23 +4,12 @@
 #include <cassert>
 #include <cstddef>
 #include <limits>
+#include <numeric>
 #include <utility>
 #include <vector>
 
 using brwt::wavelet_tree;
 using node_proxy = wavelet_tree::node_proxy;
-
-// ==========================================
-// Auxiliary algorithms
-// ==========================================
-
-template <typename InputIt, typename OutputIt, typename T>
-static void exclusive_scan(InputIt first, const InputIt last, OutputIt d_first,
-                           T init) {
-  for (; first != last; ++first) {
-    *d_first++ = std::exchange(init, init + (*first));
-  }
-}
 
 // ==========================================
 // wavelet_tree implementation
@@ -43,7 +32,7 @@ wavelet_tree::wavelet_tree(const int_vector& sequence)
   }
   {
     const auto first = next_pos.begin() + static_cast<size_type>(alphabet_size);
-    exclusive_scan(first, next_pos.end(), first, size_type{0});
+    std::exclusive_scan(first, next_pos.end(), first, size_type{0});
   }
   for (auto j = alphabet_size - 1; j > 0; --j) {
     const auto lhs = 2 * j; // rhs would be (2 * j + 1)
