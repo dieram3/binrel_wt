@@ -89,10 +89,10 @@ make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
   add_pairs(11_obj, {1, 2, 4, 8});
 
   assert(pairs.size() == 3 * (remove_labels_from_obj_6 ? 38 : 40));
-  assert(std::none_of(begin(pairs), end(pairs),
-                      [](const pair_type& p) { return p.label == 5_lab; }));
+  assert(std::ranges::none_of(
+      pairs, [](const pair_type& p) { return p.label == 5_lab; }));
 
-  std::shuffle(begin(pairs), end(pairs), std::default_random_engine{});
+  std::ranges::shuffle(pairs, std::default_random_engine{});
   return binary_relation(pairs);
 }
 
