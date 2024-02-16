@@ -13,16 +13,14 @@
 
 namespace brwt {
 
-using block_t = bit_vector::block_type;
+namespace {
 
-// ===----------------------------------------------------===
-//                     bit_ops extensions
-// ===----------------------------------------------------===
+using block_t = bit_vector::block_type;
 
 // TODO(Diego): Use int_binary_search.
 //
 template <typename T, typename Pred>
-static constexpr T binary_search(T a, T b, Pred pred) {
+constexpr T binary_search(T a, T b, Pred pred) {
   assert(a <= b);
   while (a != b) {
     const T mid = a + (b - a) / 2;
@@ -36,10 +34,10 @@ static constexpr T binary_search(T a, T b, Pred pred) {
 }
 
 template <large_unsigned_integer T>
-static constexpr int size_in_bits = std::numeric_limits<T>::digits;
+constexpr int size_in_bits = std::numeric_limits<T>::digits;
 
 template <bool B, large_unsigned_integer T>
-static constexpr int count(const T value) {
+constexpr int count(const T value) {
   if constexpr (B) {
     return std::popcount(value);
   } else {
@@ -48,7 +46,7 @@ static constexpr int count(const T value) {
 }
 
 template <large_unsigned_integer T>
-static constexpr int select_1(const T value, const int nth) {
+constexpr int select_1(const T value, const int nth) {
   assert(nth > 0 && nth <= std::popcount(value));
   auto not_enough = [value, nth](const int pos) {
     return rank_1(value, pos) < nth;
@@ -57,22 +55,18 @@ static constexpr int select_1(const T value, const int nth) {
 }
 
 template <large_unsigned_integer T>
-static constexpr int select_0(const T value, const int nth) {
+constexpr int select_0(const T value, const int nth) {
   return select_1(~value, nth);
 }
 
 template <bool B, large_unsigned_integer T>
-static constexpr int select(const T value, const int nth) {
+constexpr int select(const T value, const int nth) {
   if constexpr (B) {
     return select_1(value, nth);
   } else {
     return select_0(value, nth);
   }
 }
-
-// ===----------------------------------------------------===
-//             Bitmap implementation
-// ===----------------------------------------------------===
 
 constexpr size_type bits_per_block = bit_vector::bits_per_block;
 constexpr size_type blocks_per_super_block = 8;
@@ -82,6 +76,8 @@ constexpr size_type bits_per_super_block =
 static_assert(is_power_of_two(bits_per_block));
 static_assert(is_power_of_two(blocks_per_super_block));
 static_assert(is_power_of_two(bits_per_super_block));
+
+} // namespace
 
 /// Returns the range of blocks belonging to the super block `sb_idx`.
 ///
@@ -97,15 +93,19 @@ auto bitmap::num_super_blocks() const noexcept -> size_type {
   return sb_rank_1.size();
 }
 
+namespace {
+
 /// Sequentially counts the number of set bits in the given range of blocks.
 ///
-static constexpr size_type pop_count(const std::span<const block_t> blocks) {
+constexpr size_type pop_count(const std::span<const block_t> blocks) {
   size_type sum = 0;
   for (const auto elem : blocks) {
     sum += std::popcount(elem);
   }
   return sum;
 }
+
+} // namespace
 
 bitmap::bitmap(bit_vector vec) : bit_seq(std::move(vec)) {
 
@@ -193,6 +193,8 @@ auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
   return binary_search(sb_begin, num_super_blocks() - 1, not_enough);
 }
 
+namespace {
+
 /// Sequentially searches for the nth bit set to B.
 ///
 /// \pre The nth bit must exist in the range of blocks.
@@ -202,8 +204,8 @@ auto bitmap::sb_select(const size_type nth) const noexcept -> size_type {
 /// multiplied by the number of preceding blocks.
 ///
 template <bool B, large_unsigned_integer T>
-static constexpr index_type sequential_select(const std::span<const T> blocks,
-                                              const size_type nth) {
+constexpr index_type sequential_select(const std::span<const T> blocks,
+                                       const size_type nth) {
   assert(nth > 0);
 
   size_type sum = 0;
@@ -221,6 +223,8 @@ static constexpr index_type sequential_select(const std::span<const T> blocks,
   }
   return index_npos;
 }
+
+} // namespace
 
 /// Templated version of select_1 and select_0.
 template <bool B>
@@ -251,4 +255,4 @@ auto bitmap::select_0(size_type nth) const noexcept -> index_type {
   return select<0>(nth);
 }
 
-} // end namespace brwt
+} // namespace brwt

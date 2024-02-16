@@ -8,8 +8,10 @@
 
 namespace brwt {
 
+namespace {
+
 template <typename InputIt>
-static int needed_bits(const InputIt first, const InputIt last) {
+int needed_bits(const InputIt first, const InputIt last) {
   if (first == last) {
     return 0;
   }
@@ -18,13 +20,11 @@ static int needed_bits(const InputIt first, const InputIt last) {
 }
 
 template <typename InputRange>
-static int needed_bits(const InputRange& range) {
+int needed_bits(const InputRange& range) {
   return needed_bits(std::begin(range), std::end(range));
 }
 
-// ==========================================
-// int_vector implementation
-// ==========================================
+} // namespace
 
 auto int_vector::set_value(const size_type pos, const value_type value) noexcept
     -> void {

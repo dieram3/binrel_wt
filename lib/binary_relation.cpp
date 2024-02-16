@@ -13,6 +13,8 @@
 
 namespace brwt {
 
+namespace {
+
 using std::size_t;
 using node_proxy = wavelet_tree::node_proxy;
 
@@ -25,7 +27,7 @@ using pair_type = binary_relation::pair_type;
 // ==========================================
 
 template <typename T>
-static constexpr auto to_underlying_type(const T value) noexcept {
+constexpr auto to_underlying_type(const T value) noexcept {
   static_assert(std::is_enum_v<T>);
   return static_cast<std::underlying_type_t<T>>(value);
 }
@@ -34,45 +36,47 @@ static constexpr auto to_underlying_type(const T value) noexcept {
 // binary_relation implementation
 // ==========================================
 
-static constexpr auto to_integer(const object_id x) noexcept {
+constexpr auto to_integer(const object_id x) noexcept {
   return to_underlying_type(x);
 }
 
-static constexpr auto to_integer(const label_id x) noexcept {
+constexpr auto to_integer(const label_id x) noexcept {
   return to_underlying_type(x);
 }
 
-static constexpr auto as_symbol(const label_id label) noexcept {
+constexpr auto as_symbol(const label_id label) noexcept {
   return static_cast<symbol_id>(label);
 }
 
-static constexpr auto as_label(const symbol_id symbol) noexcept {
+constexpr auto as_label(const symbol_id symbol) noexcept {
   return static_cast<label_id>(symbol);
 }
 
-static constexpr object_id prev(const object_id x) noexcept {
+constexpr object_id prev(const object_id x) noexcept {
   assert(to_integer(x) != 0);
   return static_cast<object_id>(to_integer(x) - 1);
 }
 
-static constexpr label_id prev(const label_id alpha) noexcept {
+constexpr label_id prev(const label_id alpha) noexcept {
   assert(to_integer(alpha) != 0);
   return static_cast<label_id>(to_integer(alpha) - 1);
 }
 
-static constexpr auto between_symbols(const label_id min,
-                                      const label_id max) noexcept {
+constexpr auto between_symbols(const label_id min,
+                               const label_id max) noexcept {
   assert(min <= max);
   return between<symbol_id>{as_symbol(min), as_symbol(max)};
 }
 
-static constexpr std::optional<pair_type>
+constexpr std::optional<pair_type>
 optional_pair(const std::optional<object_id>& obj, const label_id label) {
   if (obj) {
     return pair_type{*obj, label};
   }
   return std::nullopt;
 }
+
+} // namespace
 
 [[deprecated("when there is no pair with object_id=x, this function does not "
              "work as expected")]] auto
@@ -146,11 +150,13 @@ auto binary_relation::get_associated_object(const index_type wt_pos) const
   return object_id{(bit_pos + 1) - (wt_pos + 1)}; // m_bitmap.rank_1(bit_pos)
 }
 
+namespace {
 namespace pairs_constructor_detail {
+
 using std::vector;
 
-static auto count_objects_frequency(const vector<pair_type>& pairs,
-                                    const object_id max_object) {
+auto count_objects_frequency(const vector<pair_type>& pairs,
+                             const object_id max_object) {
   // TODO(Diego): Consider to replace the histogram with a compressed vector.
   const auto num_objects = static_cast<size_t>(max_object) + 1;
   std::vector<size_type> frequency(num_objects);
@@ -162,14 +168,14 @@ static auto count_objects_frequency(const vector<pair_type>& pairs,
 }
 
 template <typename ForwardRange, typename T>
-static void inplace_exclusive_scan(ForwardRange& range, const T init) {
+void inplace_exclusive_scan(ForwardRange& range, const T init) {
   std::exclusive_scan(std::begin(range), std::end(range), std::begin(range),
                       init);
 }
 
-static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
-                                      const label_id max_label,
-                                      vector<size_type>& objects_frequency) {
+wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
+                               const label_id max_label,
+                               vector<size_type>& objects_frequency) {
   int_vector seq(/*count=*/static_cast<size_type>(pairs.size()),
                  /*bpe=*/used_bits(static_cast<word_type>(max_label)));
 
@@ -213,8 +219,8 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   return wavelet_tree(seq);
 }
 
-static bitmap make_bitmap(const vector<size_type>& objects_frequency,
-                          const size_type num_pairs) {
+bitmap make_bitmap(const vector<size_type>& objects_frequency,
+                   const size_type num_pairs) {
   auto bit_seq = [&] {
     const auto num_objects = static_cast<size_type>(objects_frequency.size());
     return bit_vector(/*count=*/num_pairs + num_objects);
@@ -229,7 +235,8 @@ static bitmap make_bitmap(const vector<size_type>& objects_frequency,
   return bitmap(std::move(bit_seq));
 }
 
-} // end namespace pairs_constructor_detail
+} // namespace pairs_constructor_detail
+} // namespace
 
 binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
   if (pairs.empty()) {
@@ -429,4 +436,4 @@ auto binary_relation::count_distinct_labels(const object_id x,
   return count_distinct_symbols(m_wtree, range, cond);
 }
 
-} // end namespace brwt
+} // namespace brwt

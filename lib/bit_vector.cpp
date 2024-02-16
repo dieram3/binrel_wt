@@ -4,31 +4,27 @@
 #include <algorithm>
 #include <cassert>
 
-using brwt::bit_vector;
+namespace brwt {
+
+namespace {
+
 using size_type = bit_vector::size_type;
 using block_type = bit_vector::block_type;
 
-// ==========================================
-// helper functions
-// ==========================================
-
 template <typename Container, typename Integer>
-static constexpr decltype(auto) at(Container& c, Integer pos) noexcept {
+constexpr decltype(auto) at(Container& c, Integer pos) noexcept {
   using index_t = typename Container::size_type;
   assert(static_cast<index_t>(pos) < c.size());
   return c[static_cast<index_t>(pos)];
 }
 
-static constexpr block_type make_mask(const size_type count) noexcept {
-  using brwt::lsb_mask;
+constexpr block_type make_mask(const size_type count) noexcept {
   return (count == bit_vector::bits_per_block)
              ? (block_type{0} - 1)
              : lsb_mask<block_type>(static_cast<int>(count));
 }
 
-// ==========================================
-// bit_vector implementation
-// ==========================================
+} // namespace
 
 bit_vector::bit_vector(const size_type count) : m_len{count} {
   assert(count >= 0);
@@ -128,3 +124,5 @@ void bit_vector::set_chunk(const size_type pos, const size_type count,
   at(m_blocks, lblock + 1) &= ~rmask;
   at(m_blocks, lblock + 1) |= (value >> lcount) & rmask;
 }
+
+} // namespace brwt
