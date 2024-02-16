@@ -4,6 +4,7 @@ Language: Cpp
 AllowShortFunctionsOnASingleLine: Empty
 AlwaysBreakTemplateDeclarations: true
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
+FixNamespaceComments: true
 IncludeCategories:
   - Regex:           '^"brwt/'           # BRWT headers
     Priority:        2
