@@ -24,11 +24,6 @@ using pair_type = binary_relation::pair_type;
 // Generic helpers
 // ==========================================
 
-template <typename InputRange, typename UnaryFunction>
-static UnaryFunction for_each(InputRange&& range, UnaryFunction f) {
-  return std::for_each(std::begin(range), std::end(range), f);
-}
-
 template <typename T>
 static constexpr auto to_underlying_type(const T value) noexcept {
   static_assert(std::is_enum_v<T>);
@@ -159,7 +154,7 @@ static auto count_objects_frequency(const vector<pair_type>& pairs,
   // TODO(Diego): Consider to replace the histogram with a compressed vector.
   const auto num_objects = static_cast<size_t>(max_object) + 1;
   std::vector<size_type> frequency(num_objects);
-  for_each(pairs, [&frequency](const pair_type& p) {
+  std::ranges::for_each(pairs, [&frequency](const pair_type& p) {
     const auto obj_index = static_cast<size_t>(p.object);
     ++frequency[obj_index];
   });
@@ -182,7 +177,7 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   // associated object value. The inplace_exclusive_scan and the for_each are an
   // inline counting sort to do this.
   inplace_exclusive_scan(objects_frequency, size_type{0});
-  for_each(pairs, [&](const pair_type& p) {
+  std::ranges::for_each(pairs, [&](const pair_type& p) {
     const auto obj_index = static_cast<size_t>(p.object);
     const auto next_pos = objects_frequency[obj_index]++;
     seq[next_pos] = static_cast<int_vector::value_type>(p.label);
@@ -195,7 +190,7 @@ static wavelet_tree make_wavelet_tree(const vector<pair_type>& pairs,
   // stored in objects_frequency as a byproduct of the counting sort).
   auto first = seq.begin();
   auto seq_end = seq.begin();
-  for_each(objects_frequency, [&](size_type& freq) {
+  std::ranges::for_each(objects_frequency, [&](size_type& freq) {
     // First, remove duplicates. Note that at this point, freq contains the
     // accumulated frequency of all pairs until the current object.
     const auto last = seq.begin() + freq;
@@ -226,7 +221,7 @@ static bitmap make_bitmap(const vector<size_type>& objects_frequency,
   }();
 
   size_type acc_count = 0;
-  for_each(objects_frequency, [&](const size_type count) {
+  std::ranges::for_each(objects_frequency, [&](const size_type count) {
     acc_count += count;
     bit_seq.set(acc_count, true);
     acc_count += 1;
@@ -243,7 +238,7 @@ binary_relation::binary_relation(const std::vector<pair_type>& pairs) {
 
   object_id max_object{};
   label_id max_label{};
-  for_each(pairs, [&](const pair_type& pair) {
+  std::ranges::for_each(pairs, [&](const pair_type& pair) {
     max_object = std::max(max_object, pair.object);
     max_label = std::max(max_label, pair.label);
   });

@@ -41,7 +41,7 @@ make_test_binary_relation(const bool remove_labels_from_obj_6 = false) {
 
   auto add_pairs = [&](const object_id object,
                        const std::initializer_list<unsigned> labels) {
-    std::for_each(begin(labels), end(labels), [&](const auto label) {
+    std::ranges::for_each(labels, [&](const auto label) {
       const auto p = pair(object, static_cast<label_id>(label));
 
       // Add the pair multiple times to ensure that the constructor manages
