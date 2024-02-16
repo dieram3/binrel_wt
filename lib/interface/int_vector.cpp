@@ -1,14 +1,16 @@
-#ifndef BRWT_INT_VECTOR_H
-#define BRWT_INT_VECTOR_H
+module;
 
-#include "brwt/bit_vector.h"
-#include "brwt/detail/iterator.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <initializer_list>
 
-namespace brwt {
+export module brwt.int_vector;
+
+import brwt.bit_vector;
+import brwt.detail.iterator;
+
+export namespace brwt {
 
 class int_vector {
 public:
@@ -338,5 +340,3 @@ inline void swap(int_vector::value_type& lhs, int_vector::reference rhs) {
 }
 
 } // namespace brwt
-
-#endif // BRWT_INT_VECTOR_H

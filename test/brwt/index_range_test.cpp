@@ -1,5 +1,6 @@
-#include "brwt/index_range.h"
 #include <doctest/doctest.h>
+
+import brwt.index_range;
 
 namespace brwt::test {
 namespace {

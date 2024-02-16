@@ -1,9 +1,13 @@
-#include "brwt/bit_vector.h"
-#include "brwt/bit_ops.h"
-#include "brwt/utility.h"
+module;
+
 #include <algorithm>
 #include <cassert>
 #include <string>
+
+module brwt.bit_vector;
+
+import brwt.bit_ops;
+import brwt.utility;
 
 namespace brwt {
 

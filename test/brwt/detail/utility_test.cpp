@@ -1,10 +1,11 @@
-#include "brwt/detail/utility.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
+
+import brwt.detail.utility;
 
 // TODO(Diego): Review reference_traits in more detail when possible.
 

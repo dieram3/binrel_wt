@@ -1,10 +1,6 @@
 #include "brwt/wavelet_tree.h"
 #include "bitmask_support.h"
 #include "static_vector.h"
-#include "brwt/bit_vector.h"
-#include "brwt/bitmap.h"
-#include "brwt/common_types.h"
-#include "brwt/int_vector.h"
 #include <cassert>
 #include <cstddef>
 #include <limits>
@@ -12,6 +8,11 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+import brwt.bit_vector;
+import brwt.bitmap;
+import brwt.common_types;
+import brwt.int_vector;
 
 using brwt::wavelet_tree;
 using node_proxy = wavelet_tree::node_proxy;

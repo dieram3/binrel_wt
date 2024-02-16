@@ -1,12 +1,14 @@
-#ifndef BRWT_BITMAP_H
-#define BRWT_BITMAP_H
+module;
 
-#include "brwt/bit_vector.h"
-#include "brwt/common_types.h"
-#include "brwt/int_vector.h"
 #include <cassert>
 
-namespace brwt {
+export module brwt.bitmap;
+
+import brwt.bit_vector;
+import brwt.common_types;
+import brwt.int_vector;
+
+export namespace brwt {
 
 class bitmap {
 public:
@@ -86,5 +88,3 @@ inline auto bitmap::num_zeros() const noexcept -> size_type {
 }
 
 } // namespace brwt
-
-#endif // BRWT_BITMAP_H

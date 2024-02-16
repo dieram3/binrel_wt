@@ -1,11 +1,12 @@
 #include "brwt/binary_relation.h"
 #include "utility.h"
-#include "brwt/common_types.h"
 #include <benchmark/benchmark.h>
 #include <cassert>
 #include <cstddef>
 #include <utility>
 #include <vector>
+
+import brwt.common_types;
 
 using brwt::binary_relation;
 using object_id = binary_relation::object_id;

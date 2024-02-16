@@ -1,11 +1,12 @@
-#ifndef BRWT_DETAIL_UTILITY_H
-#define BRWT_DETAIL_UTILITY_H
+module;
 
 #include <memory>
 #include <type_traits>
 #include <utility>
 
-namespace brwt::detail {
+export module brwt.detail.utility;
+
+export namespace brwt::detail {
 
 /// \brief Class used to treat a smart reference (or proxy) as a pointer.
 ///
@@ -53,5 +54,3 @@ struct reference_traits<T&> {
 };
 
 } // namespace brwt::detail
-
-#endif // BRWT_DETAIL_UTILITY_H

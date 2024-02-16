@@ -41,9 +41,10 @@ CheckOptions:
   cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions: true
   llvm-namespace-comment.ShortNamespaceLines: 20
   # Ignore concept headers (which are not understood) until clang-tidy 18 is released.
+  # Include-cleaner thinks module interface units should be included. Ignore those.
   misc-include-cleaner.IgnoreHeaders: >
     concepts;
-    brwt/concepts.h;
+    .*\.cppm;
   readability-braces-around-statements.ShortStatementLines: 2
   readability-identifier-length.IgnoredParameterNames: '^[abcxyzn]$'
   readability-identifier-naming.ClassCase: lower_case

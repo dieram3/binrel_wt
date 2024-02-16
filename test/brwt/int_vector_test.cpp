@@ -1,4 +1,3 @@
-#include "brwt/int_vector.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
@@ -8,6 +7,8 @@
 #include <stdexcept>
 #include <type_traits>
 #include <vector>
+
+import brwt.int_vector;
 
 // TODO(Diego): Consider adding more static asserts.
 

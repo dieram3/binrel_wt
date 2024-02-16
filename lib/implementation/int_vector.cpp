@@ -1,12 +1,16 @@
-#include "brwt/int_vector.h"
-#include "brwt/bit_ops.h"
-#include "brwt/bit_vector.h"
+module;
+
 #include <algorithm>
 #include <cassert>
 #include <initializer_list>
 #include <iterator>
 #include <limits>
 #include <stdexcept>
+
+module brwt.int_vector;
+
+import brwt.bit_ops;
+import brwt.bit_vector;
 
 namespace brwt {
 

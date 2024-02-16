@@ -1,5 +1,4 @@
 #include "brwt/binary_relation.h"
-#include "brwt/common_types.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
@@ -11,6 +10,8 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+import brwt.common_types;
 
 // TODO(Diego): Remove the use of make_test_binary_relation. Use
 // make_test_binary_relation_2 instead.

@@ -1,6 +1,7 @@
-#include "brwt/bit_ops.h"
 #include <doctest/doctest.h>
 #include <cstdint>
+
+import brwt.bit_ops;
 
 /// TODO(Diego): Test used_bits
 

@@ -1,12 +1,13 @@
-#include "brwt/bitmap.h"
 #include "utility.h"
-#include "brwt/bit_vector.h"
-#include "brwt/common_types.h"
 #include <benchmark/benchmark.h>
 #include <cassert>
 #include <cstddef>
 #include <random>
 #include <utility>
+
+import brwt.bitmap;
+import brwt.bit_vector;
+import brwt.common_types;
 
 using brwt::bitmap;
 using brwt::index_type;

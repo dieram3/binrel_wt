@@ -1,10 +1,12 @@
-#ifndef BRWT_INDEX_RANGE_H
-#define BRWT_INDEX_RANGE_H
+module;
 
-#include "brwt/common_types.h"
 #include <cassert>
 
-namespace brwt {
+export module brwt.index_range;
+
+import brwt.common_types;
+
+export namespace brwt {
 
 class index_range {
 public:
@@ -56,5 +58,3 @@ inline auto empty(const index_range& range) {
 }
 
 } // namespace brwt
-
-#endif // BRWT_INDEX_RANGE_H

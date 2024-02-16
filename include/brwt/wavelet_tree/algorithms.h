@@ -1,9 +1,10 @@
 #ifndef BRWT_WAVELET_TREE_ALGORITHMS_H
 #define BRWT_WAVELET_TREE_ALGORITHMS_H
 
-#include "brwt/common_types.h"
-#include "brwt/index_range.h"
 #include <utility>
+
+import brwt.common_types;
+import brwt.index_range;
 
 namespace brwt {
 

@@ -1,13 +1,10 @@
-#ifndef BRWT_CONCEPTS_H
-#define BRWT_CONCEPTS_H
+export module brwt.concepts;
 
-#include "brwt/type_traits.h"
+import brwt.type_traits;
 
-namespace brwt {
+export namespace brwt {
 
 template <typename T>
 concept large_unsigned_integer = is_large_unsigned_integer<T>::value;
 
 } // namespace brwt
-
-#endif

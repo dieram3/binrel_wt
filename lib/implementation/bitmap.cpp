@@ -1,9 +1,5 @@
-#include "brwt/bitmap.h"
-#include "brwt/bit_ops.h"
-#include "brwt/bit_vector.h"
-#include "brwt/common_types.h"
-#include "brwt/int_vector.h"
-#include "brwt/utility.h"
+module;
+
 #include <algorithm>
 #include <bit>
 #include <cassert>
@@ -11,6 +7,15 @@
 #include <limits>
 #include <span>
 #include <utility>
+
+module brwt.bitmap;
+
+import brwt.bit_ops;
+import brwt.bit_vector;
+import brwt.common_types;
+import brwt.concepts;
+import brwt.int_vector;
+import brwt.utility;
 
 namespace brwt {
 

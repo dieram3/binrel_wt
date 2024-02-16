@@ -1,8 +1,9 @@
-#include "brwt/bitmap.h"
-#include "brwt/bit_vector.h"
 #include <doctest/doctest.h>
 #include <string>
 #include <vector>
+
+import brwt.bitmap;
+import brwt.bit_vector;
 
 using brwt::bit_vector;
 using brwt::bitmap;

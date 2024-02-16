@@ -1,12 +1,13 @@
 #include "brwt/wavelet_tree/algorithms.h"
 #include "../generic_algorithms.h"
 #include "bitmask_support.h"
-#include "brwt/common_types.h"
-#include "brwt/index_range.h"
 #include "brwt/wavelet_tree/wavelet_tree.h"
 #include <algorithm>
 #include <cassert>
 #include <utility>
+
+import brwt.common_types;
+import brwt.index_range;
 
 namespace brwt {
 

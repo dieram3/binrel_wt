@@ -1,6 +1,4 @@
 #include "brwt/wavelet_tree/wavelet_tree.h"
-#include "brwt/common_types.h"
-#include "brwt/int_vector.h"
 #include "brwt/wavelet_tree/algorithms.h"
 #include <doctest/doctest.h>
 #include <array>
@@ -10,6 +8,9 @@
 #include <type_traits>
 #include <utility>
 #include <vector>
+
+import brwt.common_types;
+import brwt.int_vector;
 
 using brwt::int_vector;
 using brwt::size_type;

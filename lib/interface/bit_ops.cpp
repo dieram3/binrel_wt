@@ -1,13 +1,15 @@
-#ifndef BRWT_BIT_OPS_H
-#define BRWT_BIT_OPS_H
+module;
 
-#include "brwt/concepts.h"
 #include <bit>
 #include <cassert>
 #include <concepts>
 #include <limits>
 
-namespace brwt {
+export module brwt.bit_ops;
+
+import brwt.concepts;
+
+export namespace brwt {
 
 /// \brief Creates a mask with the 'count' least significant bits set.
 ///
@@ -72,5 +74,3 @@ constexpr bool is_power_of_two(const T value) {
 }
 
 } // namespace brwt
-
-#endif // BRWT_BIT_OPS_H

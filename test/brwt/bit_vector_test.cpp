@@ -1,8 +1,9 @@
-#include "brwt/bit_vector.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <ostream>
 #include <string>
+
+import brwt.bit_vector;
 
 // TODO(Diego): Test size() instead of length(). Remove length(). Test
 // num_blocks(). Test data().

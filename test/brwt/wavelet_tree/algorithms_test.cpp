@@ -1,8 +1,9 @@
 #include "brwt/wavelet_tree/algorithms.h"
-#include "brwt/common_types.h"
-#include "brwt/int_vector.h"
 #include "brwt/wavelet_tree/wavelet_tree.h"
 #include <doctest/doctest.h>
+
+import brwt.common_types;
+import brwt.int_vector;
 
 using brwt::index_npos;
 using brwt::index_type;

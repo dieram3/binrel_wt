@@ -1,4 +1,3 @@
-#include "brwt/detail/iterator.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
@@ -8,6 +7,8 @@
 #include <memory>
 #include <type_traits>
 #include <utility>
+
+import brwt.detail.iterator;
 
 // TODO(Diego): Review random_access_iterator in more detail when possible.
 

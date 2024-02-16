@@ -1,13 +1,15 @@
-#ifndef BRWT_DETAIL_ITERATOR_H
-#define BRWT_DETAIL_ITERATOR_H
+module;
 
-#include "brwt/detail/utility.h"
 #include <cassert>
 #include <iterator>
 #include <memory>
 #include <type_traits>
 
-namespace brwt::detail {
+export module brwt.detail.iterator;
+
+import brwt.detail.utility;
+
+export namespace brwt::detail {
 
 /// \brief This class provide \e random-access iterators to containers that have
 /// overloaded the subscript operator (\c operator[]).
@@ -91,48 +93,49 @@ public:
 
   // arithmetic operators
 
-  friend random_access_iterator operator+(random_access_iterator it,
-                                          difference_type d) noexcept {
+  friend inline random_access_iterator operator+(random_access_iterator it,
+                                                 difference_type d) noexcept {
     return it += d;
   }
 
-  friend random_access_iterator operator+(difference_type d,
-                                          random_access_iterator it) noexcept {
+  friend inline random_access_iterator
+  operator+(difference_type d, random_access_iterator it) noexcept {
     return it += d;
   }
 
-  friend random_access_iterator operator-(random_access_iterator it,
-                                          difference_type d) noexcept {
+  friend inline random_access_iterator operator-(random_access_iterator it,
+                                                 difference_type d) noexcept {
     return it -= d;
   }
 
-  friend difference_type operator-(const random_access_iterator& lhs,
-                                   const random_access_iterator& rhs) noexcept {
+  friend inline difference_type
+  operator-(const random_access_iterator& lhs,
+            const random_access_iterator& rhs) noexcept {
     return lhs.m_pos - rhs.m_pos;
   }
 
   // relational operators
 
-  friend bool operator==(const random_access_iterator& lhs,
-                         const random_access_iterator& rhs) noexcept {
+  friend inline bool operator==(const random_access_iterator& lhs,
+                                const random_access_iterator& rhs) noexcept {
     assert(lhs.m_cont == rhs.m_cont);
     return lhs.m_pos == rhs.m_pos;
   }
-  friend bool operator<(const random_access_iterator& lhs,
-                        const random_access_iterator& rhs) noexcept {
+  friend inline bool operator<(const random_access_iterator& lhs,
+                               const random_access_iterator& rhs) noexcept {
     assert(lhs.m_cont == rhs.m_cont);
     return lhs.m_pos < rhs.m_pos;
   }
-  friend bool operator>(const random_access_iterator& lhs,
-                        const random_access_iterator& rhs) noexcept {
+  friend inline bool operator>(const random_access_iterator& lhs,
+                               const random_access_iterator& rhs) noexcept {
     return rhs < lhs;
   }
-  friend bool operator<=(const random_access_iterator& lhs,
-                         const random_access_iterator& rhs) noexcept {
+  friend inline bool operator<=(const random_access_iterator& lhs,
+                                const random_access_iterator& rhs) noexcept {
     return !(rhs < lhs);
   }
-  friend bool operator>=(const random_access_iterator& lhs,
-                         const random_access_iterator& rhs) noexcept {
+  friend inline bool operator>=(const random_access_iterator& lhs,
+                                const random_access_iterator& rhs) noexcept {
     return !(lhs < rhs);
   }
 
@@ -153,5 +156,3 @@ private:
 };
 
 } // namespace brwt::detail
-
-#endif // BRWT_DETAIL_ITERATOR_H

@@ -1,10 +1,11 @@
-#ifndef BRWT_UTILITY_H
-#define BRWT_UTILITY_H
+module;
 
 #include <cassert>
 #include <concepts>
 
-namespace brwt {
+export module brwt.utility;
+
+export namespace brwt {
 
 /// \brief Computes the ceil of a real division between two integers.
 ///
@@ -22,5 +23,3 @@ constexpr T ceil_div(T a, T b) noexcept {
 }
 
 } // namespace brwt
-
-#endif // BRWT_UTILITY_H

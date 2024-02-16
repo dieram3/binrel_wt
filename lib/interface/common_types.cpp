@@ -1,10 +1,12 @@
-#ifndef BRWT_COMMON_TYPES_H
-#define BRWT_COMMON_TYPES_H
+module;
 
 #include <cstddef>
 #include <cstdint>
 
-namespace brwt {
+export module brwt.common_types;
+
+export namespace brwt {
+
 namespace types {
 // TODO(Diego): Deprecate the use of 'types' namespace, remove the use of it
 // along the library, then remove it. Types will be in brwt namespace now.
@@ -25,7 +27,7 @@ using types::index_type;
 using types::size_type;
 using types::word_type;
 
-constexpr index_type index_npos = -1;
+inline constexpr index_type index_npos = -1;
 
 // wavelet tree types
 
@@ -51,5 +53,3 @@ struct between {
 };
 
 } // namespace brwt
-
-#endif // BRWT_COMMON_TYPES_H

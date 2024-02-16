@@ -1,5 +1,4 @@
-#ifndef BRWT_BIT_VECTOR_H
-#define BRWT_BIT_VECTOR_H
+module;
 
 #include <cstddef>
 #include <cstdint>
@@ -8,9 +7,11 @@
 #include <string>
 #include <vector>
 
+export module brwt.bit_vector;
+
 namespace brwt {
 
-class bit_vector {
+export class bit_vector {
 public:
   using size_type = std::ptrdiff_t;
   using block_type = std::uint_fast64_t;
@@ -77,5 +78,3 @@ inline void bit_vector::set_block(const size_type num_block,
 }
 
 } // namespace brwt
-
-#endif // BRWT_BIT_VECTOR_H
