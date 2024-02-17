@@ -1,7 +1,9 @@
 #include "brwt/int_vector.h"
 #include "brwt/bit_ops.h"
+#include "brwt/bit_vector.h"
 #include <algorithm>
 #include <cassert>
+#include <initializer_list>
 #include <iterator>
 #include <limits>
 #include <stdexcept>

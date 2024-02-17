@@ -3,7 +3,6 @@
 
 #include "brwt/concepts.h"
 #include <cassert>
-#include <type_traits>
 
 namespace brwt {
 

@@ -1,8 +1,12 @@
 #include "brwt/wavelet_tree.h"
 #include "utility.h"
 #include "brwt/bit_ops.h"
+#include "brwt/common_types.h"
+#include "brwt/int_vector.h"
 #include <benchmark/benchmark.h>
+#include <algorithm>
 #include <cassert>
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 

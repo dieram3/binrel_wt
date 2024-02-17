@@ -1,7 +1,9 @@
 #include "brwt/detail/iterator.h"
 #include <doctest/doctest.h>
 #include <algorithm>
+#include <cassert>
 #include <cstddef>
+#include <initializer_list>
 #include <iterator>
 #include <memory>
 #include <type_traits>

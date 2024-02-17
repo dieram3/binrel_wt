@@ -1,11 +1,17 @@
 #include "brwt/binary_relation.h"
 #include "brwt/bit_ops.h"
+#include "brwt/bit_vector.h"
+#include "brwt/bitmap.h"
+#include "brwt/common_types.h"
 #include "brwt/index_range.h"
+#include "brwt/int_vector.h"
+#include "brwt/wavelet_tree.h"
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
 #include <iterator>
 #include <numeric>
+#include <optional>
 #include <tuple>
 #include <type_traits>
 #include <utility>

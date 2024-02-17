@@ -1,6 +1,8 @@
 #include "brwt/bitmap.h"
 #include "brwt/bit_ops.h"
 #include "brwt/bit_vector.h"
+#include "brwt/common_types.h"
+#include "brwt/int_vector.h"
 #include "brwt/utility.h"
 #include <algorithm>
 #include <bit>
@@ -8,7 +10,6 @@
 #include <iterator>
 #include <limits>
 #include <span>
-#include <type_traits>
 #include <utility>
 
 namespace brwt {

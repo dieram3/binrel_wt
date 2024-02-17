@@ -3,6 +3,7 @@
 #include "brwt/utility.h"
 #include <algorithm>
 #include <cassert>
+#include <string>
 
 namespace brwt {
 

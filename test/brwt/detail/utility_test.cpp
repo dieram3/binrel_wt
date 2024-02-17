@@ -1,5 +1,4 @@
 #include "brwt/detail/utility.h"
-#include "brwt/detail/iterator.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>

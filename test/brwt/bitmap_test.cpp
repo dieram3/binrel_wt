@@ -2,6 +2,7 @@
 #include "brwt/bit_vector.h"
 #include <doctest/doctest.h>
 #include <string>
+#include <vector>
 
 using brwt::bit_vector;
 using brwt::bitmap;

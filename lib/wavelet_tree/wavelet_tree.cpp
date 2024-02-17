@@ -1,10 +1,15 @@
 #include "brwt/wavelet_tree.h"
 #include "bitmask_support.h"
 #include "static_vector.h"
+#include "brwt/bit_vector.h"
+#include "brwt/bitmap.h"
+#include "brwt/common_types.h"
+#include "brwt/int_vector.h"
 #include <cassert>
 #include <cstddef>
 #include <limits>
 #include <numeric>
+#include <type_traits>
 #include <utility>
 #include <vector>
 

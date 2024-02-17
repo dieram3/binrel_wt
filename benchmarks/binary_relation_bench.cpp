@@ -1,8 +1,10 @@
 #include "brwt/binary_relation.h"
 #include "utility.h"
+#include "brwt/common_types.h"
 #include <benchmark/benchmark.h>
 #include <cassert>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 using brwt::binary_relation;

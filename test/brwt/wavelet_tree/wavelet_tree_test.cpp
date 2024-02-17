@@ -1,5 +1,7 @@
-#include "brwt/wavelet_tree.h"
+#include "brwt/wavelet_tree/wavelet_tree.h"
+#include "brwt/common_types.h"
 #include "brwt/int_vector.h"
+#include "brwt/wavelet_tree/algorithms.h"
 #include <doctest/doctest.h>
 #include <array>
 #include <cstddef>

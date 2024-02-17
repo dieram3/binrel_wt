@@ -1,7 +1,10 @@
 #include "brwt/bitmap.h"
 #include "utility.h"
+#include "brwt/bit_vector.h"
+#include "brwt/common_types.h"
 #include <benchmark/benchmark.h>
 #include <cassert>
+#include <cstddef>
 #include <random>
 #include <utility>
 

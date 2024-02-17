@@ -4,7 +4,6 @@
 #include "brwt/bitmap.h"
 #include "brwt/common_types.h"
 #include "brwt/int_vector.h"
-#include <cstddef>
 #include <utility>
 
 namespace brwt {

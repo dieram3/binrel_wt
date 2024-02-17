@@ -1,4 +1,5 @@
 #include "brwt/binary_relation.h"
+#include "brwt/common_types.h"
 #include <doctest/doctest.h>
 #include <algorithm>
 #include <cassert>
