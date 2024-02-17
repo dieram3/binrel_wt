@@ -4,6 +4,7 @@
 #include "brwt/concepts.h"
 #include <bit>
 #include <cassert>
+#include <concepts>
 #include <limits>
 
 namespace brwt {
@@ -63,7 +64,7 @@ constexpr int rank_0(const T value, const int pos) noexcept {
 ///
 /// \pre <tt>value > 0</tt>
 ///
-template <integral T>
+template <std::integral T>
 constexpr bool is_power_of_two(const T value) {
   assert(value > 0);
 
