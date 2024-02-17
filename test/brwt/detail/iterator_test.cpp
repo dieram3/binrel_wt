@@ -504,20 +504,6 @@ TEST_CASE_FIXTURE(iterator_fixture, "operator==") {
   CHECK(j0 == j0);
 }
 
-TEST_CASE_FIXTURE(iterator_fixture, "operator!=") {
-  CHECK_FALSE(i0 != i0);
-  CHECK(i0 != i1);
-  CHECK_FALSE(i0 != j0);
-
-  CHECK(i1 != i0);
-  CHECK_FALSE(i1 != i1);
-  CHECK(i1 != j0);
-
-  CHECK_FALSE(j0 != i0);
-  CHECK(j0 != i1);
-  CHECK_FALSE(j0 != j0);
-}
-
 TEST_CASE_FIXTURE(iterator_fixture, "operator<") {
   CHECK_FALSE(i0 < i0);
   CHECK(i0 < i1);

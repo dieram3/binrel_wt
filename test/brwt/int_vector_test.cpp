@@ -486,28 +486,6 @@ TEST_CASE_FIXTURE(int_vector_fixture, "operator==(int_vector,int_vector)") {
   CHECK(d == d);
 }
 
-TEST_CASE_FIXTURE(int_vector_fixture, "operator!=(int_vector,int_vector)") {
-  CHECK_FALSE(a != a);
-  CHECK_FALSE(a != b);
-  CHECK(a != c);
-  CHECK(a != d);
-
-  CHECK_FALSE(b != a);
-  CHECK_FALSE(b != b);
-  CHECK(b != c);
-  CHECK(b != d);
-
-  CHECK(c != a);
-  CHECK(c != b);
-  CHECK_FALSE(c != c);
-  CHECK_FALSE(c != d);
-
-  CHECK(d != a);
-  CHECK(d != b);
-  CHECK_FALSE(d != c);
-  CHECK_FALSE(d != d);
-}
-
 TEST_CASE("swap(reference, reference)") {
   int_vector v = {10, 20, 30, 40};
   swap(v.front(), v.back());

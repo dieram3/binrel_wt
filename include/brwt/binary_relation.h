@@ -254,17 +254,6 @@ constexpr bool operator==(const binary_relation::pair_type& lhs,
   return lhs.object == rhs.object && lhs.label == rhs.label;
 }
 
-/// \brief Compares \p lhs and \p rhs for inequality.
-///
-/// \returns <tt>!(lhs == rhs)</tt>
-///
-/// \relates binary_relation::pair_type
-///
-constexpr bool operator!=(const binary_relation::pair_type& lhs,
-                          const binary_relation::pair_type& rhs) noexcept {
-  return !(lhs == rhs);
-}
-
 } // namespace brwt
 
 #endif // BRWT_BINARY_RELATION_H

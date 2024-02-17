@@ -118,10 +118,6 @@ public:
     assert(lhs.m_cont == rhs.m_cont);
     return lhs.m_pos == rhs.m_pos;
   }
-  friend bool operator!=(const random_access_iterator& lhs,
-                         const random_access_iterator& rhs) noexcept {
-    return !(lhs == rhs);
-  }
   friend bool operator<(const random_access_iterator& lhs,
                         const random_access_iterator& rhs) noexcept {
     assert(lhs.m_cont == rhs.m_cont);

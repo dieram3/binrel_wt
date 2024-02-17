@@ -301,16 +301,6 @@ inline bool operator==(const int_vector& lhs, const int_vector& rhs) {
          std::equal(lhs.begin(), lhs.end(), rhs.begin());
 }
 
-/// \brief Compares \p lhs and \p rhs for inequality.
-///
-/// \returns <tt>!(lhs == rhs)</tt>
-///
-/// \relates int_vector
-///
-inline bool operator!=(const int_vector& lhs, const int_vector& rhs) {
-  return !(lhs == rhs);
-}
-
 /// \brief Swaps the values of the elements that \p lhs and \p rhs are referring
 /// to.
 ///

@@ -200,13 +200,6 @@ public:
            lhs.level_mask == rhs.level_mask;
   }
 
-  /// \brief Checks it twho proxies do not refer to the same node.
-  ///
-  friend bool operator!=(const node_proxy& lhs,
-                         const node_proxy& rhs) noexcept {
-    return !(lhs == rhs);
-  }
-
 private:
   // Memberwise constructor
   node_proxy(const wavelet_tree& wt_, index_type begin_, size_type size_,
