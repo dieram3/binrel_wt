@@ -40,6 +40,10 @@ HeaderFilterRegex: '.*'
 CheckOptions:
   cppcoreguidelines-special-member-functions.AllowMissingMoveFunctions: true
   llvm-namespace-comment.ShortNamespaceLines: 20
+  # Ignore concept headers (which are not understood) until clang-tidy 18 is released.
+  misc-include-cleaner.IgnoreHeaders: >
+    concepts;
+    brwt/concepts.h;
   readability-braces-around-statements.ShortStatementLines: 2
   readability-identifier-length.IgnoredParameterNames: '^[abcxyzn]$'
   readability-identifier-naming.ClassCase: lower_case
