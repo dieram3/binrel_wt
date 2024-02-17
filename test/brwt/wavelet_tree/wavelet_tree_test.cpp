@@ -18,7 +18,7 @@ using brwt::wavelet_tree;
 using std::ptrdiff_t;
 using std::size_t;
 
-static constexpr symbol_id operator"" _sym(const unsigned long long value) {
+static constexpr symbol_id operator""_sym(const unsigned long long value) {
   return static_cast<symbol_id>(value);
 }
 

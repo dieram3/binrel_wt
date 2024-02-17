@@ -10,7 +10,7 @@ using brwt::int_vector;
 using brwt::symbol_id;
 using brwt::wavelet_tree;
 
-static constexpr symbol_id operator"" _sym(const unsigned long long value) {
+static constexpr symbol_id operator""_sym(const unsigned long long value) {
   return static_cast<symbol_id>(value);
 }
 

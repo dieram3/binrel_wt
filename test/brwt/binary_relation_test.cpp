@@ -23,11 +23,11 @@ using object_id = binary_relation::object_id;
 using label_id = binary_relation::label_id;
 using pair_type = binary_relation::pair_type;
 
-static object_id operator"" _obj(unsigned long long x) {
+static object_id operator""_obj(unsigned long long x) {
   return static_cast<object_id>(x);
 }
 
-static label_id operator"" _lab(unsigned long long x) {
+static label_id operator""_lab(unsigned long long x) {
   return static_cast<label_id>(x);
 }
 
